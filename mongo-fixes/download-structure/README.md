@@ -1,6 +1,6 @@
 # download-structure
 
-This script is to update edition resources on cmd due to structural changes.
+This script is to update instance resource on cmd to include download structural changes.
 
 ## How to run service
 
