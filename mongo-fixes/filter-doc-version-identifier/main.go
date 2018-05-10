@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ONSdigital/dp-data-tools-go/mongo-fixes/filter-doc-version-identifier/data"
+	"github.com/ONSdigital/dp-data-tools/mongo-fixes/filter-doc-version-identifier/data"
 	"github.com/ONSdigital/dp-dataset-api/models"
 	"github.com/ONSdigital/go-ns/log"
 	"gopkg.in/mgo.v2"

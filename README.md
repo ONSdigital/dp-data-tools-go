@@ -1,5 +1,5 @@
-dp-data-tools-go
-==================
+dp-data-tools
+=============
 Contains several various tools to update data
 
 Current tools/scripts
