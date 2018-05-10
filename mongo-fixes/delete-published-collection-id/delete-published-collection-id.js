@@ -10,16 +10,18 @@ ds_collection = 'datasets'
 // sub-document parts
 ds_subdocs = ['next', 'current']
 
-// do a find first, show what would be changed
-show_find         = true
-// if show_find is true, show_old_ids_only limits output to collection_id
-show_old_ids_only = true
+if (typeof(cfg) == "undefined") {
+        // default, but can be changed on command-line, see README
+        cfg = {
+                verbose:  true,    // do a find first, show what would be changed
+                ids:      true,    // if verbose is true, ids limits output to collection_id
+                update:   true     // set to false to avoid updates
+        }
+}
 
 // o determines what find() outputs (null shows all)
 o = null
 
-// set to false to only use show_find
-do_update = true
 
 //////////////////////////
 
@@ -57,8 +59,8 @@ for (i = 0; i < ds_subdocs.length; i++) {
                 ' state@' + state_path + ' c_id@' + collid_path
         )
 
-        if (show_find) {
-                if (show_old_ids_only) {
+        if (cfg.verbose) {
+                if (cfg.ids) {
                         o = {}
                         o[collid_path] = 1
                 }
@@ -66,7 +68,7 @@ for (i = 0; i < ds_subdocs.length; i++) {
                 show_(r)
         }
 
-        if (do_update) {
+        if (cfg.update) {
                 r = db.getCollection(ds_collection).updateMany(q, setter)
                 show_(r)
         }
