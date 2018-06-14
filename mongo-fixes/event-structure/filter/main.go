@@ -20,11 +20,9 @@ type Event struct {
 	Time time.Time `bson:"time,omitempty" json:"time"`
 }
 
-var (
-	mongoURL string
-)
-
 func main() {
+
+	var mongoURL string
 	flag.StringVar(&mongoURL, "mongo-url", mongoURL, "mongoDB URL")
 	flag.Parse()
 
