@@ -1,8 +1,10 @@
 check-audit
 ==================
 
-This utility updates checks audit process by consuming kafka messages from
-`audit-events` topic.
+This utility consumes messages from the `audit-events` kafka topic and builds a
+list of actions and their respective results (as `successful` and `unsuccessful`
+counters) stored in-memory. The results (list of actions) are logged once the
+utility has received a signal to terminate.
 
 ### How to run the utility locally
 
