@@ -26,6 +26,7 @@ type AuditEvent struct {
 
 // Action represents stats of the consumed actions
 type Action struct {
+	Attempted    int
 	Successful   int
 	Unsuccessful int
 	Total        int
@@ -86,25 +87,34 @@ func readMessage(eventValue []byte) (*AuditEvent, error) {
 }
 
 func addResult(actions map[string]Action, event *AuditEvent) {
-	var successful, unsuccessful int
-	if event.ActionResult == "successful" {
+	var successful, attempted, unsuccessful int
+
+	switch event.ActionResult {
+	case "successful":
 		successful = 1
-	} else {
+	case "unsuccessful":
 		unsuccessful = 1
+	case "attempted":
+		attempted = 1
 	}
 
 	action, ok := actions[event.AttemptedAction]
 	if !ok {
 		actions[event.AttemptedAction] = Action{
+			Attempted:    attempted,
 			Successful:   successful,
 			Unsuccessful: unsuccessful,
 			Total:        1,
 		}
 	} else {
-		if successful == 1 {
-			action.Successful++
+		if attempted == 1 {
+			action.Attempted++
 		} else {
-			action.Unsuccessful++
+			if successful == 1 {
+				action.Successful++
+			} else {
+				action.Unsuccessful++
+			}
 		}
 		action.Total++
 		actions[event.AttemptedAction] = action
