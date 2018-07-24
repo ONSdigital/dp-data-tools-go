@@ -32,6 +32,12 @@ type Action struct {
 	Total        int
 }
 
+const (
+	attempted    = "attempted"
+	successful   = "successful"
+	unsuccessful = "unsuccessful"
+)
+
 var kafkaBrokers string
 
 func main() {
@@ -87,36 +93,25 @@ func readMessage(eventValue []byte) (*AuditEvent, error) {
 }
 
 func addResult(actions map[string]Action, event *AuditEvent) {
-	var successful, attempted, unsuccessful int
-
-	switch event.ActionResult {
-	case "successful":
-		successful = 1
-	case "unsuccessful":
-		unsuccessful = 1
-	case "attempted":
-		attempted = 1
-	}
-
 	action, ok := actions[event.AttemptedAction]
 	if !ok {
 		actions[event.AttemptedAction] = Action{
-			Attempted:    attempted,
-			Successful:   successful,
-			Unsuccessful: unsuccessful,
-			Total:        1,
+			Attempted:    0,
+			Successful:   0,
+			Unsuccessful: 0,
+			Total:        0,
 		}
-	} else {
-		if attempted == 1 {
-			action.Attempted++
-		} else {
-			if successful == 1 {
-				action.Successful++
-			} else {
-				action.Unsuccessful++
-			}
-		}
-		action.Total++
-		actions[event.AttemptedAction] = action
 	}
+
+	switch event.ActionResult {
+	case successful:
+		action.Successful++
+	case unsuccessful:
+		action.Unsuccessful++
+	case attempted:
+		action.Attempted++
+	}
+
+	action.Total++
+	actions[event.AttemptedAction] = action
 }
