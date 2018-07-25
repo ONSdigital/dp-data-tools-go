@@ -26,10 +26,17 @@ type AuditEvent struct {
 
 // Action represents stats of the consumed actions
 type Action struct {
+	Attempted    int
 	Successful   int
 	Unsuccessful int
 	Total        int
 }
+
+const (
+	attempted    = "attempted"
+	successful   = "successful"
+	unsuccessful = "unsuccessful"
+)
 
 var kafkaBrokers string
 
@@ -86,27 +93,25 @@ func readMessage(eventValue []byte) (*AuditEvent, error) {
 }
 
 func addResult(actions map[string]Action, event *AuditEvent) {
-	var successful, unsuccessful int
-	if event.ActionResult == "successful" {
-		successful = 1
-	} else {
-		unsuccessful = 1
-	}
-
 	action, ok := actions[event.AttemptedAction]
 	if !ok {
 		actions[event.AttemptedAction] = Action{
-			Successful:   successful,
-			Unsuccessful: unsuccessful,
-			Total:        1,
+			Attempted:    0,
+			Successful:   0,
+			Unsuccessful: 0,
+			Total:        0,
 		}
-	} else {
-		if successful == 1 {
-			action.Successful++
-		} else {
-			action.Unsuccessful++
-		}
-		action.Total++
-		actions[event.AttemptedAction] = action
 	}
+
+	switch event.ActionResult {
+	case successful:
+		action.Successful++
+	case unsuccessful:
+		action.Unsuccessful++
+	case attempted:
+		action.Attempted++
+	}
+
+	action.Total++
+	actions[event.AttemptedAction] = action
 }
