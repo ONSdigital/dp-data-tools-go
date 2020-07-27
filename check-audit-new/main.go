@@ -1,0 +1,153 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"flag"
+	"net/http"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+
+	kafka "github.com/ONSdigital/dp-kafka"
+	"github.com/ONSdigital/go-ns/avro"
+	"github.com/ONSdigital/log.go/log"
+)
+
+// AuditEvent represents the structure of the audit message received
+type AuditEvent struct {
+	CreatedAt    int64  `avro:"created_at"`
+	RequestID    string `avro:"request_id"`
+	Identity     string `avro:"identity"`
+	CollectionID string `avro:"collection_id"`
+	Path         string `avro:"path"`
+	Method       string `avro:"method"`
+	StatusCode   int32  `avro:"status_code"`
+	QueryParam   string `avro:"query_param"`
+}
+
+var audit = `{
+	"type": "record",
+	"name": "audit",
+	"fields": [
+	  {"name": "created_at", "type": "long", "logicalType": "timestamp-millis"},
+	  {"name": "request_id", "type": "string", "default": ""},
+	  {"name": "identity", "type": "string", "default": ""},
+	  {"name": "collection_id", "type": "string", "default": ""},
+	  {"name": "path", "type": "string", "default": ""},
+	  {"name": "method", "type": "string", "default": ""},
+	  {"name": "status_code", "type": "int", "default": 0},
+	  {"name": "query_param", "type": "string", "default": ""}
+	]
+  }`
+
+// AuditSchema is the Avro schema for Audit messages.
+var AuditSchema = &avro.Schema{
+	Definition: audit,
+}
+
+// Action represents stats of the consumed actions
+type Action struct {
+	Attempted    int
+	Successful   int
+	Unsuccessful int
+	Total        int
+}
+
+const (
+	topic         = "audit"
+	consumerGroup = "check-audit"
+)
+
+const (
+	attempted    = "attempted"
+	successful   = "successful"
+	unsuccessful = "unsuccessful"
+)
+
+var kafkaBrokers string
+
+func main() {
+
+	// Get context and parse input
+	ctx := context.Background()
+	flag.StringVar(&kafkaBrokers, "kafka-brokers", kafkaBrokers, "kafka broker addresses, comma separated")
+	flag.Parse()
+
+	// Validate
+	if kafkaBrokers == "" {
+		err := errors.New("missing kafka brokers, must be comma separated")
+		log.Event(ctx, "", log.ERROR, log.Error(err), log.Data{"kafka_brokers": kafkaBrokers})
+		return
+	}
+	kafkaBrokerList := strings.Split(kafkaBrokers, ",")
+
+	// Create Consumer with channels
+	cgChannels := kafka.CreateConsumerGroupChannels(true)
+	consumer, err := kafka.NewConsumerGroup(
+		ctx, kafkaBrokerList, topic, consumerGroup, -1, true, cgChannels)
+	if err != nil {
+		log.Event(ctx, "[KAFKA-TEST] Fatal error creating consumer.", log.FATAL, log.Error(err))
+		os.Exit(1)
+	}
+
+	// OS Signals channel
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+
+	paths := make(map[string]Action)
+	for {
+		select {
+		case message := <-consumer.Channels().Upstream:
+			event, err := readMessage(message.GetData())
+			if err != nil {
+				log.Event(ctx, "", log.ERROR, log.Error(err), log.Data{"schema": "failed to unmarshal event"})
+				break
+			}
+
+			log.Event(ctx, "received message", log.INFO, log.Data{"audit_event": event})
+
+			addResult(paths, event)
+
+			consumer.CommitAndRelease(message)
+		case <-signals:
+			log.Event(ctx, "audit stats", log.INFO, log.Data{"audit": paths})
+			os.Exit(0)
+		}
+	}
+}
+
+func readMessage(eventValue []byte) (*AuditEvent, error) {
+	var e AuditEvent
+
+	if err := AuditSchema.Unmarshal(eventValue, &e); err != nil {
+		return nil, err
+	}
+
+	return &e, nil
+}
+
+func addResult(paths map[string]Action, event *AuditEvent) {
+	action, ok := paths[event.Path]
+	if !ok {
+		paths[event.Path] = Action{
+			Attempted:    0,
+			Successful:   0,
+			Unsuccessful: 0,
+			Total:        0,
+		}
+	}
+
+	switch event.StatusCode {
+	case 0:
+		action.Attempted++
+	case http.StatusInternalServerError:
+		action.Unsuccessful++
+	default:
+		action.Successful++
+	}
+
+	action.Total++
+	paths[event.Path] = action
+}
