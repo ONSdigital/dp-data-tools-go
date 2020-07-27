@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	kafka "github.com/ONSdigital/dp-kafka"
 	"github.com/ONSdigital/go-ns/avro"
@@ -25,6 +26,14 @@ type AuditEvent struct {
 	Method       string `avro:"method"`
 	StatusCode   int32  `avro:"status_code"`
 	QueryParam   string `avro:"query_param"`
+}
+
+// CreatedAtTime returns a time.Time representation of the CreatedAt field of an AuditEvent struct
+func (a *AuditEvent) CreatedAtTime() time.Time {
+	var sec, nanosec int64
+	sec = a.CreatedAt / 1e3
+	nanosec = (a.CreatedAt % 1e3) * 1e6
+	return time.Unix(sec, nanosec).UTC()
 }
 
 var audit = `{
@@ -106,7 +115,8 @@ func main() {
 				break
 			}
 
-			log.Event(ctx, "received message", log.INFO, log.Data{"audit_event": event})
+			createdAtTime := event.CreatedAtTime()
+			log.Event(ctx, "received message", log.INFO, log.Data{"audit_event": event, "created_at_time": createdAtTime})
 
 			addResult(paths, event)
 
