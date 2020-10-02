@@ -2,6 +2,10 @@
 
  See below for various tools to update data.
 
+## Prerequisites
+
+Some of these tools require [dp-cli](https://github.com/ONSdigital/dp-cli).
+
 ## Current tools/scripts
 
 ### mongodb related
