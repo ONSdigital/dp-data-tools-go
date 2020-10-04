@@ -15,6 +15,7 @@ Some of these tools require [dp-cli](https://github.com/ONSdigital/dp-cli).
 * [Instance/version documents include new downloads structure](./mongo-fixes/download-structure/dataset)
 * [Filter output documents include new downloads structure](./mongo-fixes/download-structure/filter)
 * [Remove collection_id from published datasets](./mongo-fixes/delete-published-collection-id)
+* [Neptune migration - clear all collections and import updated recipes](./mongo-fixes/neptune-migration)
 
 ### kafka related
 
