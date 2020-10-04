@@ -9,20 +9,28 @@ fi
 mongo $1 <<EOF
 
  use datasets
- db.dimension.options.remove({})
- db.instances.remove({})
- db.editions.remove({})
- db.datasets.remove({})
+ db.dimension.options.renameCollection("dimension.options_neo4j", false)
+ db.createCollection("dimension.options")
+ db.instances.renameCollection("instances_neo4j", false)
+ db.createCollection("instances")
+ db.editions.renameCollection("editions_neo4j", false)
+ db.createCollection("editions")
+ db.datasets.renameCollection("datasets_neo4j", false)
+ db.createCollection("datasets")
 
  use imports
- db.imports.remove({})
+ db.imports.renameCollection("imports_neo4j", false)
+ db.createCollection("imports")
 
  use filters
- db.filters.remove({})
- db.filterOutputs.remove({})
+ db.filters.renameCollection("filters_neo4j", false)
+ db.createCollection("filters")
+ db.filterOutputs.renameCollection("filterOutputs_neo4j", false)
+ db.createCollection("filterOutputs")
 
  use recipes
- db.recipes.remove({})
+ db.recipes.renameCollection("recipes_neo4j", false)
+ db.createCollection("recipes")
 
  var file = cat('./recipes.json');
  use recipes
