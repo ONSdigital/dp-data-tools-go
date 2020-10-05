@@ -10,7 +10,7 @@ utility has received a signal to terminate.
 
 Run:
 - `go build`
-- `./check-audit-new -kafka-brokers='<brokers>'`
+- `HUMAN_LOG=1 ./check-audit-new -kafka-brokers='<brokers>'`
 
 Where `<brokers>` should be a comma-separated list like `localhost:9092` (i.e. `<ip-address>:<port>`).
 
@@ -23,5 +23,11 @@ Where `<brokers>` should be a comma-separated list like `localhost:9092` (i.e. `
   - `GOOS=linux GOARCH=amd64 go build` (theses are typical values for AWS hosts)
 - copy that cross-compiled binary onto the target box using one of:
   - `scp check-audit-new <username>@<target-ip-address>:`
+  - `dp scp develop publishing 2`
   - `cd ../../dp-setup/ansible && scp -F ./ssh.cfg ../../dp-data-tools/check-audit-new/check-audit-new <username>@<target-ip-address>:`
-- on the target box (via ssh), run `./check-audit-new -kafka-brokers='<ip1:port1>,<ip2:port2>'`
+- on the target box (via ssh), run `HUMAN_LOG=1 ./check-audit-new -kafka-brokers='<ip1:port1>,<ip2:port2>'`
+
+### Note about HUMAN_LOG and special characters encoding
+
+If you run check-audit-new without HUMAN_LOG, then any special character will be presented as a unicode escaped ASCII hexadecimal code.
+For example, if an audit event contains `query_param` with value `k1=v1&k2=v1`, the value will be displayed as `k1=v1\u0026k2=v2` unless the tool is run with HUMAN_LOG=1

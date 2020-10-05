@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	kafka "github.com/ONSdigital/dp-kafka"
+	kafka "github.com/ONSdigital/dp-kafka/v2"
 	"github.com/ONSdigital/go-ns/avro"
 	"github.com/ONSdigital/log.go/log"
 )
@@ -76,6 +76,7 @@ const (
 )
 
 var kafkaBrokers string
+var kafkaVersion = "1.0.2"
 
 func main() {
 
@@ -93,9 +94,10 @@ func main() {
 	kafkaBrokerList := strings.Split(kafkaBrokers, ",")
 
 	// Create Consumer with channels
-	cgChannels := kafka.CreateConsumerGroupChannels(true)
+	cgChannels := kafka.CreateConsumerGroupChannels(1)
+	cgConfig := &kafka.ConsumerGroupConfig{KafkaVersion: &kafkaVersion}
 	consumer, err := kafka.NewConsumerGroup(
-		ctx, kafkaBrokerList, topic, consumerGroup, -1, true, cgChannels)
+		ctx, kafkaBrokerList, topic, consumerGroup, cgChannels, cgConfig)
 	if err != nil {
 		log.Event(ctx, "[KAFKA-TEST] Fatal error creating consumer.", log.FATAL, log.Error(err))
 		os.Exit(1)
@@ -120,7 +122,7 @@ func main() {
 
 			addResult(paths, event)
 
-			consumer.CommitAndRelease(message)
+			message.Commit()
 		case <-signals:
 			log.Event(ctx, "audit stats", log.INFO, log.Data{"audit": paths})
 			os.Exit(0)
