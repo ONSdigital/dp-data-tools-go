@@ -1525,7 +1525,6 @@
           {
             "href": "http://localhost:22400/code-lists/city-regions",
             "id": "city-regions",
-            "is_hierarchy": true,
             "name": "geography"
           },
           {
@@ -2302,7 +2301,6 @@
           {
             "href": "http://localhost:22400/code-lists/city-regions",
             "id": "city-regions",
-            "is_hierarchy": true,
             "name": "geography"
           },
           {
@@ -2401,7 +2399,7 @@
           {
             "href": "http://localhost:22400/code-lists/adzuna-jobs-category",
             "id": "adzuna-jobs-category",
-            "name": "qdzunajobscategory"
+            "name": "adzunajobscategory"
           }
         ],
         "dataset_id": "online-job-advert-estimates",
@@ -2585,6 +2583,53 @@
           "time-series"
         ],
         "title": "Regional Labour Market Statistics"
+      }
+    ]
+  },
+  {
+    "alias": "2011 Census - DC2601WA",
+    "files": [
+      {
+        "description": "2011 Census - DC2601WA"
+      }
+    ],
+    "format": "v4",
+    "_id": "aeb08d0b-44d7-434a-816c-3a73be533ab2",
+    "output_instances": [
+      {
+        "code_lists": [
+          {
+            "href": "http://localhost:22400/code-lists/calendar-years",
+            "id": "calendar-years",
+            "name": "time"
+          },
+          {
+            "href": "http://localhost:22400/code-lists/middle-layer-super-output-area",
+            "id": "middle-layer-super-output-area",
+            "is_hierarchy": true,
+            "name": "geography"
+          },
+          {
+            "href": "http://localhost:22400/code-lists/speak-welsh",
+            "id": "speak-welsh",
+            "name": "speakwelsh"
+          },
+          {
+            "href": "http://localhost:22400/code-lists/welsh-household-composition",
+            "id": "welsh-household-composition",
+            "name": "welshhouseholdcomposition"
+          },
+          {
+            "href": "http://localhost:22400/code-lists/household-reference-person",
+            "id": "household-reference-person",
+            "name": "householdreferenceperson"
+          }
+        ],
+        "dataset_id": "census-2011-market-dc2601wa",
+        "editions": [
+          "time-series"
+        ],
+        "title": "2011 Census - DC2601WA"
       }
     ]
   }
