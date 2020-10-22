@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"strings"
+	"time"
 
 	"github.com/ONSdigital/dp-dataset-api/models"
 	"github.com/ONSdigital/log.go/log"
@@ -15,6 +16,29 @@ import (
 var (
 	mongoURL string
 )
+
+// InstanceWithID represents instance with the additional _id from mongo
+type InstanceWithID struct {
+	ID                bson.ObjectId               `bson:"_id"`
+	Alerts            *[]models.Alert             `bson:"alerts,omitempty"                      json:"alerts,omitempty"`
+	CollectionID      string                      `bson:"collection_id,omitempty"               json:"collection_id,omitempty"`
+	Dimensions        []models.Dimension          `bson:"dimensions,omitempty"                  json:"dimensions,omitempty"`
+	Downloads         *models.DownloadList        `bson:"downloads,omitempty"                   json:"downloads,omitempty"`
+	Edition           string                      `bson:"edition,omitempty"                     json:"edition,omitempty"`
+	Events            *[]models.Event             `bson:"events,omitempty"                      json:"events,omitempty"`
+	Headers           *[]string                   `bson:"headers,omitempty"                     json:"headers,omitempty"`
+	ImportTasks       *models.InstanceImportTasks `bson:"import_tasks,omitempty"                json:"import_tasks"`
+	InstanceID        string                      `bson:"id,omitempty"                          json:"id,omitempty"`
+	LastUpdated       time.Time                   `bson:"last_updated,omitempty"                json:"last_updated,omitempty"`
+	LatestChanges     *[]models.LatestChange      `bson:"latest_changes,omitempty"              json:"latest_changes,omitempty"`
+	Links             *models.InstanceLinks       `bson:"links,omitempty"                       json:"links,omitempty"`
+	ReleaseDate       string                      `bson:"release_date,omitempty"                json:"release_date,omitempty"`
+	State             string                      `bson:"state,omitempty"                       json:"state,omitempty"`
+	Temporal          *[]models.TemporalFrequency `bson:"temporal,omitempty"                    json:"temporal,omitempty"`
+	TotalObservations *int                        `bson:"total_observations,omitempty"          json:"total_observations,omitempty"`
+	UniqueTimestamp   bson.MongoTimestamp         `bson:"unique_timestamp"                      json:"-"`
+	Version           int                         `bson:"version,omitempty"                     json:"version,omitempty"`
+}
 
 func main() {
 	flag.StringVar(&mongoURL, "mongo-url", mongoURL, "mongoDB URL")
@@ -62,9 +86,6 @@ func main() {
 			instance.Dimensions[i].HRef = strings.Replace(dimension.HRef, "/v1", "", 1)
 		}
 
-		log.Event(ctx, "instance", log.Data{"instance": instance.Dimensions[0].HRef})
-		log.Event(ctx, "instance", log.Data{"instance": instance.Dimensions[1].HRef})
-
 		// prepares updated_instance in bson.M and then updates existing instance document
 		updatedInstance := bson.M{"$set": instance}
 
@@ -84,7 +105,7 @@ func main() {
 
 }
 
-func getInstances(ctx context.Context, session *mgo.Session) (results []models.Instance, err error) {
+func getInstances(ctx context.Context, session *mgo.Session) (results []InstanceWithID, err error) {
 	s := session.Copy()
 	defer s.Close()
 
@@ -108,7 +129,7 @@ func getInstances(ctx context.Context, session *mgo.Session) (results []models.I
 }
 
 //createBackup updates an instance document
-func addInstanceToBackup(session *mgo.Session, instance models.Instance) error {
+func addInstanceToBackup(session *mgo.Session, instance InstanceWithID) error {
 
 	s := session.Copy()
 	defer s.Close()
@@ -122,7 +143,7 @@ func updateInstance(session *mgo.Session, instanceID string, updatedInstance bso
 	s := session.Copy()
 	defer s.Close()
 
-	err = s.DB("datasets").C("instances_backup").Update(bson.M{"id": instanceID}, updatedInstance)
+	err = s.DB("datasets").C("instances").Update(bson.M{"id": instanceID}, updatedInstance)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return errors.New("instance not found")
