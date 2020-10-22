@@ -17,6 +17,11 @@ var (
 	mongoURL string
 )
 
+// MongoID represents instance id
+type MongoID struct {
+	ID bson.ObjectId `bson:"_id"`
+}
+
 // InstanceWithID represents instance with the additional _id from mongo
 type InstanceWithID struct {
 	ID                bson.ObjectId               `bson:"_id"`
@@ -61,39 +66,38 @@ func main() {
 	session.SetBatch(10000)
 	session.SetPrefetch(0.25)
 
-	// Get all instances
-	instances, err := getInstances(ctx, session)
+	// Get all instances IDs
+	instanceIDs, err := getInstanceIDs(ctx, session)
 	if err != nil {
 		log.Event(ctx, "failed to get all instances", log.Error(err), log.ERROR)
 		return
 	}
 
 	// Create a backup collection
-	for _, instance := range instances {
-		if err = addInstanceToBackup(session, instance); err != nil {
+	for _, id := range instanceIDs {
+		if err = addInstanceToBackup(ctx, session, id.ID); err != nil {
 			log.Event(ctx, "failed to backup instances", log.Error(err), log.ERROR)
 			return
 		}
 	}
 
-	errorCount := 0
+	log.Event(ctx, "successfully backed up all instance documents", log.INFO)
+
+	errorCount, processCount := 0, 0
 
 	// loop over instances
-	for _, instance := range instances {
-
-		// loop over dimensions
-		for i, dimension := range instance.Dimensions {
-			v1count := strings.Count(dimension.HRef, "/v1")
-			instance.Dimensions[i].HRef = strings.Replace(dimension.HRef, "/v1", "", v1count)
-		}
-
-		// prepares updated_instance in bson.M and then updates existing instance document
-		updatedInstance := bson.M{"$set": instance}
+	for _, id := range instanceIDs {
 
 		// update the whole instance document
-		if err := updateInstance(session, instance.InstanceID, updatedInstance); err != nil {
-			log.Event(ctx, "failed to update dimension of instance", log.Error(err), log.Data{"current_instance": instance}, log.ERROR)
+		if err := updateInstance(ctx, session, id.ID); err != nil {
+			log.Event(ctx, "failed to update dimension of instance", log.Error(err), log.Data{"current_instance_id": id}, log.ERROR)
 			errorCount++
+		}
+
+		processCount++
+
+		if processCount%10 == 0 {
+			log.Event(ctx, "updating instance process", log.Data{"process": len(instanceIDs) / processCount}, log.INFO)
 		}
 
 	}
@@ -106,19 +110,13 @@ func main() {
 
 }
 
-func getInstances(ctx context.Context, session *mgo.Session) (results []InstanceWithID, err error) {
+func getInstanceIDs(ctx context.Context, session *mgo.Session) (results []MongoID, err error) {
 	s := session.Copy()
 	defer s.Close()
 
-	iter := s.DB("datasets").C("instances").Find(bson.M{}).Iter()
-	defer func() {
-		err := iter.Close()
-		if err != nil {
-			log.Event(ctx, "error closing edition iterator", log.Error(err), log.ERROR)
-		}
-	}()
-
-	if err := iter.All(&results); err != nil {
+	err = s.DB("datasets").C("instances").Find(bson.M{}).Select(bson.M{"_id": 1}).All(&results)
+	if err != nil {
+		log.Event(ctx, "failed to get instance ids", log.Error(err), log.ERROR)
 		return nil, err
 	}
 
@@ -130,21 +128,49 @@ func getInstances(ctx context.Context, session *mgo.Session) (results []Instance
 }
 
 //createBackup updates an instance document
-func addInstanceToBackup(session *mgo.Session, instance InstanceWithID) error {
+func addInstanceToBackup(ctx context.Context, session *mgo.Session, id bson.ObjectId) error {
 
 	s := session.Copy()
 	defer s.Close()
 
-	err := s.DB("datasets").C("instances_backup").Insert(instance)
-	return err
+	var instance models.Instance
+	err := s.DB("datasets").C("instances").Find(bson.M{"_id": id}).One(&instance)
+	if err != nil {
+		log.Event(ctx, "failed to get instance from id", log.Error(err), log.ERROR)
+		return err
+	}
+
+	err = s.DB("datasets").C("instances_backup").Insert(instance)
+	if err != nil {
+		log.Event(ctx, "failed to add instance to backup", log.Error(err), log.ERROR)
+		return err
+	}
+
+	return nil
 }
 
 //UpdateInstance updates an instance document
-func updateInstance(session *mgo.Session, instanceID string, updatedInstance bson.M) (err error) {
+func updateInstance(ctx context.Context, session *mgo.Session, id bson.ObjectId) (err error) {
 	s := session.Copy()
 	defer s.Close()
 
-	err = s.DB("datasets").C("instances").Update(bson.M{"id": instanceID}, updatedInstance)
+	var instance models.Instance
+	err = s.DB("datasets").C("instances").Find(bson.M{"_id": id}).One(&instance)
+	if err != nil {
+		log.Event(ctx, "failed to get instance from id for updating", log.Error(err), log.ERROR)
+		return err
+	}
+
+	// loop over dimensions
+	for i, dimension := range instance.Dimensions {
+		v1count := strings.Count(dimension.HRef, "/v1")
+		instance.Dimensions[i].HRef = strings.Replace(dimension.HRef, "/v1", "", v1count)
+	}
+
+	// prepares updated_instance in bson.M and then updates existing instance document
+	updatedInstance := bson.M{"$set": instance}
+
+	err = s.DB("datasets").C("instances").Update(bson.M{"id": instance.InstanceID}, updatedInstance)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return errors.New("instance not found")
