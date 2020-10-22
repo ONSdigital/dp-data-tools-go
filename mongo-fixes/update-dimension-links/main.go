@@ -83,7 +83,8 @@ func main() {
 
 		// loop over dimensions
 		for i, dimension := range instance.Dimensions {
-			instance.Dimensions[i].HRef = strings.Replace(dimension.HRef, "/v1", "", 1)
+			v1count := strings.Count(dimension.HRef, "/v1")
+			instance.Dimensions[i].HRef = strings.Replace(dimension.HRef, "/v1", "", v1count)
 		}
 
 		// prepares updated_instance in bson.M and then updates existing instance document
