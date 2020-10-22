@@ -1,8 +1,7 @@
 update-dimension-links
 ==================
 
-This script is to update the dimensions URLs in each instances to be unversioned (to not contain /v1)
-Maybe also rename the URL domain to localhost??? 
+This script is to update the dimensions URLs in each instances to be unversioned (to not contain /v1) 
 
 ### How to run service
 * Run `go build`
