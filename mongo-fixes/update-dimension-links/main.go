@@ -124,7 +124,7 @@ func getInstanceIDs(ctx context.Context, session *mgo.Session) (results []MongoI
 	s := session.Copy()
 	defer s.Close()
 
-	err = s.DB("datasets").C("instances").Find(bson.M{}).Select(bson.M{"_id": 1}).All(&results)
+	err = s.DB("datasets").C("instances").Find(bson.M{"dimensions": bson.M{"$elemMatch": bson.M{"href": bson.M{"$regex": "/v1/"}}}}).Select(bson.M{"_id": 1}).All(&results)
 	if err != nil {
 		log.Event(ctx, "failed to get instance ids", log.Error(err), log.ERROR)
 		return nil, err
