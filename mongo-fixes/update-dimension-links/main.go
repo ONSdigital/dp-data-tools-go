@@ -11,6 +11,7 @@ import (
 	"github.com/ONSdigital/log.go/log"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/schollz/progressbar/v3"
 )
 
 var (
@@ -66,26 +67,33 @@ func main() {
 	session.SetBatch(10000)
 	session.SetPrefetch(0.25)
 
+	log.Event(ctx, "successfully connected to mongo", log.INFO)
+
 	// Get all instances IDs
 	instanceIDs, err := getInstanceIDs(ctx, session)
 	if err != nil {
 		log.Event(ctx, "failed to get all instances", log.Error(err), log.ERROR)
 		return
 	}
+	log.Event(ctx, "successfully retrieved all instance ids", log.INFO)
 
 	// Create a backup collection
 	// dateTime formatted in YYMMDD_HHMMSS
 	dateTime := time.Now().Format("20060102_150405")
+	backupProgressBar := progressbar.Default(int64(len(instanceIDs)), "backup instance")
 	for _, id := range instanceIDs {
 		if err = addInstanceToBackup(ctx, session, id.ID, dateTime); err != nil {
 			log.Event(ctx, "failed to backup instances", log.Error(err), log.ERROR)
 			return
 		}
+		backupProgressBar.Add(1)
+		time.Sleep(40 * time.Millisecond)
 	}
 
 	log.Event(ctx, "successfully backed up all instance documents", log.INFO)
 
-	errorCount, processCount := 0, 0
+	errorCount := 0
+	updateProgressBar := progressbar.Default(int64(len(instanceIDs)), "updating instance")
 
 	// loop over instances
 	for _, id := range instanceIDs {
@@ -96,11 +104,8 @@ func main() {
 			errorCount++
 		}
 
-		processCount++
-
-		if processCount%10 == 0 {
-			log.Event(ctx, "updating instance process", log.Data{"process": len(instanceIDs) / processCount}, log.INFO)
-		}
+		updateProgressBar.Add(1)
+		time.Sleep(40 * time.Millisecond)
 
 	}
 
@@ -126,8 +131,6 @@ func getInstanceIDs(ctx context.Context, session *mgo.Session) (results []MongoI
 		return nil, errors.New("no instance documents found")
 	}
 
-	log.Event(ctx, "get Instance ids", log.Data{"mongo ids": results})
-
 	return results, nil
 }
 
@@ -143,8 +146,6 @@ func addInstanceToBackup(ctx context.Context, session *mgo.Session, id bson.Obje
 		log.Event(ctx, "failed to get instance from id", log.Error(err), log.ERROR)
 		return err
 	}
-
-	log.Event(ctx, "add Instance to backup data", log.Data{"mongo id": id})
 
 	_, err = s.DB("datasets").C("instances_backup_"+dateTime).UpsertId(id, instance)
 	if err != nil {
