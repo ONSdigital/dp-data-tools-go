@@ -74,8 +74,10 @@ func main() {
 	}
 
 	// Create a backup collection
+	// dateTime formatted in YYMMDD_HHMMSS
+	dateTime := time.Now().Format("20060102_150405")
 	for _, id := range instanceIDs {
-		if err = addInstanceToBackup(ctx, session, id.ID); err != nil {
+		if err = addInstanceToBackup(ctx, session, id.ID, dateTime); err != nil {
 			log.Event(ctx, "failed to backup instances", log.Error(err), log.ERROR)
 			return
 		}
@@ -124,11 +126,13 @@ func getInstanceIDs(ctx context.Context, session *mgo.Session) (results []MongoI
 		return nil, errors.New("no instance documents found")
 	}
 
+	log.Event(ctx, "get Instance ids", log.Data{"mongo ids": results})
+
 	return results, nil
 }
 
 //createBackup updates an instance document
-func addInstanceToBackup(ctx context.Context, session *mgo.Session, id bson.ObjectId) error {
+func addInstanceToBackup(ctx context.Context, session *mgo.Session, id bson.ObjectId, dateTime string) error {
 
 	s := session.Copy()
 	defer s.Close()
@@ -140,7 +144,9 @@ func addInstanceToBackup(ctx context.Context, session *mgo.Session, id bson.Obje
 		return err
 	}
 
-	err = s.DB("datasets").C("instances_backup").Insert(instance)
+	log.Event(ctx, "add Instance to backup data", log.Data{"mongo id": id})
+
+	_, err = s.DB("datasets").C("instances_backup_"+dateTime).UpsertId(id, instance)
 	if err != nil {
 		log.Event(ctx, "failed to add instance to backup", log.Error(err), log.ERROR)
 		return err
@@ -163,8 +169,10 @@ func updateInstance(ctx context.Context, session *mgo.Session, id bson.ObjectId)
 
 	// loop over dimensions
 	for i, dimension := range instance.Dimensions {
-		v1count := strings.Count(dimension.HRef, "/v1")
-		instance.Dimensions[i].HRef = strings.Replace(dimension.HRef, "/v1", "", v1count)
+		for strings.Contains(dimension.HRef, "/v1/") {
+			dimension.HRef = strings.Replace(dimension.HRef, "/v1/", "/", 1)
+		}
+		instance.Dimensions[i].HRef = dimension.HRef
 	}
 
 	// prepares updated_instance in bson.M and then updates existing instance document
