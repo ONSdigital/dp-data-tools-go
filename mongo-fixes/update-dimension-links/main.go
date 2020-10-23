@@ -78,7 +78,7 @@ func main() {
 	log.Event(ctx, "successfully retrieved all instance ids", log.INFO)
 
 	// Create a backup collection
-	// dateTime formatted in YYMMDD_HHMMSS
+	// dateTime formatted in YYYYMMDD_HHMMSS
 	dateTime := time.Now().Format("20060102_150405")
 	backupProgressBar := progressbar.Default(int64(len(instanceIDs)), "backup instance")
 	for _, id := range instanceIDs {
@@ -103,14 +103,17 @@ func main() {
 			log.Event(ctx, "failed to update dimension of instance", log.Error(err), log.Data{"current_instance_id": id}, log.ERROR)
 			errorCount++
 		}
+		if errorCount > 10 {
+			log.Event(ctx, "too many errors updating instances", log.Error(err), log.ERROR)
+			return
+		}
 
 		updateProgressBar.Add(1)
 		time.Sleep(40 * time.Millisecond)
-
 	}
 
 	if errorCount > 0 {
-		log.Event(ctx, "failed to update dimension of all instances", log.Data{"no_unsuccessful_updates": errorCount}, log.INFO)
+		log.Event(ctx, "failed to update dimension of all instances", log.Data{"unsuccessful_update_count": errorCount}, log.INFO)
 	} else {
 		log.Event(ctx, "successfully updated all instance documents", log.INFO)
 	}
