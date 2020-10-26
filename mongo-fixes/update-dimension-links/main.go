@@ -23,30 +23,6 @@ type MongoID struct {
 	ID bson.ObjectId `bson:"_id"`
 }
 
-// InstanceWithID represents instance with the additional _id from mongo
-// keep in line with `Instance` from `dp-dataset-api/models/instance.go`
-type InstanceWithID struct {
-	ID                bson.ObjectId               `bson:"_id"`
-	Alerts            *[]models.Alert             `bson:"alerts,omitempty"                      json:"alerts,omitempty"`
-	CollectionID      string                      `bson:"collection_id,omitempty"               json:"collection_id,omitempty"`
-	Dimensions        []models.Dimension          `bson:"dimensions,omitempty"                  json:"dimensions,omitempty"`
-	Downloads         *models.DownloadList        `bson:"downloads,omitempty"                   json:"downloads,omitempty"`
-	Edition           string                      `bson:"edition,omitempty"                     json:"edition,omitempty"`
-	Events            *[]models.Event             `bson:"events,omitempty"                      json:"events,omitempty"`
-	Headers           *[]string                   `bson:"headers,omitempty"                     json:"headers,omitempty"`
-	ImportTasks       *models.InstanceImportTasks `bson:"import_tasks,omitempty"                json:"import_tasks"`
-	InstanceID        string                      `bson:"id,omitempty"                          json:"id,omitempty"`
-	LastUpdated       time.Time                   `bson:"last_updated,omitempty"                json:"last_updated,omitempty"`
-	LatestChanges     *[]models.LatestChange      `bson:"latest_changes,omitempty"              json:"latest_changes,omitempty"`
-	Links             *models.InstanceLinks       `bson:"links,omitempty"                       json:"links,omitempty"`
-	ReleaseDate       string                      `bson:"release_date,omitempty"                json:"release_date,omitempty"`
-	State             string                      `bson:"state,omitempty"                       json:"state,omitempty"`
-	Temporal          *[]models.TemporalFrequency `bson:"temporal,omitempty"                    json:"temporal,omitempty"`
-	TotalObservations *int                        `bson:"total_observations,omitempty"          json:"total_observations,omitempty"`
-	UniqueTimestamp   bson.MongoTimestamp         `bson:"unique_timestamp"                      json:"-"`
-	Version           int                         `bson:"version,omitempty"                     json:"version,omitempty"`
-}
-
 func main() {
 	flag.StringVar(&mongoURL, "mongo-url", mongoURL, "mongoDB URL")
 	flag.Parse()
@@ -183,7 +159,7 @@ func updateInstance(ctx context.Context, session *mgo.Session, id bson.ObjectId)
 	// prepares updated_instance in bson.M and then updates existing instance document
 	updateInstance := bson.M{"$set": instance}
 
-	err = s.DB("datasets").C("instances").Update(bson.M{"id": instance.InstanceID}, updateInstance)
+	err = s.DB("datasets").C("instances").Update(bson.M{"_id": id}, updateInstance)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return errors.New("instance not found")
