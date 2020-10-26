@@ -24,7 +24,7 @@ type MongoID struct {
 }
 
 // InstanceWithID represents instance with the additional _id from mongo
-// keep in line with `Instance` from $file
+// keep in line with `Instance` from `dp-dataset-api/models/instance.go`
 type InstanceWithID struct {
 	ID                bson.ObjectId               `bson:"_id"`
 	Alerts            *[]models.Alert             `bson:"alerts,omitempty"                      json:"alerts,omitempty"`
