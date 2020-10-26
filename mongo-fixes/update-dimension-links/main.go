@@ -24,6 +24,7 @@ type MongoID struct {
 }
 
 // InstanceWithID represents instance with the additional _id from mongo
+// keep in line with `Instance` from $file
 type InstanceWithID struct {
 	ID                bson.ObjectId               `bson:"_id"`
 	Alerts            *[]models.Alert             `bson:"alerts,omitempty"                      json:"alerts,omitempty"`
@@ -102,10 +103,10 @@ func main() {
 		if err := updateInstance(ctx, session, id.ID); err != nil {
 			log.Event(ctx, "failed to update dimension of instance", log.Error(err), log.Data{"current_instance_id": id}, log.ERROR)
 			errorCount++
-		}
-		if errorCount > 10 {
-			log.Event(ctx, "too many errors updating instances", log.Error(err), log.ERROR)
-			return
+			if errorCount > 10 {
+				log.Event(ctx, "too many errors updating instances", log.Error(err), log.ERROR)
+				return
+			}
 		}
 
 		updateProgressBar.Add(1)
@@ -113,7 +114,7 @@ func main() {
 	}
 
 	if errorCount > 0 {
-		log.Event(ctx, "failed to update dimension of all instances", log.Data{"unsuccessful_update_count": errorCount}, log.INFO)
+		log.Event(ctx, "failed to update dimension of all instances", log.Data{"unsuccessful_update_count": errorCount}, log.WARN)
 	} else {
 		log.Event(ctx, "successfully updated all instance documents", log.INFO)
 	}
@@ -137,7 +138,7 @@ func getInstanceIDs(ctx context.Context, session *mgo.Session) (results []MongoI
 	return results, nil
 }
 
-//createBackup updates an instance document
+// addInstanceToBackup backs-up an instance document
 func addInstanceToBackup(ctx context.Context, session *mgo.Session, id bson.ObjectId, dateTime string) error {
 
 	s := session.Copy()
@@ -159,7 +160,7 @@ func addInstanceToBackup(ctx context.Context, session *mgo.Session, id bson.Obje
 	return nil
 }
 
-//UpdateInstance updates an instance document
+// updateInstance updates an instance document
 func updateInstance(ctx context.Context, session *mgo.Session, id bson.ObjectId) (err error) {
 	s := session.Copy()
 	defer s.Close()
@@ -180,9 +181,9 @@ func updateInstance(ctx context.Context, session *mgo.Session, id bson.ObjectId)
 	}
 
 	// prepares updated_instance in bson.M and then updates existing instance document
-	updatedInstance := bson.M{"$set": instance}
+	updateInstance := bson.M{"$set": instance}
 
-	err = s.DB("datasets").C("instances").Update(bson.M{"id": instance.InstanceID}, updatedInstance)
+	err = s.DB("datasets").C("instances").Update(bson.M{"id": instance.InstanceID}, updateInstance)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return errors.New("instance not found")

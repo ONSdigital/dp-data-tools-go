@@ -1,7 +1,7 @@
 update-dimension-links
 ==================
 
-This script is to update the dimensions URLs in each instances to be unversioned (to not contain /v1) 
+This program updates dimension URLs in the `instances` collection -  removing any versioning (i.e. `/v1/` substring)
 
 ### How to run service
 * Run `go build`
