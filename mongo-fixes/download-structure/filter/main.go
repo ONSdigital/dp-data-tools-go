@@ -1,11 +1,11 @@
 package main
 
 import (
-	"errors"
+	"context"
 	"flag"
 	"fmt"
 
-	"github.com/ONSdigital/go-ns/log"
+	"github.com/ONSdigital/log.go/log"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -40,19 +40,21 @@ func main() {
 	flag.StringVar(&downloadServiceURL, "download-service-url", downloadServiceURL, "download-service url")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	if mongoURL == "" {
-		log.Error(errors.New("missing mongo-url flag"), nil)
+		log.Event(ctx, "missing mongo-url flag", log.ERROR)
 		return
 	}
 
 	if downloadServiceURL == "" {
-		log.Error(errors.New("missing download-service-url flag"), nil)
+		log.Event(ctx, "missing download-service-url flag", log.ERROR)
 		return
 	}
 
 	session, err := mgo.Dial(mongoURL)
 	if err != nil {
-		log.ErrorC("unable to create mongo session", err, nil)
+		log.Event(ctx, "unable to create mongo session", log.ERROR)
 		return
 	}
 	defer session.Close()
@@ -66,7 +68,7 @@ func main() {
 	defer func() {
 		err := iter.Close()
 		if err != nil {
-			log.ErrorC("error closing edition iterator", err, nil)
+			log.Event(ctx, "error closing edition iterator", log.ERROR)
 		}
 	}()
 
@@ -75,7 +77,7 @@ func main() {
 
 	var filters []Filter
 	if err := iter.All(&filters); err != nil {
-		log.ErrorC("could not get instances from mongo", err, nil)
+		log.Event(ctx, "could not get instances from mongo", log.ERROR)
 		return
 	}
 
@@ -99,9 +101,8 @@ func main() {
 	}
 
 	if errorCount > 0 {
-		log.Info("unsuccessfully updated all documents.", log.Data{"number_of_unsuccessful_updates": errorCount, "filter_ids": filterIDs})
+		log.Event(ctx, "unsuccessfully updated all documents", log.INFO, log.Data{"number_of_unsuccessful_updates": errorCount, "filter_ids": filterIDs})
 	}
 
-	log.Info("successfully updated all documents.", nil)
-
+	log.Event(ctx, "successfully updated all documents", log.INFO)
 }
