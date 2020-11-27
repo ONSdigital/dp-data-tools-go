@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"strconv"
 	"time"
 
 	"github.com/ONSdigital/dp-dataset-api/models"
-	"github.com/ONSdigital/go-ns/log"
+	"github.com/ONSdigital/log.go/log"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -57,14 +58,16 @@ func main() {
 	flag.StringVar(&mongoURL, "mongo-url", mongoURL, "mongoDB URL")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	if mongoURL == "" {
-		log.Error(errors.New("missing mongo-url flag"), nil)
+		log.Event(ctx, "missing mongo-url flag", log.ERROR)
 		return
 	}
 
 	session, err := mgo.Dial(mongoURL)
 	if err != nil {
-		log.ErrorC("unable to create mongo session", err, nil)
+		log.Event(ctx, "unable to create mongo session", log.ERROR, log.Error(err))
 		return
 	}
 	defer session.Close()
@@ -73,9 +76,9 @@ func main() {
 	session.SetPrefetch(0.25)
 
 	// Get all editions
-	editions, err := getEditions(session)
+	editions, err := getEditions(ctx, session)
 	if err != nil {
-		log.ErrorC("failed to get all editions", err, nil)
+		log.Event(ctx, "failed to get all editions", log.ERROR, log.Error(err))
 		return
 	}
 
@@ -94,9 +97,9 @@ func main() {
 		}
 
 		// Get latest version for an edition (of state edition-confirmed, associated or published)
-		state, version, err := getLatestVersion(session, edition.Links.Dataset.ID, edition.Edition, states)
+		state, version, err := getLatestVersion(ctx, session, edition.Links.Dataset.ID, edition.Edition, states)
 		if err != nil {
-			log.ErrorC("failed to get latest version", err, logData)
+			log.Event(ctx, "failed to get latest version", log.ERROR, log.Error(err), logData)
 			return
 		}
 
@@ -106,10 +109,10 @@ func main() {
 		newEdition.Next.Links.LatestVersion.HRef = "http://localhost:10400/datasets/" + edition.Links.Dataset.ID + "/editions/" + edition.Edition + "/versions/" + strconv.Itoa(version)
 
 		if state != "published" {
-			_, publishedVersion, err := getLatestVersion(session, edition.Links.Dataset.ID, edition.Edition, []string{"published"})
+			_, publishedVersion, err := getLatestVersion(ctx, session, edition.Links.Dataset.ID, edition.Edition, []string{"published"})
 			if err != nil {
 				if err != mgo.ErrNotFound {
-					log.ErrorC("failed to get latest published version", err, logData)
+					log.Event(ctx, "failed to get latest published version", log.ERROR, log.Error(err), logData)
 					return
 				}
 			}
@@ -126,21 +129,21 @@ func main() {
 
 		// Remove current edition document
 		if err = session.DB("datasets").C("editions").Remove(bson.M{"id": edition.ID}); err != nil {
-			log.ErrorC("failed to delete edition before creating new edition", err, logData)
+			log.Event(ctx, "failed to delete edition before creating new edition", log.ERROR, log.Error(err), logData)
 			return
 		}
 
 		// Create new Edition document
 		if err = session.DB("datasets").C("editions").Insert(newEdition); err != nil {
-			log.ErrorC("failed to insert new edition document, data lost in mongo but exists in this log", err, logData)
+			log.Event(ctx, "failed to insert new edition document, data lost in mongo but exists in this log", log.ERROR, log.Error(err), logData)
 			return
 		}
 
-		log.Info("Successfully updated edition resource", logData)
+		log.Event(ctx, "successfully updated edition resource", log.INFO, logData)
 	}
 }
 
-func getEditions(session *mgo.Session) (*ListCurrentEditions, error) {
+func getEditions(ctx context.Context, session *mgo.Session) (*ListCurrentEditions, error) {
 	s := session.Copy()
 	defer s.Close()
 
@@ -148,7 +151,7 @@ func getEditions(session *mgo.Session) (*ListCurrentEditions, error) {
 	defer func() {
 		err := iter.Close()
 		if err != nil {
-			log.ErrorC("error closing edition iterator", err, nil)
+			log.Event(ctx, "error closing edition iterator", log.ERROR, log.Error(err))
 		}
 	}()
 
@@ -164,7 +167,7 @@ func getEditions(session *mgo.Session) (*ListCurrentEditions, error) {
 	return &ListCurrentEditions{Items: results}, nil
 }
 
-func getLatestVersion(session *mgo.Session, datasetID, edition string, listOfStates []string) (string, int, error) {
+func getLatestVersion(ctx context.Context, session *mgo.Session, datasetID, edition string, listOfStates []string) (string, int, error) {
 	s := session.Copy()
 	defer s.Close()
 	var version models.Version
@@ -181,7 +184,8 @@ func getLatestVersion(session *mgo.Session, datasetID, edition string, listOfSta
 	// Results are sorted in reverse order to get latest version
 	err := s.DB("datasets").C("instances").Find(selector).Sort("-version").One(&version)
 	if err != nil {
-		log.Info("We should never get here - this would mean there are no versions for a published edition assuming error is not found", log.Data{"dataset_id": datasetID, "edition": edition})
+		log.Event(ctx, "We should never get here - this would mean there are no versions for a published edition assuming error is not found",
+			log.ERROR, log.Error(err), log.Data{"dataset_id": datasetID, "edition": edition})
 		return "", latestVersion, err
 	}
 
