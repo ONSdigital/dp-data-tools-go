@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"os"
@@ -8,7 +9,7 @@ import (
 
 	"github.com/ONSdigital/dp-data-tools/mongo-fixes/filter-doc-version-identifier/data"
 	"github.com/ONSdigital/dp-dataset-api/models"
-	"github.com/ONSdigital/go-ns/log"
+	"github.com/ONSdigital/log.go/log"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -23,14 +24,16 @@ func main() {
 	flag.StringVar(&mongoURL, "mongo-url", mongoURL, "mongoDB URL")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	if mongoURL == "" {
-		log.Error(errors.New("missing mongo-url flag"), nil)
+		log.Event(ctx, "missing mongo-url flag", log.ERROR)
 		return
 	}
 
 	session, err := mgo.Dial(mongoURL)
 	if err != nil {
-		log.ErrorC("unable to create mongo session", err, nil)
+		log.Event(ctx, "unable to create mongo session", log.ERROR, log.Error(err))
 		return
 	}
 	defer session.Close()
@@ -40,26 +43,27 @@ func main() {
 
 	count := 0
 
-	count, err = updateFilters(session, "filters", count)
+	count, err = updateFilters(ctx, session, "filters", count)
 	if err != nil {
-		log.ErrorC("failed updating filter blueprints", err, nil)
+		log.Event(ctx, "failed updating filter blueprints", log.ERROR, log.Error(err))
 		os.Exit(1)
 	}
-	log.Info("Successfuly updated filter blueprints", nil)
+	log.Event(ctx, "successfuly updated filter blueprints", log.INFO)
 
-	if _, err = updateFilters(session, "filterOutputs", count); err != nil {
-		log.ErrorC("failed updating filter outputs", err, nil)
+	if _, err = updateFilters(ctx, session, "filterOutputs", count); err != nil {
+		log.Event(ctx, "failed updating filter outputs", log.ERROR, log.Error(err))
 		os.Exit(1)
 	}
-	log.Info("Successfuly updated filter outputs", nil)
+
+	log.Event(ctx, "successfuly updated filter outputs", log.INFO)
 }
 
-func updateFilters(session *mgo.Session, collection string, count int) (int, error) {
+func updateFilters(ctx context.Context, session *mgo.Session, collection string, count int) (int, error) {
 	logData := log.Data{"collection": collection}
 	// Get all filters
-	filters, err := getFilters(session, collection)
+	filters, err := getFilters(ctx, session, collection)
 	if err != nil {
-		log.ErrorC("failed to get all filter blueprints", err, nil)
+		log.Event(ctx, "failed to get all filter blueprints", log.ERROR, log.Error(err))
 		return count, err
 	}
 
@@ -67,7 +71,8 @@ func updateFilters(session *mgo.Session, collection string, count int) (int, err
 	for _, filter := range filters.Items {
 		count++
 		if count%100 == 0 {
-			log.Debug("", log.Data{"count": count})
+
+			log.Event(ctx, "getting existing count", log.INFO, log.Data{"count": count})
 		}
 
 		logData["filter"] = filter
@@ -78,9 +83,10 @@ func updateFilters(session *mgo.Session, collection string, count int) (int, err
 		}
 
 		// Get version, edition and dataset id for filter blueprint
-		version, err := getVersion(session, filter.InstanceID)
+		version, err := getVersion(ctx, session, filter.InstanceID)
 		if err != nil {
-			log.ErrorC("failed to get version doc", err, logData)
+
+			log.Event(ctx, "failed to get version doc", log.ERROR, log.Error(err), logData)
 			return count, err
 		}
 
@@ -100,7 +106,7 @@ func updateFilters(session *mgo.Session, collection string, count int) (int, err
 
 		// Update filterBlueprint
 		if err = session.DB("filters").C(collection).Update(bson.M{"filter_id": filter.FilterID}, update); err != nil {
-			log.ErrorC("failed to update filter", err, logData)
+			log.Event(ctx, "failed to update filter", log.ERROR, log.Error(err), logData)
 			return count, err
 		}
 	}
@@ -108,7 +114,7 @@ func updateFilters(session *mgo.Session, collection string, count int) (int, err
 	return count, nil
 }
 
-func getFilters(session *mgo.Session, collection string) (*data.ListFilters, error) {
+func getFilters(ctx context.Context, session *mgo.Session, collection string) (*data.ListFilters, error) {
 	s := session.Copy()
 	defer s.Close()
 
@@ -116,7 +122,8 @@ func getFilters(session *mgo.Session, collection string) (*data.ListFilters, err
 	defer func() {
 		err := iter.Close()
 		if err != nil {
-			log.ErrorC("error closing filter iterator", err, nil)
+
+			log.Event(ctx, "error closing filter iterator", log.ERROR, log.Error(err))
 		}
 	}()
 
@@ -132,7 +139,7 @@ func getFilters(session *mgo.Session, collection string) (*data.ListFilters, err
 	return &data.ListFilters{Items: results}, nil
 }
 
-func getVersion(session *mgo.Session, instanceID string) (models.Version, error) {
+func getVersion(ctx context.Context, session *mgo.Session, instanceID string) (models.Version, error) {
 	s := session.Copy()
 	defer s.Close()
 	var version models.Version
@@ -140,7 +147,7 @@ func getVersion(session *mgo.Session, instanceID string) (models.Version, error)
 	// Results are sorted in reverse order to get latest version
 	err := s.DB("datasets").C("instances").Find(bson.M{"id": instanceID}).One(&version)
 	if err != nil {
-		log.Info("We should never get here - this would mean there are no versions for filter", log.Data{"instance_id": instanceID})
+		log.Event(ctx, "We should never get here - this would mean there are no versions for filter", log.ERROR, log.Error(err), log.Data{"instance_id": instanceID})
 		return version, err
 	}
 

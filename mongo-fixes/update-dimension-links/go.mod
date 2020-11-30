@@ -1,6 +1,6 @@
 module github.com/dp-data-tools/mongo-fixes/update-dimension-links
 
-go 1.14
+go 1.15
 
 require (
 	github.com/ONSdigital/dp-dataset-api v1.22.0

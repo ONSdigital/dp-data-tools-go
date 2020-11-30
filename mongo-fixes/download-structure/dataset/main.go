@@ -1,11 +1,11 @@
 package main
 
 import (
-	"errors"
+	"context"
 	"flag"
 	"fmt"
 
-	"github.com/ONSdigital/go-ns/log"
+	"github.com/ONSdigital/log.go/log"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -44,19 +44,21 @@ func main() {
 	flag.StringVar(&downloadServiceURL, "download-service-url", downloadServiceURL, "download-service url")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	if mongoURL == "" {
-		log.Error(errors.New("missing mongo-url flag"), nil)
+		log.Event(ctx, "missing mongo-url flag", log.ERROR)
 		return
 	}
 
 	if downloadServiceURL == "" {
-		log.Error(errors.New("missing download-service-url flag"), nil)
+		log.Event(ctx, "missing download-service-url flag", log.ERROR)
 		return
 	}
 
 	session, err := mgo.Dial(mongoURL)
 	if err != nil {
-		log.ErrorC("unable to create mongo session", err, nil)
+		log.Event(ctx, "unable to create mongo session", log.ERROR, log.Error(err))
 		return
 	}
 	defer session.Close()
@@ -70,13 +72,13 @@ func main() {
 	defer func() {
 		err := iter.Close()
 		if err != nil {
-			log.ErrorC("error closing edition iterator", err, nil)
+			log.Event(ctx, "error closing edition iterator", log.ERROR, log.Error(err))
 		}
 	}()
 
 	var instances []Instance
 	if err := iter.All(&instances); err != nil {
-		log.ErrorC("could not get instances from mongo", err, nil)
+		log.Event(ctx, "could not get instances from mongo", log.ERROR, log.Error(err))
 		return
 	}
 
@@ -94,12 +96,11 @@ func main() {
 		}
 
 		if _, err := collection.Upsert(bson.M{"id": instance.ID}, query); err != nil {
-			log.ErrorC("could not upsert document", err, log.Data{"instance_id": instance.ID, "query": query})
+			log.Event(ctx, "could not upsert document", log.ERROR, log.Error(err), log.Data{"instance_id": instance.ID, "query": query})
 			return
 		}
 
 	}
 
-	log.Info("successfully updated all documents.", nil)
-
+	log.Event(ctx, "successfully updated all documents.", log.INFO)
 }

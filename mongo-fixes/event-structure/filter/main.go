@@ -1,12 +1,13 @@
 package main
 
 import (
-	"errors"
+	"context"
 	"flag"
-	"github.com/ONSdigital/go-ns/log"
+	"time"
+
+	"github.com/ONSdigital/log.go/log"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"time"
 )
 
 // Filter represents filter output resource
@@ -26,14 +27,16 @@ func main() {
 	flag.StringVar(&mongoURL, "mongo-url", mongoURL, "mongoDB URL")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	if mongoURL == "" {
-		log.Error(errors.New("missing mongo-url flag"), nil)
+		log.Event(ctx, "missing mongo-url flag", log.ERROR)
 		return
 	}
 
 	session, err := mgo.Dial(mongoURL)
 	if err != nil {
-		log.ErrorC("unable to create mongo session", err, nil)
+		log.Event(ctx, "unable to create mongo session", log.ERROR, log.Error(err))
 		return
 	}
 	defer session.Close()
@@ -47,7 +50,7 @@ func main() {
 	defer func() {
 		err := iter.Close()
 		if err != nil {
-			log.ErrorC("error closing edition iterator", err, nil)
+			log.Event(ctx, "error closing edition iterator", log.ERROR, log.Error(err))
 		}
 	}()
 
@@ -56,7 +59,7 @@ func main() {
 
 	var filters []Filter
 	if err := iter.All(&filters); err != nil {
-		log.ErrorC("failed to get filters", err, nil)
+		log.Event(ctx, "failed to get filters", log.ERROR, log.Error(err))
 		return
 	}
 
@@ -75,9 +78,9 @@ func main() {
 	}
 
 	if errorCount > 0 {
-		log.Info("failed to update all filter outputs.", log.Data{"number_of_unsuccessful_updates": errorCount, "filter_ids": filterIDs})
+		log.Event(ctx, "failed to update all filter outputs", log.ERROR, log.Data{"number_of_unsuccessful_updates": errorCount, "filter_ids": filterIDs})
 	}
 
-	log.Info("successfully updated all documents.", nil)
+	log.Event(ctx, "successfully updated all documents", log.INFO)
 
 }
