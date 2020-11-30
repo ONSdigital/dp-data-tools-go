@@ -1,4 +1,4 @@
-module github.com/ONSdigital/dp-data-tools/check-audit
+module github.com/ONSdigital/dp-data-tools/kafka-tools/check-audit
 
 go 1.15
 
