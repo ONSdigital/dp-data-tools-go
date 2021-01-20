@@ -21,3 +21,7 @@ Some of these tools require [dp-cli](https://github.com/ONSdigital/dp-cli).
 
 * [Check audit messages have been added to kafka](./kafka-tools/check-audit)
 * [Queue a kafka message to rebuild full downloads for a dataset](./kafka-tools/generate-downloads)
+
+### dp-topics-api related
+
+* [Generate Topics database](./topics-tools/gen-topics-database)
