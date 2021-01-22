@@ -1,0 +1,69 @@
+Output at end of run with skipping URI's with version numbers on the end
+
+
+Total GOOD pages: 103
+
+indexNumber: 104
+
+indexNumber: 104
+
+topicPageCount: 21
+
+contentPageCount: 83
+
+Nof listOfPageData: 16736
+Showing: listOfPageData
+Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: https://www.ons.gov.uk/economy/economicoutputandproductivity/output/data
+    Broken link: Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: /economy/grossdomesticproductgdp/datasets/quarterlycountryandregionalgdp
+    Broken link: Error on page: /economy/grossdomesticproductgdp/datasets/quarterlycountryandregionalgdp
+    Broken link: Error on page: /economy/inflationandpriceindices/datasets/consumerpriceinflation
+    Broken link: Error on page: /economy/inflationandpriceindices/datasets/indexofprivatehousingrentalpricesreferencetables
+    Broken link: Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/regionbyoccupation2digitsocashetable3
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/regionbyindustry2digitsicashetable5
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbyparliamentaryconstituencyashetable9
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofresidencebyparliamentaryconstituencyashetable10
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/workbasedtraveltoworkareaashetable11
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/residencebasedtraveltoworkareaashetable12
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/agegroupbyoccupation2digitsocashetable20
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/regionbypublicandprivatesectorashetable25
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/careworkerssocashetable26
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalenterprisepartnershipsashetable27
+    Broken link: Error on page: /employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofresidencebylocalenterprisepartnershipsashetable28
+    Broken link: Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: /peoplepopulationandcommunity/wellbeing/datasets/headlineestimatesofpersonalwellbeing
+    Broken link: Error on page: /peoplepopulationandcommunity/wellbeing/datasets/quarterlypersonalwellbeingestimatesseasonallyadjusted
+    Broken link: Error on page: /peoplepopulationandcommunity/wellbeing/bulletins/measuringnationalwellbeing/april2018tomarch2019
+    Broken link: Error on page: /peoplepopulationandcommunity/birthsdeathsandmarriages/deaths/datasets/suicidesbylocalauthority
+    Broken link: Error on page: 
+    Broken link: Error on page: https://www.ons.gov.uk/peoplepopulationandcommunity/data
+    Broken link: Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: /peoplepopulationandcommunity/healthandsocialcare/healthcaresystem/datasets/healthaccountsreferencetables
+    Broken link: Error on page: /peoplepopulationandcommunity/healthandsocialcare/healthandlifeexpectancies/datasets/healthstatelifeexpectancyatbirthandatage65bylocalareasuk
+    Broken link: Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: /peoplepopulationandcommunity/personalandhouseholdfinances/incomeandwealth/datasets/generationalincometheeffectsoftaxesandbenefits
+    Broken link: Error on page: 
+    Broken link: Error on page: 
+    Broken link: Error on page: /peoplepopulationandcommunity/wellbeing/datasets/childrenswellbeingmeasures
+    Broken link: Error on page: 
+    Broken link: 
+Nof duplicates: 44
+
+maxDepth: 21
+
+attemptedGetCount is: 17195
+
+Length of contentDuplicateCheck is: 16589
+
+All Done.

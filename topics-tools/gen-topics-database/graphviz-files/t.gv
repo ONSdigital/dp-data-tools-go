@@ -1,0 +1,522 @@
+digraph G {
+
+    rankdir=LR
+    ranksep=2.7
+
+    subgraph topic_root {
+        topic_root [label = "/topic_root\n1"]
+
+        topic_root -> businessindustryandtrade
+        topic_root -> economy
+        topic_root -> employmentandlabourmarket
+        topic_root -> peoplepopulationandcommunity
+    }
+    subgraph businessindustryandtrade {
+        businessindustryandtrade [shape = box, label = "/businessindustryandtrade\n2 - taxonomy_landing_page"]
+
+        businessindustryandtrade -> businessindustryandtrade_business
+        businessindustryandtrade -> businessindustryandtrade_changestobusiness
+        businessindustryandtrade -> businessindustryandtrade_constructionindustry
+        businessindustryandtrade -> businessindustryandtrade_internationaltrade
+        businessindustryandtrade -> businessindustryandtrade_itandinternetindustry
+        businessindustryandtrade -> businessindustryandtrade_manufacturingandproductionindustry
+        businessindustryandtrade -> businessindustryandtrade_retailindustry
+        businessindustryandtrade -> businessindustryandtrade_tourismindustry
+    }
+    subgraph businessindustryandtrade_business {
+        businessindustryandtrade_business [shape = box, label = "/businessindustryandtrade\n/business\n3 - taxonomy_landing_page"]
+
+        businessindustryandtrade_business -> businessindustryandtrade_business_activitysizeandlocation
+        businessindustryandtrade_business -> businessindustryandtrade_business_businessinnovation
+        businessindustryandtrade_business -> businessindustryandtrade_business_businessservices
+    }
+    subgraph businessindustryandtrade_business_activitysizeandlocation {
+        businessindustryandtrade_business_activitysizeandlocation [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/business\n/activitysizeandlocation\n4 - product_page"]
+    }
+    subgraph businessindustryandtrade_business_businessinnovation {
+        businessindustryandtrade_business_businessinnovation [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/business\n/businessinnovation\n5 - product_page"]
+    }
+    subgraph businessindustryandtrade_business_businessservices {
+        businessindustryandtrade_business_businessservices [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/business\n/businessservices\n6 - product_page"]
+    }
+    subgraph businessindustryandtrade_changestobusiness {
+        businessindustryandtrade_changestobusiness [shape = box, label = "/businessindustryandtrade\n/changestobusiness\n7 - taxonomy_landing_page"]
+
+        businessindustryandtrade_changestobusiness -> businessindustryandtrade_changestobusiness_bankruptcyinsolvency
+        businessindustryandtrade_changestobusiness -> businessindustryandtrade_changestobusiness_businessbirthsdeathsandsurvivalrates
+        businessindustryandtrade_changestobusiness -> businessindustryandtrade_changestobusiness_mergersandacquisitions
+    }
+    subgraph businessindustryandtrade_changestobusiness_bankruptcyinsolvency {
+        businessindustryandtrade_changestobusiness_bankruptcyinsolvency [shape = box, color="#E02020", style=filled, label = "/businessindustryandtrade\n/changestobusiness\n/bankruptcyinsolvency
+ ** NO Content **\n8"]
+    }
+    subgraph businessindustryandtrade_changestobusiness_businessbirthsdeathsandsurvivalrates {
+        businessindustryandtrade_changestobusiness_businessbirthsdeathsandsurvivalrates [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/changestobusiness\n/businessbirthsdeathsandsurvivalrates\n9 - product_page"]
+    }
+    subgraph businessindustryandtrade_changestobusiness_mergersandacquisitions {
+        businessindustryandtrade_changestobusiness_mergersandacquisitions [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/changestobusiness\n/mergersandacquisitions\n10 - product_page"]
+    }
+    subgraph businessindustryandtrade_constructionindustry {
+        businessindustryandtrade_constructionindustry [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/constructionindustry\n11 - product_page"]
+        businessindustryandtrade_constructionindustry -> businessindustryandtrade_constructionindustry_qmis_newordersinconstructionqmi
+    }
+    subgraph businessindustryandtrade_constructionindustry_qmis_newordersinconstructionqmi {
+        businessindustryandtrade_constructionindustry_qmis_newordersinconstructionqmi [shape = box, color="#1038E0", style=bold, label = "** RelatedMethodology - Broken URI: **\n/businessindustryandtrade\n/constructionindustry\n/qmis\n/newordersinconstructionqmi"]
+    }
+    subgraph businessindustryandtrade_internationaltrade {
+        businessindustryandtrade_internationaltrade [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/internationaltrade\n12 - product_page"]
+    }
+    subgraph businessindustryandtrade_itandinternetindustry {
+        businessindustryandtrade_itandinternetindustry [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/itandinternetindustry\n13 - product_page"]
+    }
+    subgraph businessindustryandtrade_manufacturingandproductionindustry {
+        businessindustryandtrade_manufacturingandproductionindustry [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/manufacturingandproductionindustry\n14 - product_page"]
+    }
+    subgraph businessindustryandtrade_retailindustry {
+        businessindustryandtrade_retailindustry [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/retailindustry\n15 - product_page"]
+    }
+    subgraph businessindustryandtrade_tourismindustry {
+        businessindustryandtrade_tourismindustry [shape = box, color="#E07020", style=filled, label = "/businessindustryandtrade\n/tourismindustry\n16 - product_page"]
+    }
+    subgraph economy {
+        economy [shape = box, label = "/economy\n17 - taxonomy_landing_page"]
+
+        economy -> economy_economicoutputandproductivity
+        economy -> economy_environmentalaccounts
+        economy -> economy_governmentpublicsectorandtaxes
+        economy -> economy_grossdomesticproductgdp
+        economy -> economy_grossvalueaddedgva
+        economy -> economy_inflationandpriceindices
+        economy -> economy_investmentspensionsandtrusts
+        economy -> economy_nationalaccounts
+        economy -> economy_regionalaccounts
+        economy -> economy_economicoutputandproductivity_output_articles_economicactivityfasterindicatorsuk_latest
+    }
+    subgraph economy_economicoutputandproductivity_output_articles_economicactivityfasterindicatorsuk_latest {
+        economy_economicoutputandproductivity_output_articles_economicactivityfasterindicatorsuk_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/economy\n/economicoutputandproductivity\n/output\n/articles\n/economicactivityfasterindicatorsuk\n/latest"]
+    }
+    subgraph economy_economicoutputandproductivity {
+        economy_economicoutputandproductivity [shape = box, label = "/economy\n/economicoutputandproductivity\n18 - taxonomy_landing_page"]
+
+        economy_economicoutputandproductivity -> economy_economicoutputandproductivity_output
+        economy_economicoutputandproductivity -> economy_economicoutputandproductivity_productivitymeasures
+        economy_economicoutputandproductivity -> economy_economicoutputandproductivity_publicservicesproductivity
+    }
+    subgraph economy_economicoutputandproductivity_output {
+        economy_economicoutputandproductivity_output [shape = box, color="#E07020", style=filled, label = "/economy\n/economicoutputandproductivity\n/output\n19 - product_page"]
+        economy_economicoutputandproductivity_output -> businessindustryandtrade_constructionindustry_bulletins_outputintheconstructionindustry_latest
+    }
+    subgraph businessindustryandtrade_constructionindustry_bulletins_outputintheconstructionindustry_latest {
+        businessindustryandtrade_constructionindustry_bulletins_outputintheconstructionindustry_latest [shape = box, color="#1038E0", style=bold, label = "** StatsBulletins - Broken URI: **\n/businessindustryandtrade\n/constructionindustry\n/bulletins\n/outputintheconstructionindustry\n/latest"]
+    }
+    subgraph economy_economicoutputandproductivity_productivitymeasures {
+        economy_economicoutputandproductivity_productivitymeasures [shape = box, color="#E07020", style=filled, label = "/economy\n/economicoutputandproductivity\n/productivitymeasures\n20 - product_page"]
+    }
+    subgraph economy_economicoutputandproductivity_publicservicesproductivity {
+        economy_economicoutputandproductivity_publicservicesproductivity [shape = box, color="#E07020", style=filled, label = "/economy\n/economicoutputandproductivity\n/publicservicesproductivity\n21 - product_page"]
+    }
+    subgraph economy_environmentalaccounts {
+        economy_environmentalaccounts [shape = box, color="#E07020", style=filled, label = "/economy\n/environmentalaccounts\n22 - product_page"]
+    }
+    subgraph economy_governmentpublicsectorandtaxes {
+        economy_governmentpublicsectorandtaxes [shape = box, label = "/economy\n/governmentpublicsectorandtaxes\n23 - taxonomy_landing_page"]
+
+        economy_governmentpublicsectorandtaxes -> economy_governmentpublicsectorandtaxes_localgovernmentfinance
+        economy_governmentpublicsectorandtaxes -> economy_governmentpublicsectorandtaxes_publicsectorfinance
+        economy_governmentpublicsectorandtaxes -> economy_governmentpublicsectorandtaxes_publicspending
+        economy_governmentpublicsectorandtaxes -> economy_governmentpublicsectorandtaxes_researchanddevelopmentexpenditure
+        economy_governmentpublicsectorandtaxes -> economy_governmentpublicsectorandtaxes_taxesandrevenue
+    }
+    subgraph economy_governmentpublicsectorandtaxes_localgovernmentfinance {
+        economy_governmentpublicsectorandtaxes_localgovernmentfinance [shape = box, color="#E02020", style=filled, label = "/economy\n/governmentpublicsectorandtaxes\n/localgovernmentfinance
+ ** NO Content **\n24"]
+    }
+    subgraph economy_governmentpublicsectorandtaxes_publicsectorfinance {
+        economy_governmentpublicsectorandtaxes_publicsectorfinance [shape = box, color="#E07020", style=filled, label = "/economy\n/governmentpublicsectorandtaxes\n/publicsectorfinance\n25 - product_page"]
+    }
+    subgraph economy_governmentpublicsectorandtaxes_publicspending {
+        economy_governmentpublicsectorandtaxes_publicspending [shape = box, color="#E07020", style=filled, label = "/economy\n/governmentpublicsectorandtaxes\n/publicspending\n26 - product_page"]
+    }
+    subgraph economy_governmentpublicsectorandtaxes_researchanddevelopmentexpenditure {
+        economy_governmentpublicsectorandtaxes_researchanddevelopmentexpenditure [shape = box, color="#E07020", style=filled, label = "/economy\n/governmentpublicsectorandtaxes\n/researchanddevelopmentexpenditure\n27 - product_page"]
+        economy_governmentpublicsectorandtaxes_researchanddevelopmentexpenditure -> economy_governmentpublicsectorandtaxes_researchanddevelopmentexpenditure_qmis_ukbusinessenterpriseresearchanddevelopmentqmi
+    }
+    subgraph economy_governmentpublicsectorandtaxes_researchanddevelopmentexpenditure_qmis_ukbusinessenterpriseresearchanddevelopmentqmi {
+        economy_governmentpublicsectorandtaxes_researchanddevelopmentexpenditure_qmis_ukbusinessenterpriseresearchanddevelopmentqmi [shape = box, color="#1038E0", style=bold, label = "** RelatedMethodology - Broken URI: **\n/economy\n/governmentpublicsectorandtaxes\n/researchanddevelopmentexpenditure\n/qmis\n/ukbusinessenterpriseresearchanddevelopmentqmi"]
+    }
+    subgraph economy_governmentpublicsectorandtaxes_taxesandrevenue {
+        economy_governmentpublicsectorandtaxes_taxesandrevenue [shape = box, color="#E07020", style=filled, label = "/economy\n/governmentpublicsectorandtaxes\n/taxesandrevenue\n28 - product_page"]
+    }
+    subgraph economy_grossdomesticproductgdp {
+        economy_grossdomesticproductgdp [shape = box, color="#E07020", style=filled, label = "/economy\n/grossdomesticproductgdp\n29 - product_page"]
+        economy_grossdomesticproductgdp -> economy_grossdomesticproductgdp_qmis_quarterlystocksinquiryqsi
+    }
+    subgraph economy_grossdomesticproductgdp_qmis_quarterlystocksinquiryqsi {
+        economy_grossdomesticproductgdp_qmis_quarterlystocksinquiryqsi [shape = box, color="#1038E0", style=bold, label = "** RelatedMethodology - Broken URI: **\n/economy\n/grossdomesticproductgdp\n/qmis\n/quarterlystocksinquiryqsi"]
+    }
+    subgraph economy_grossvalueaddedgva {
+        economy_grossvalueaddedgva [shape = box, color="#E07020", style=filled, label = "/economy\n/grossvalueaddedgva\n30 - product_page"]
+    }
+    subgraph economy_inflationandpriceindices {
+        economy_inflationandpriceindices [shape = box, color="#E07020", style=filled, label = "/economy\n/inflationandpriceindices\n31 - product_page"]
+    }
+    subgraph economy_investmentspensionsandtrusts {
+        economy_investmentspensionsandtrusts [shape = box, color="#E07020", style=filled, label = "/economy\n/investmentspensionsandtrusts\n32 - product_page"]
+    }
+    subgraph economy_nationalaccounts {
+        economy_nationalaccounts [shape = box, label = "/economy\n/nationalaccounts\n33 - taxonomy_landing_page"]
+
+        economy_nationalaccounts -> economy_nationalaccounts_balanceofpayments
+        economy_nationalaccounts -> economy_nationalaccounts_satelliteaccounts
+        economy_nationalaccounts -> economy_nationalaccounts_supplyandusetables
+        economy_nationalaccounts -> economy_nationalaccounts_uksectoraccounts
+        economy_nationalaccounts -> economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest
+    }
+    subgraph economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest {
+        economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/economy\n/grossdomesticproductgdp\n/compendium\n/unitedkingdomnationalaccountsthebluebook\n/latest"]
+    }
+    subgraph economy_nationalaccounts_balanceofpayments {
+        economy_nationalaccounts_balanceofpayments [shape = box, color="#E07020", style=filled, label = "/economy\n/nationalaccounts\n/balanceofpayments\n34 - product_page"]
+        economy_nationalaccounts_balanceofpayments -> economy_nationalaccounts_balanceofpayments_qmis_balanceofpaymentsbopqmi
+    }
+    subgraph economy_nationalaccounts_balanceofpayments_qmis_balanceofpaymentsbopqmi {
+        economy_nationalaccounts_balanceofpayments_qmis_balanceofpaymentsbopqmi [shape = box, color="#1038E0", style=bold, label = "** RelatedMethodology - Broken URI: **\n/economy\n/nationalaccounts\n/balanceofpayments\n/qmis\n/balanceofpaymentsbopqmi"]
+    }
+    subgraph economy_nationalaccounts_satelliteaccounts {
+        economy_nationalaccounts_satelliteaccounts [shape = box, color="#E07020", style=filled, label = "/economy\n/nationalaccounts\n/satelliteaccounts\n35 - product_page"]
+    }
+    subgraph economy_nationalaccounts_supplyandusetables {
+        economy_nationalaccounts_supplyandusetables [shape = box, color="#E07020", style=filled, label = "/economy\n/nationalaccounts\n/supplyandusetables\n36 - product_page"]
+    }
+    subgraph economy_nationalaccounts_uksectoraccounts {
+        economy_nationalaccounts_uksectoraccounts [shape = box, color="#E07020", style=filled, label = "/economy\n/nationalaccounts\n/uksectoraccounts\n37 - product_page"]
+        economy_nationalaccounts_uksectoraccounts -> economy_nationalaccounts_uksectoraccounts_methodologies_naturalcapital
+    }
+    subgraph economy_nationalaccounts_uksectoraccounts_methodologies_naturalcapital {
+        economy_nationalaccounts_uksectoraccounts_methodologies_naturalcapital [shape = box, color="#1038E0", style=bold, label = "** RelatedMethodologyArticle - Broken URI: **\n/economy\n/nationalaccounts\n/uksectoraccounts\n/methodologies\n/naturalcapital"]
+    }
+    subgraph economy_regionalaccounts {
+        economy_regionalaccounts [shape = box, label = "/economy\n/regionalaccounts\n38 - taxonomy_landing_page"]
+
+        economy_regionalaccounts -> economy_regionalaccounts_grossdisposablehouseholdincome
+    }
+    subgraph economy_regionalaccounts_grossdisposablehouseholdincome {
+        economy_regionalaccounts_grossdisposablehouseholdincome [shape = box, color="#E07020", style=filled, label = "/economy\n/regionalaccounts\n/grossdisposablehouseholdincome\n39 - product_page"]
+    }
+    subgraph employmentandlabourmarket {
+        employmentandlabourmarket [shape = box, label = "/employmentandlabourmarket\n40 - taxonomy_landing_page"]
+
+        employmentandlabourmarket -> employmentandlabourmarket_peopleinwork
+        employmentandlabourmarket -> employmentandlabourmarket_peoplenotinwork
+    }
+    subgraph employmentandlabourmarket_peopleinwork {
+        employmentandlabourmarket_peopleinwork [shape = box, label = "/employmentandlabourmarket\n/peopleinwork\n41 - taxonomy_landing_page"]
+
+        employmentandlabourmarket_peopleinwork -> employmentandlabourmarket_peopleinwork_earningsandworkinghours
+        employmentandlabourmarket_peopleinwork -> employmentandlabourmarket_peopleinwork_employmentandemployeetypes
+        employmentandlabourmarket_peopleinwork -> employmentandlabourmarket_peopleinwork_labourproductivity
+        employmentandlabourmarket_peopleinwork -> employmentandlabourmarket_peopleinwork_publicsectorpersonnel
+        employmentandlabourmarket_peopleinwork -> employmentandlabourmarket_peopleinwork_workplacedisputesandworkingconditions
+        employmentandlabourmarket_peopleinwork -> employmentandlabourmarket_peopleinwork_workplacepensions
+        employmentandlabourmarket_peopleinwork -> employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest
+        employmentandlabourmarket_peopleinwork -> employmentandlabourmarket_peopleinwork_earningsandworkinghours_bulletins_annualsurveyofhoursandearnings_latest
+    }
+    subgraph employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest {
+        employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/employmentandlabourmarket\n/peopleinwork\n/employmentandemployeetypes\n/bulletins\n/uklabourmarket\n/latest"]
+    }
+    subgraph employmentandlabourmarket_peopleinwork_earningsandworkinghours_bulletins_annualsurveyofhoursandearnings_latest {
+        employmentandlabourmarket_peopleinwork_earningsandworkinghours_bulletins_annualsurveyofhoursandearnings_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/employmentandlabourmarket\n/peopleinwork\n/earningsandworkinghours\n/bulletins\n/annualsurveyofhoursandearnings\n/latest"]
+    }
+    subgraph employmentandlabourmarket_peopleinwork_earningsandworkinghours {
+        employmentandlabourmarket_peopleinwork_earningsandworkinghours [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peopleinwork\n/earningsandworkinghours\n42 - product_page"]
+    }
+    subgraph employmentandlabourmarket_peopleinwork_employmentandemployeetypes {
+        employmentandlabourmarket_peopleinwork_employmentandemployeetypes [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peopleinwork\n/employmentandemployeetypes\n43 - product_page"]
+    }
+    subgraph employmentandlabourmarket_peopleinwork_labourproductivity {
+        employmentandlabourmarket_peopleinwork_labourproductivity [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peopleinwork\n/labourproductivity\n44 - product_page"]
+    }
+    subgraph employmentandlabourmarket_peopleinwork_publicsectorpersonnel {
+        employmentandlabourmarket_peopleinwork_publicsectorpersonnel [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peopleinwork\n/publicsectorpersonnel\n45 - product_page"]
+    }
+    subgraph employmentandlabourmarket_peopleinwork_workplacedisputesandworkingconditions {
+        employmentandlabourmarket_peopleinwork_workplacedisputesandworkingconditions [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peopleinwork\n/workplacedisputesandworkingconditions\n46 - product_page"]
+        employmentandlabourmarket_peopleinwork_workplacedisputesandworkingconditions -> employmentandlabourmarket_peopleinwork_workplacedisputesandworkingconditions_qmis_labourdisputessurveyqmi
+    }
+    subgraph employmentandlabourmarket_peopleinwork_workplacedisputesandworkingconditions_qmis_labourdisputessurveyqmi {
+        employmentandlabourmarket_peopleinwork_workplacedisputesandworkingconditions_qmis_labourdisputessurveyqmi [shape = box, color="#1038E0", style=bold, label = "** RelatedMethodology - Broken URI: **\n/employmentandlabourmarket\n/peopleinwork\n/workplacedisputesandworkingconditions\n/qmis\n/labourdisputessurveyqmi"]
+    }
+    subgraph employmentandlabourmarket_peopleinwork_workplacepensions {
+        employmentandlabourmarket_peopleinwork_workplacepensions [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peopleinwork\n/workplacepensions\n47 - product_page"]
+    }
+    subgraph employmentandlabourmarket_peoplenotinwork {
+        employmentandlabourmarket_peoplenotinwork [shape = box, label = "/employmentandlabourmarket\n/peoplenotinwork\n48 - taxonomy_landing_page"]
+
+        employmentandlabourmarket_peoplenotinwork -> employmentandlabourmarket_peoplenotinwork_economicinactivity
+        employmentandlabourmarket_peoplenotinwork -> employmentandlabourmarket_peoplenotinwork_outofworkbenefits
+        employmentandlabourmarket_peoplenotinwork -> employmentandlabourmarket_peoplenotinwork_redundancies
+        employmentandlabourmarket_peoplenotinwork -> employmentandlabourmarket_peoplenotinwork_unemployment
+        employmentandlabourmarket_peoplenotinwork -> employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest
+    }
+    subgraph employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest {
+        employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/employmentandlabourmarket\n/peopleinwork\n/employmentandemployeetypes\n/bulletins\n/uklabourmarket\n/latest"]
+    }
+    subgraph employmentandlabourmarket_peoplenotinwork_economicinactivity {
+        employmentandlabourmarket_peoplenotinwork_economicinactivity [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peoplenotinwork\n/economicinactivity\n49 - product_page"]
+    }
+    subgraph employmentandlabourmarket_peoplenotinwork_outofworkbenefits {
+        employmentandlabourmarket_peoplenotinwork_outofworkbenefits [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peoplenotinwork\n/outofworkbenefits\n50 - product_page"]
+    }
+    subgraph employmentandlabourmarket_peoplenotinwork_redundancies {
+        employmentandlabourmarket_peoplenotinwork_redundancies [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peoplenotinwork\n/redundancies\n51 - product_page"]
+    }
+    subgraph employmentandlabourmarket_peoplenotinwork_unemployment {
+        employmentandlabourmarket_peoplenotinwork_unemployment [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peoplenotinwork\n/unemployment\n52 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity {
+        peoplepopulationandcommunity [shape = box, label = "/peoplepopulationandcommunity\n53 - taxonomy_landing_page"]
+
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_birthsdeathsandmarriages
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_community
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_crimeandjustice
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_culturalidentity
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_educationandchildcare
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_elections
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_healthandsocialcare
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_householdcharacteristics
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_housing
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_leisureandtourism
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_personalandhouseholdfinances
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_populationandmigration
+        peoplepopulationandcommunity -> peoplepopulationandcommunity_wellbeing
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages {
+        peoplepopulationandcommunity_birthsdeathsandmarriages [shape = box, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n54 - taxonomy_landing_page"]
+
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_adoption
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_ageing
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_conceptionandfertilityrates
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_deaths
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_divorce
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_families
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_lifeexpectancies
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_livebirths
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_marriagecohabitationandcivilpartnerships
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_maternities
+        peoplepopulationandcommunity_birthsdeathsandmarriages -> peoplepopulationandcommunity_birthsdeathsandmarriages_stillbirths
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_adoption {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_adoption [shape = box, color="#E02020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/adoption
+ ** NO Content **\n55"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_ageing {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_ageing [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/ageing\n56 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_conceptionandfertilityrates {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_conceptionandfertilityrates [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/conceptionandfertilityrates\n57 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_deaths {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_deaths [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/deaths\n58 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_divorce {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_divorce [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/divorce\n59 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_families {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_families [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/families\n60 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_lifeexpectancies {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_lifeexpectancies [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/lifeexpectancies\n61 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_livebirths {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_livebirths [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/livebirths\n62 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_marriagecohabitationandcivilpartnerships {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_marriagecohabitationandcivilpartnerships [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/marriagecohabitationandcivilpartnerships\n63 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_maternities {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_maternities [shape = box, color="#E02020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/maternities
+ ** NO Content **\n64"]
+    }
+    subgraph peoplepopulationandcommunity_birthsdeathsandmarriages_stillbirths {
+        peoplepopulationandcommunity_birthsdeathsandmarriages_stillbirths [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/birthsdeathsandmarriages\n/stillbirths\n65 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_community {
+        peoplepopulationandcommunity_community [shape = box, color=red, style=bold, label = "/peoplepopulationandcommunity\n/community
+ ** MISSING: /data **\n66"]
+    }
+    subgraph peoplepopulationandcommunity_crimeandjustice {
+        peoplepopulationandcommunity_crimeandjustice [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/crimeandjustice\n67 - product_page"]
+        peoplepopulationandcommunity_crimeandjustice -> peoplepopulationandcommunity_crimeandjustice_datset_onlinebullyinginenglandandwalesappendixtables
+    }
+    subgraph peoplepopulationandcommunity_crimeandjustice_datset_onlinebullyinginenglandandwalesappendixtables {
+        peoplepopulationandcommunity_crimeandjustice_datset_onlinebullyinginenglandandwalesappendixtables [shape = box, color="#1038E0", style=bold, label = "** Datasets - Broken URI: **\n/peoplepopulationandcommunity\n/crimeandjustice\n/datset\n/onlinebullyinginenglandandwalesappendixtables"]
+    }
+    subgraph peoplepopulationandcommunity_culturalidentity {
+        peoplepopulationandcommunity_culturalidentity [shape = box, label = "/peoplepopulationandcommunity\n/culturalidentity\n68 - taxonomy_landing_page"]
+
+        peoplepopulationandcommunity_culturalidentity -> peoplepopulationandcommunity_culturalidentity_ethnicity
+        peoplepopulationandcommunity_culturalidentity -> peoplepopulationandcommunity_culturalidentity_language
+        peoplepopulationandcommunity_culturalidentity -> peoplepopulationandcommunity_culturalidentity_religion
+        peoplepopulationandcommunity_culturalidentity -> peoplepopulationandcommunity_culturalidentity_sexuality
+    }
+    subgraph peoplepopulationandcommunity_culturalidentity_ethnicity {
+        peoplepopulationandcommunity_culturalidentity_ethnicity [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/culturalidentity\n/ethnicity\n69 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_culturalidentity_language {
+        peoplepopulationandcommunity_culturalidentity_language [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/culturalidentity\n/language\n70 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_culturalidentity_religion {
+        peoplepopulationandcommunity_culturalidentity_religion [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/culturalidentity\n/religion\n71 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_culturalidentity_sexuality {
+        peoplepopulationandcommunity_culturalidentity_sexuality [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/culturalidentity\n/sexuality\n72 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_educationandchildcare {
+        peoplepopulationandcommunity_educationandchildcare [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/educationandchildcare\n73 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_elections {
+        peoplepopulationandcommunity_elections [shape = box, label = "/peoplepopulationandcommunity\n/elections\n74 - taxonomy_landing_page"]
+
+        peoplepopulationandcommunity_elections -> peoplepopulationandcommunity_elections_electoralregistration
+        peoplepopulationandcommunity_elections -> peoplepopulationandcommunity_elections_generalelections
+        peoplepopulationandcommunity_elections -> peoplepopulationandcommunity_elections_localgovernmentelections
+    }
+    subgraph peoplepopulationandcommunity_elections_electoralregistration {
+        peoplepopulationandcommunity_elections_electoralregistration [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/elections\n/electoralregistration\n75 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_elections_generalelections {
+        peoplepopulationandcommunity_elections_generalelections [shape = box, color="#E02020", style=filled, label = "/peoplepopulationandcommunity\n/elections\n/generalelections
+ ** NO Content **\n76"]
+    }
+    subgraph peoplepopulationandcommunity_elections_localgovernmentelections {
+        peoplepopulationandcommunity_elections_localgovernmentelections [shape = box, color="#E02020", style=filled, label = "/peoplepopulationandcommunity\n/elections\n/localgovernmentelections
+ ** NO Content **\n77"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare {
+        peoplepopulationandcommunity_healthandsocialcare [shape = box, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n78 - taxonomy_landing_page"]
+
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_causesofdeath
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_childhealth
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_conditionsanddiseases
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_disability
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_drugusealcoholandsmoking
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_healthcaresystem
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_healthinequalities
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_healthandlifeexpectancies
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_healthandwellbeing
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_mentalhealth
+        peoplepopulationandcommunity_healthandsocialcare -> peoplepopulationandcommunity_healthandsocialcare_socialcare
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_causesofdeath {
+        peoplepopulationandcommunity_healthandsocialcare_causesofdeath [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/causesofdeath\n79 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_childhealth {
+        peoplepopulationandcommunity_healthandsocialcare_childhealth [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/childhealth\n80 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_conditionsanddiseases {
+        peoplepopulationandcommunity_healthandsocialcare_conditionsanddiseases [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/conditionsanddiseases\n81 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_disability {
+        peoplepopulationandcommunity_healthandsocialcare_disability [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/disability\n82 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_drugusealcoholandsmoking {
+        peoplepopulationandcommunity_healthandsocialcare_drugusealcoholandsmoking [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/drugusealcoholandsmoking\n83 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_healthcaresystem {
+        peoplepopulationandcommunity_healthandsocialcare_healthcaresystem [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/healthcaresystem\n84 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_healthinequalities {
+        peoplepopulationandcommunity_healthandsocialcare_healthinequalities [shape = box, color="#E02020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/healthinequalities
+ ** NO Content **\n85"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_healthandlifeexpectancies {
+        peoplepopulationandcommunity_healthandsocialcare_healthandlifeexpectancies [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/healthandlifeexpectancies\n86 - product_page"]
+        peoplepopulationandcommunity_healthandsocialcare_healthandlifeexpectancies -> peoplepopulationandcommunity_healthandsocialcare_healthandlifeexpectancies_qmis_healthexpectanciesqmi
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_healthandlifeexpectancies_qmis_healthexpectanciesqmi {
+        peoplepopulationandcommunity_healthandsocialcare_healthandlifeexpectancies_qmis_healthexpectanciesqmi [shape = box, color="#1038E0", style=bold, label = "** RelatedMethodology - Broken URI: **\n/peoplepopulationandcommunity\n/healthandsocialcare\n/healthandlifeexpectancies\n/qmis\n/healthexpectanciesqmi"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_healthandwellbeing {
+        peoplepopulationandcommunity_healthandsocialcare_healthandwellbeing [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/healthandwellbeing\n87 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_mentalhealth {
+        peoplepopulationandcommunity_healthandsocialcare_mentalhealth [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/mentalhealth\n88 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_healthandsocialcare_socialcare {
+        peoplepopulationandcommunity_healthandsocialcare_socialcare [shape = box, color="#E02020", style=filled, label = "/peoplepopulationandcommunity\n/healthandsocialcare\n/socialcare
+ ** NO Content **\n89"]
+    }
+    subgraph peoplepopulationandcommunity_householdcharacteristics {
+        peoplepopulationandcommunity_householdcharacteristics [shape = box, label = "/peoplepopulationandcommunity\n/householdcharacteristics\n90 - taxonomy_landing_page"]
+
+        peoplepopulationandcommunity_householdcharacteristics -> peoplepopulationandcommunity_householdcharacteristics_homeinternetandsocialmediausage
+        peoplepopulationandcommunity_householdcharacteristics -> peoplepopulationandcommunity_culturalidentity_sexuality_bulletins_integratedhouseholdsurvey_latest
+    }
+    subgraph peoplepopulationandcommunity_culturalidentity_sexuality_bulletins_integratedhouseholdsurvey_latest {
+        peoplepopulationandcommunity_culturalidentity_sexuality_bulletins_integratedhouseholdsurvey_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/peoplepopulationandcommunity\n/culturalidentity\n/sexuality\n/bulletins\n/integratedhouseholdsurvey\n/latest"]
+    }
+    subgraph peoplepopulationandcommunity_householdcharacteristics_homeinternetandsocialmediausage {
+        peoplepopulationandcommunity_householdcharacteristics_homeinternetandsocialmediausage [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/householdcharacteristics\n/homeinternetandsocialmediausage\n91 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_housing {
+        peoplepopulationandcommunity_housing [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/housing\n92 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_leisureandtourism {
+        peoplepopulationandcommunity_leisureandtourism [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/leisureandtourism\n93 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_personalandhouseholdfinances {
+        peoplepopulationandcommunity_personalandhouseholdfinances [shape = box, label = "/peoplepopulationandcommunity\n/personalandhouseholdfinances\n94 - taxonomy_landing_page"]
+
+        peoplepopulationandcommunity_personalandhouseholdfinances -> peoplepopulationandcommunity_personalandhouseholdfinances_debt
+        peoplepopulationandcommunity_personalandhouseholdfinances -> peoplepopulationandcommunity_personalandhouseholdfinances_expenditure
+        peoplepopulationandcommunity_personalandhouseholdfinances -> peoplepopulationandcommunity_personalandhouseholdfinances_incomeandwealth
+        peoplepopulationandcommunity_personalandhouseholdfinances -> peoplepopulationandcommunity_personalandhouseholdfinances_pensionssavingsandinvestments
+    }
+    subgraph peoplepopulationandcommunity_personalandhouseholdfinances_debt {
+        peoplepopulationandcommunity_personalandhouseholdfinances_debt [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/personalandhouseholdfinances\n/debt\n95 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_personalandhouseholdfinances_expenditure {
+        peoplepopulationandcommunity_personalandhouseholdfinances_expenditure [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/personalandhouseholdfinances\n/expenditure\n96 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_personalandhouseholdfinances_incomeandwealth {
+        peoplepopulationandcommunity_personalandhouseholdfinances_incomeandwealth [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/personalandhouseholdfinances\n/incomeandwealth\n97 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_personalandhouseholdfinances_pensionssavingsandinvestments {
+        peoplepopulationandcommunity_personalandhouseholdfinances_pensionssavingsandinvestments [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/personalandhouseholdfinances\n/pensionssavingsandinvestments\n98 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_populationandmigration {
+        peoplepopulationandcommunity_populationandmigration [shape = box, label = "/peoplepopulationandcommunity\n/populationandmigration\n99 - taxonomy_landing_page"]
+
+        peoplepopulationandcommunity_populationandmigration -> peoplepopulationandcommunity_populationandmigration_internationalmigration
+        peoplepopulationandcommunity_populationandmigration -> peoplepopulationandcommunity_populationandmigration_migrationwithintheuk
+        peoplepopulationandcommunity_populationandmigration -> peoplepopulationandcommunity_populationandmigration_populationestimates
+        peoplepopulationandcommunity_populationandmigration -> peoplepopulationandcommunity_populationandmigration_populationprojections
+        peoplepopulationandcommunity_populationandmigration -> peoplepopulationandcommunity_populationandmigration_populationestimates_articles_overviewoftheukpopulation_latest
+        peoplepopulationandcommunity_populationandmigration -> peoplepopulationandcommunity_populationandmigration_internationalmigration_articles_noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration_latest
+    }
+    subgraph peoplepopulationandcommunity_populationandmigration_populationestimates_articles_overviewoftheukpopulation_latest {
+        peoplepopulationandcommunity_populationandmigration_populationestimates_articles_overviewoftheukpopulation_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/peoplepopulationandcommunity\n/populationandmigration\n/populationestimates\n/articles\n/overviewoftheukpopulation\n/latest"]
+    }
+    subgraph peoplepopulationandcommunity_populationandmigration_internationalmigration_articles_noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration_latest {
+        peoplepopulationandcommunity_populationandmigration_internationalmigration_articles_noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/peoplepopulationandcommunity\n/populationandmigration\n/internationalmigration\n/articles\n/noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration\n/latest"]
+    }
+    subgraph peoplepopulationandcommunity_populationandmigration_internationalmigration {
+        peoplepopulationandcommunity_populationandmigration_internationalmigration [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/populationandmigration\n/internationalmigration\n100 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_populationandmigration_migrationwithintheuk {
+        peoplepopulationandcommunity_populationandmigration_migrationwithintheuk [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/populationandmigration\n/migrationwithintheuk\n101 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_populationandmigration_populationestimates {
+        peoplepopulationandcommunity_populationandmigration_populationestimates [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/populationandmigration\n/populationestimates\n102 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_populationandmigration_populationprojections {
+        peoplepopulationandcommunity_populationandmigration_populationprojections [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/populationandmigration\n/populationprojections\n103 - product_page"]
+    }
+    subgraph peoplepopulationandcommunity_wellbeing {
+        peoplepopulationandcommunity_wellbeing [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/wellbeing\n104 - product_page"]
+        peoplepopulationandcommunity_wellbeing -> peoplepopulationandcommunity_wellbeing_qmis_subjectivewellbeingannualpopulationsurveyapsqmi
+    }
+    subgraph peoplepopulationandcommunity_wellbeing_qmis_subjectivewellbeingannualpopulationsurveyapsqmi {
+        peoplepopulationandcommunity_wellbeing_qmis_subjectivewellbeingannualpopulationsurveyapsqmi [shape = box, color="#1038E0", style=bold, label = "** RelatedMethodology - Broken URI: **\n/peoplepopulationandcommunity\n/wellbeing\n/qmis\n/subjectivewellbeingannualpopulationsurveyapsqmi"]
+    }
+}
