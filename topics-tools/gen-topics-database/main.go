@@ -4311,6 +4311,8 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 
 	var pageType = make([]allowedPageType, indexNumber+1)
 
+	var maxContentItems int
+
 	for id := 1; id <= indexNumber; id++ {
 
 		var contentState string // this acts as a flag, as well as holding value
@@ -4496,6 +4498,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 			//content[id].ID = strconv.Itoa(id) + " - " + indexNames[id]
 			content[id].ID = idRef[id]
 
+			var totalItems int
 			var next Content
 			// pre-assign next struct to allow for cross assignment of SubtopicsIds
 			content[id].Next = &next
@@ -4503,30 +4506,43 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 			content[id].Next.State = contentState
 
 			if len(spotlight) > 0 {
+				totalItems += len(spotlight)
 				content[id].Next.Spotlight = &spotlight
 			}
 			if len(articles) > 0 {
+				totalItems += len(articles)
 				content[id].Next.Articles = &articles
 			}
 			if len(bulletins) > 0 {
+				totalItems += len(bulletins)
 				content[id].Next.Bulletins = &bulletins
 			}
 			if len(methodologies) > 0 {
+				totalItems += len(methodologies)
 				content[id].Next.Methodologies = &methodologies
 			}
 			if len(methodologyArticles) > 0 {
+				totalItems += len(methodologyArticles)
 				content[id].Next.MethodologyArticles = &methodologyArticles
 			}
 			if len(staticDatasets) > 0 {
+				totalItems += len(staticDatasets)
 				content[id].Next.StaticDatasets = &staticDatasets
 			}
 			if len(timeseries) > 0 {
+				totalItems += len(timeseries)
 				content[id].Next.Timeseries = &timeseries
+			}
+
+			if totalItems > maxContentItems {
+				maxContentItems = totalItems
 			}
 
 			content[id].Current = content[id].Next
 		}
 	}
+
+	fmt.Printf("\nmaxContentItems: %d\n", maxContentItems)
 
 	var baseURI string = "http://localhost:25300/topics/"
 
