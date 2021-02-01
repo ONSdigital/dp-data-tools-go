@@ -4,7 +4,7 @@ package main
 //       That is, the struct(s) may need additional fields.
 
 // NOTE: to grab all output info from running this use:
-//       go run main.go topic.go content.go >t.txt
+//       go run main.go >t.txt
 
 import (
 	"bytes"
