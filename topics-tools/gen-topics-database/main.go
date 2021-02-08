@@ -210,6 +210,7 @@ const (
 	pageTopicBroken
 	pageTopicHighlightedLinks // Topic spotlight
 	pageTopicSubtopicID
+	pageTopicAndContent
 	pageContent
 	pageContentItems                     // Content Timeseries
 	pageContentDatasets                  // Content Static datasets
@@ -1325,7 +1326,21 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		check(err)
 
 		// ===========================================
-		getNodeData(&data, returnedIndexNumber, fullURI, bodyTextFile, checkFile)
+		if getNodeData(&data, returnedIndexNumber, fullURI, bodyTextFile, checkFile) {
+			// This page has 'highlighted' type which we need to re-map to spotlight ...
+			// First indicate a content page:
+			listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: returnedIndexNumber, pageType: pageContent, parentURI: parentURI, shortURI: shortURI})
+			listOfPageData = append(listOfPageData, pageData{id: returnedIndexNumber, subSectionIndex: parentID, pageType: pageContent, uriStatus: pageContent, shortURI: shortURI, parentURI: parentURI, fixedPayload: fixedJSON})
+
+			// We can only re-map valid links, so ...
+			for index, link := range *data.HighlightedLinks {
+				if link.valid {
+					// re-process each page, but re-map any links to what will end up as 'spotlight' on a content page
+					// that matches the topic page
+					getPageDataRetry(index, *link.URI, returnedIndexNumber, pageContentHighlightedContent, fullURI, bodyTextFile, checkFile)
+				}
+			}
+		}
 
 		// and ...
 		// write out any child 'highlighted links' termination node as their own subgraph's
@@ -3796,7 +3811,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 	} else if *shape.Type == "taxonomy_landing_page" {
 		// NOTE: this is an upper level page being linked back up to !!!
 		// ( this should probably not be being grabbed ... we shall see if its of use )
-		// "product_page" has been linked to from content nodes
+		// "taxonomy_landing_page" has been linked to from content nodes
 		var data DataResponse
 
 		// sanity check the page has some fields for later use
@@ -4242,7 +4257,8 @@ func getTerminationNodeData(data *DataResponse, parentTopicNumber int, parentFul
 	return info
 }
 
-func getNodeData(data *DataResponse, parentTopicNumber int, parentFullURI string, bodyTextFile io.Writer, checkFile io.Writer) {
+func getNodeData(data *DataResponse, parentTopicNumber int, parentFullURI string, bodyTextFile io.Writer, checkFile io.Writer) bool {
+	var anyValid bool
 	// read any child 'highlighted links' and save their page /data
 	if data.HighlightedLinks != nil {
 		if len(*data.HighlightedLinks) > 0 {
@@ -4252,10 +4268,21 @@ func getNodeData(data *DataResponse, parentTopicNumber int, parentFullURI string
 				if valid {
 					(*data.HighlightedLinks)[index].valid = true
 					(*data.HighlightedLinks)[index].linkType = lType
+					anyValid = true
 				}
 			}
 		}
 	}
+	return anyValid
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }
 
 func populateTopicAndContentStructs(topics []TopicResponseStore, content []ContentResponse) {
@@ -4331,7 +4358,11 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 					// this should not happen ... (it's not been seen on a full site scan)
 					fmt.Printf("oops: pageBroken\n")
 				case pageTopic:
-					pageType[id] = data.uriStatus //pageTopic
+					if pageType[id] == pageContent {
+						pageType[id] = pageTopicAndContent
+					} else {
+						pageType[id] = data.uriStatus //pageTopic
+					}
 					topicPageCount++
 					parentID := data.subSectionIndex
 					//idAndName := strconv.Itoa(data.id) + " - " + data.shortURI
@@ -4350,7 +4381,9 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 						if topics[parentID].Next.SubtopicIds == nil {
 							topics[parentID].Next.SubtopicIds = &[]string{idAndName}
 						} else {
-							*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
+							if !stringInSlice(idAndName, *topics[parentID].Next.SubtopicIds) {
+								*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
+							}
 						}
 					} else {
 						topics[id].ID = idAndName
@@ -4389,17 +4422,17 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 				case pageTopicBroken:
 					// this should not happen ... (it's not been seen on a full site scan)
 					fmt.Printf("oops: pageTopicBroken\n")
-				case pageTopicHighlightedLinks: // Topic spotlight
-					var spotlight TypeLinkObject
+				/*case pageTopicHighlightedLinks: // Topic spotlight
+				var spotlight TypeLinkObject
 
-					spotlight.HRef = data.shortURI
-					spotlight.Title = data.title
+				spotlight.HRef = data.shortURI
+				spotlight.Title = data.title
 
-					if topics[id].Next.Spotlight == nil {
-						topics[id].Next.Spotlight = &[]TypeLinkObject{spotlight}
-					} else {
-						*topics[id].Next.Spotlight = append(*topics[id].Next.Spotlight, spotlight)
-					}
+				if topics[id].Next.Spotlight == nil {
+					topics[id].Next.Spotlight = &[]TypeLinkObject{spotlight}
+				} else {
+					*topics[id].Next.Spotlight = append(*topics[id].Next.Spotlight, spotlight)
+				}*/
 
 				case pageTopicSubtopicID:
 					// Add topic node id into parent SubtopicsIds list
@@ -4409,7 +4442,9 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 					if topics[parentID].Next.SubtopicIds == nil {
 						topics[parentID].Next.SubtopicIds = &[]string{idAndName}
 					} else {
-						*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
+						if !stringInSlice(idAndName, *topics[parentID].Next.SubtopicIds) {
+							*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
+						}
 					}
 
 				case pageContent:
@@ -4422,10 +4457,17 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 					if topics[parentID].Next.SubtopicIds == nil {
 						topics[parentID].Next.SubtopicIds = &[]string{idAndName}
 					} else {
-						*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
+						if !stringInSlice(idAndName, *topics[parentID].Next.SubtopicIds) {
+							*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
+						}
 					}
 
-					pageType[id] = pageContent
+					if pageType[id] == pageTopic {
+						pageType[id] = pageTopicAndContent
+					} else {
+						pageType[id] = pageContent
+					}
+
 					contentPageCount++
 					topics[id].ID = idAndName
 					topics[id].Next.ID = idAndName
@@ -4553,8 +4595,6 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 		var content LinkObject
 		var topicLinks TopicLinks
 
-		//idStr := strconv.Itoa(id)
-		//idAndName := strconv.Itoa(id) + " - " + indexNames[id]
 		idAndName := idRef[id]
 
 		self.HRef = baseURI + idAndName
@@ -4562,19 +4602,18 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 
 		topicLinks.Self = &self
 
-		switch pageType[id] {
-		case pageTopic:
+		if pageType[id] == pageTopic || pageType[id] == pageTopicAndContent {
 			if topics[id].Next.SubtopicIds != nil {
 				if len(*topics[id].Next.SubtopicIds) > 0 {
 					subtopics.HRef = baseURI + idAndName + "/subtopics"
 					topicLinks.Subtopics = &subtopics
 				}
 			}
-		case pageContent:
+		}
+
+		if pageType[id] == pageContent || pageType[id] == pageTopicAndContent {
 			content.HRef = baseURI + idAndName + "/content"
 			topicLinks.Content = &content
-		case pageTopicBroken:
-			// do nothing for this
 		}
 
 		if pageType[id] != pageTopicBroken {
