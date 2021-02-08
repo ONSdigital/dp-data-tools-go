@@ -93,7 +93,7 @@ digraph G {
         economy -> economy_economicoutputandproductivity_output_articles_economicactivityfasterindicatorsuk_latest
     }
     subgraph economy_economicoutputandproductivity_output_articles_economicactivityfasterindicatorsuk_latest {
-        economy_economicoutputandproductivity_output_articles_economicactivityfasterindicatorsuk_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/economy\n/economicoutputandproductivity\n/output\n/articles\n/economicactivityfasterindicatorsuk\n/latest"]
+        economy_economicoutputandproductivity_output_articles_economicactivityfasterindicatorsuk_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted: article\n/economy\n/economicoutputandproductivity\n/output\n/articles\n/economicactivityfasterindicatorsuk\n/latest"]
     }
     subgraph economy_economicoutputandproductivity {
         economy_economicoutputandproductivity [shape = box, label = "/economy\n/economicoutputandproductivity\n18 - taxonomy_landing_page"]
@@ -173,7 +173,7 @@ digraph G {
         economy_nationalaccounts -> economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest
     }
     subgraph economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest {
-        economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/economy\n/grossdomesticproductgdp\n/compendium\n/unitedkingdomnationalaccountsthebluebook\n/latest"]
+        economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted: compendium_landing_page\n/economy\n/grossdomesticproductgdp\n/compendium\n/unitedkingdomnationalaccountsthebluebook\n/latest"]
     }
     subgraph economy_nationalaccounts_balanceofpayments {
         economy_nationalaccounts_balanceofpayments [shape = box, color="#E07020", style=filled, label = "/economy\n/nationalaccounts\n/balanceofpayments\n34 - product_page"]
@@ -222,10 +222,10 @@ digraph G {
         employmentandlabourmarket_peopleinwork -> employmentandlabourmarket_peopleinwork_earningsandworkinghours_bulletins_annualsurveyofhoursandearnings_latest
     }
     subgraph employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest {
-        employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/employmentandlabourmarket\n/peopleinwork\n/employmentandemployeetypes\n/bulletins\n/uklabourmarket\n/latest"]
+        employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted: bulletin\n/employmentandlabourmarket\n/peopleinwork\n/employmentandemployeetypes\n/bulletins\n/uklabourmarket\n/latest"]
     }
     subgraph employmentandlabourmarket_peopleinwork_earningsandworkinghours_bulletins_annualsurveyofhoursandearnings_latest {
-        employmentandlabourmarket_peopleinwork_earningsandworkinghours_bulletins_annualsurveyofhoursandearnings_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/employmentandlabourmarket\n/peopleinwork\n/earningsandworkinghours\n/bulletins\n/annualsurveyofhoursandearnings\n/latest"]
+        employmentandlabourmarket_peopleinwork_earningsandworkinghours_bulletins_annualsurveyofhoursandearnings_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted: bulletin\n/employmentandlabourmarket\n/peopleinwork\n/earningsandworkinghours\n/bulletins\n/annualsurveyofhoursandearnings\n/latest"]
     }
     subgraph employmentandlabourmarket_peopleinwork_earningsandworkinghours {
         employmentandlabourmarket_peopleinwork_earningsandworkinghours [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peopleinwork\n/earningsandworkinghours\n42 - product_page"]
@@ -259,7 +259,7 @@ digraph G {
         employmentandlabourmarket_peoplenotinwork -> employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest
     }
     subgraph employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest {
-        employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/employmentandlabourmarket\n/peopleinwork\n/employmentandemployeetypes\n/bulletins\n/uklabourmarket\n/latest"]
+        employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted: bulletin\n/employmentandlabourmarket\n/peopleinwork\n/employmentandemployeetypes\n/bulletins\n/uklabourmarket\n/latest"]
     }
     subgraph employmentandlabourmarket_peoplenotinwork_economicinactivity {
         employmentandlabourmarket_peoplenotinwork_economicinactivity [shape = box, color="#E07020", style=filled, label = "/employmentandlabourmarket\n/peoplenotinwork\n/economicinactivity\n49 - product_page"]
@@ -453,7 +453,7 @@ digraph G {
         peoplepopulationandcommunity_householdcharacteristics -> peoplepopulationandcommunity_culturalidentity_sexuality_bulletins_integratedhouseholdsurvey_latest
     }
     subgraph peoplepopulationandcommunity_culturalidentity_sexuality_bulletins_integratedhouseholdsurvey_latest {
-        peoplepopulationandcommunity_culturalidentity_sexuality_bulletins_integratedhouseholdsurvey_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/peoplepopulationandcommunity\n/culturalidentity\n/sexuality\n/bulletins\n/integratedhouseholdsurvey\n/latest"]
+        peoplepopulationandcommunity_culturalidentity_sexuality_bulletins_integratedhouseholdsurvey_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted: bulletin\n/peoplepopulationandcommunity\n/culturalidentity\n/sexuality\n/bulletins\n/integratedhouseholdsurvey\n/latest"]
     }
     subgraph peoplepopulationandcommunity_householdcharacteristics_homeinternetandsocialmediausage {
         peoplepopulationandcommunity_householdcharacteristics_homeinternetandsocialmediausage [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/householdcharacteristics\n/homeinternetandsocialmediausage\n91 - product_page"]
@@ -495,10 +495,10 @@ digraph G {
         peoplepopulationandcommunity_populationandmigration -> peoplepopulationandcommunity_populationandmigration_internationalmigration_articles_noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration_latest
     }
     subgraph peoplepopulationandcommunity_populationandmigration_populationestimates_articles_overviewoftheukpopulation_latest {
-        peoplepopulationandcommunity_populationandmigration_populationestimates_articles_overviewoftheukpopulation_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/peoplepopulationandcommunity\n/populationandmigration\n/populationestimates\n/articles\n/overviewoftheukpopulation\n/latest"]
+        peoplepopulationandcommunity_populationandmigration_populationestimates_articles_overviewoftheukpopulation_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted: article\n/peoplepopulationandcommunity\n/populationandmigration\n/populationestimates\n/articles\n/overviewoftheukpopulation\n/latest"]
     }
     subgraph peoplepopulationandcommunity_populationandmigration_internationalmigration_articles_noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration_latest {
-        peoplepopulationandcommunity_populationandmigration_internationalmigration_articles_noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted:\n/peoplepopulationandcommunity\n/populationandmigration\n/internationalmigration\n/articles\n/noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration\n/latest"]
+        peoplepopulationandcommunity_populationandmigration_internationalmigration_articles_noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration_latest [shape = box, color="#30A8A0", style=filled, label = "Topic - Highlighted: article\n/peoplepopulationandcommunity\n/populationandmigration\n/internationalmigration\n/articles\n/noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration\n/latest"]
     }
     subgraph peoplepopulationandcommunity_populationandmigration_internationalmigration {
         peoplepopulationandcommunity_populationandmigration_internationalmigration [shape = box, color="#E07020", style=filled, label = "/peoplepopulationandcommunity\n/populationandmigration\n/internationalmigration\n100 - product_page"]

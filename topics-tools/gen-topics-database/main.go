@@ -1339,7 +1339,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 					gvLink = strings.ReplaceAll(gvLink, "/", "_")
 					gvLinkLabel := "/" + strings.ReplaceAll(gvLink, "_", "\\n/")
 					if link.valid {
-						_, err = fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#30A8A0\", style=filled, label = \"%s\"]\n    }\n", gvLink, gvLink, fmt.Sprintf("Topic - Highlighted:\\n")+gvLinkLabel)
+						_, err = fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#30A8A0\", style=filled, label = \"%s\"]\n    }\n", gvLink, gvLink, fmt.Sprintf("Topic - Highlighted: %s\\n", link.linkType)+gvLinkLabel)
 						check(err)
 					} else {
 						_, err = fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#30A8A0\", style=bold, label = \"%s\"]\n    }\n", gvLink, gvLink, fmt.Sprintf("Topic - Highlighted:\\n")+gvLinkLabel)
