@@ -1140,8 +1140,19 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 			indexNames[indexNumber] = shortURI
 
 			appearanceInfo[shortURI]++
-			listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: indexNumber, pageType: pageTopic, parentURI: parentURI, shortURI: shortURI})
-			listOfPageData = append(listOfPageData, pageData{id: indexNumber, subSectionIndex: parentID, pageType: pageTopic, uriStatus: pageTopicBroken, shortURI: shortURI, parentURI: "https://www.ons.gov.uk" + parentURI + "/data", fixedPayload: []byte{}})
+			listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+				id:        indexNumber,
+				pageType:  pageTopic,
+				parentURI: parentURI,
+				shortURI:  shortURI})
+			listOfPageData = append(listOfPageData, pageData{
+				id:              indexNumber,
+				subSectionIndex: parentID,
+				pageType:        pageTopic,
+				uriStatus:       pageTopicBroken,
+				shortURI:        shortURI,
+				parentURI:       "https://www.ons.gov.uk" + parentURI + "/data",
+				fixedPayload:    []byte{}})
 
 			fmt.Printf("\nERROR on ONS website /data field: %v\n\n", response.StatusCode)
 			fmt.Printf("URI does not exist:  %v\n", fullURI)
@@ -1158,8 +1169,19 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		indexNames[indexNumber] = shortURI
 
 		appearanceInfo[shortURI]++
-		listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: indexNumber, pageType: pageTopic, parentURI: parentURI, shortURI: shortURI})
-		listOfPageData = append(listOfPageData, pageData{id: indexNumber, subSectionIndex: parentID, pageType: pageTopic, uriStatus: pageTopicBroken, shortURI: shortURI, parentURI: "https://www.ons.gov.uk" + parentURI + "/data", fixedPayload: []byte{}})
+		listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+			id:        indexNumber,
+			pageType:  pageTopic,
+			parentURI: parentURI,
+			shortURI:  shortURI})
+		listOfPageData = append(listOfPageData, pageData{
+			id:              indexNumber,
+			subSectionIndex: parentID,
+			pageType:        pageTopic,
+			uriStatus:       pageTopicBroken,
+			shortURI:        shortURI,
+			parentURI:       "https://www.ons.gov.uk" + parentURI + "/data",
+			fixedPayload:    []byte{}})
 
 		fmt.Printf("\nERROR on ONS website /data field: %v\n\n", response.StatusCode)
 		fmt.Printf("URI does not exist:  %v\n", fullURI)
@@ -1233,8 +1255,19 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		indexNames[indexNumber] = shortURI
 
 		appearanceInfo[shortURI]++
-		listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: indexNumber, pageType: pageContent, parentURI: parentURI, shortURI: shortURI})
-		listOfPageData = append(listOfPageData, pageData{id: indexNumber, subSectionIndex: parentID, pageType: pageContent, uriStatus: pageContent, shortURI: shortURI, parentURI: parentURI, fixedPayload: fixedJSON})
+		listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+			id:        indexNumber,
+			pageType:  pageContent,
+			parentURI: parentURI,
+			shortURI:  shortURI})
+		listOfPageData = append(listOfPageData, pageData{
+			id:              indexNumber,
+			subSectionIndex: parentID,
+			pageType:        pageContent,
+			uriStatus:       pageContent,
+			shortURI:        shortURI,
+			parentURI:       parentURI,
+			fixedPayload:    fixedJSON})
 
 		fmt.Printf("%v : Content Page: %v\n", indexNumber, fullURI)
 
@@ -1278,8 +1311,19 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		indexNames[indexNumber] = shortURI
 
 		appearanceInfo[shortURI]++
-		listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: indexNumber, pageType: pageTopic, parentURI: parentURI, shortURI: shortURI})
-		listOfPageData = append(listOfPageData, pageData{id: indexNumber, subSectionIndex: parentID, pageType: pageTopic, uriStatus: pageTopic, shortURI: shortURI, parentURI: parentURI, fixedPayload: fixedJSON})
+		listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+			id:        indexNumber,
+			pageType:  pageTopic,
+			parentURI: parentURI,
+			shortURI:  shortURI})
+		listOfPageData = append(listOfPageData, pageData{
+			id:              indexNumber,
+			subSectionIndex: parentID,
+			pageType:        pageTopic,
+			uriStatus:       pageTopic,
+			shortURI:        shortURI,
+			parentURI:       parentURI,
+			fixedPayload:    fixedJSON})
 		returnedIndexNumber = indexNumber
 
 		fmt.Printf("%v : Topic Page: %v\n", indexNumber, fullURI)
@@ -1329,8 +1373,19 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		if getNodeData(&data, returnedIndexNumber, fullURI, bodyTextFile, checkFile) {
 			// This page has 'highlighted' type which has been re-maped to spotlight ... that is on a content page
 			// so, Tag page as also having content:
-			listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: returnedIndexNumber, pageType: pageContent, parentURI: parentURI, shortURI: shortURI})
-			listOfPageData = append(listOfPageData, pageData{id: returnedIndexNumber, subSectionIndex: parentID, pageType: pageContent, uriStatus: pageContent, shortURI: shortURI, parentURI: parentURI, fixedPayload: fixedJSON})
+			listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+				id:        returnedIndexNumber,
+				pageType:  pageContent,
+				parentURI: parentURI,
+				shortURI:  shortURI})
+			listOfPageData = append(listOfPageData, pageData{
+				id:              returnedIndexNumber,
+				subSectionIndex: parentID,
+				pageType:        pageContent,
+				uriStatus:       pageContent,
+				shortURI:        shortURI,
+				parentURI:       parentURI,
+				fixedPayload:    fixedJSON})
 		}
 
 		// and ...
@@ -1396,8 +1451,19 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		indexNames[indexNumber] = shortURI
 
 		appearanceInfo[shortURI]++
-		listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: indexNumber, pageType: pageTopic, parentURI: parentURI, shortURI: shortURI})
-		listOfPageData = append(listOfPageData, pageData{id: indexNumber, subSectionIndex: parentID, pageType: pageTopic, uriStatus: pageTopicBroken, shortURI: shortURI, parentURI: "https://www.ons.gov.uk" + parentURI + "/data", fixedPayload: []byte{}})
+		listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+			id:        indexNumber,
+			pageType:  pageTopic,
+			parentURI: parentURI,
+			shortURI:  shortURI})
+		listOfPageData = append(listOfPageData, pageData{
+			id:              indexNumber,
+			subSectionIndex: parentID,
+			pageType:        pageTopic,
+			uriStatus:       pageTopicBroken,
+			shortURI:        shortURI,
+			parentURI:       "https://www.ons.gov.uk" + parentURI + "/data",
+			fixedPayload:    []byte{}})
 
 		fmt.Printf("ERROR: page has no topic or content links ...\n%v\n", fullURI)
 		_, err := fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#E0F020\", style=filled, label = \"%s\"]\n    }\n", gvPage, gvPage, gvPageLabel+"\n ** MISSING: topic & content **"+fmt.Sprintf("\\n%v", indexNumber))
@@ -2338,8 +2404,19 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 				fmt.Printf("URI does not exist:  %v\n", fullURI)
 
 				appearanceInfo[shortURI]++
-				listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: parentTopicNumber, pageType: pType, parentURI: parentURI, shortURI: shortURI})
-				listOfPageData = append(listOfPageData, pageData{id: parentTopicNumber, subSectionIndex: index, pageType: pType, uriStatus: pageBroken, shortURI: shortURI, parentURI: parentURI, fixedPayload: []byte{}})
+				listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+					id:        parentTopicNumber,
+					pageType:  pType,
+					parentURI: parentURI,
+					shortURI:  shortURI})
+				listOfPageData = append(listOfPageData, pageData{
+					id:              parentTopicNumber,
+					subSectionIndex: index,
+					pageType:        pType,
+					uriStatus:       pageBroken,
+					shortURI:        shortURI,
+					parentURI:       parentURI,
+					fixedPayload:    []byte{}})
 			} else {
 				fmt.Printf("\nToo many requests\n")
 				// caller will call this function again for a 429
@@ -3883,12 +3960,21 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 	// good 200 response, save page for later
 	appearanceInfo[shortURI]++
-	listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: parentTopicNumber, pageType: pType, parentURI: parentURI, shortURI: shortURI})
-	listOfPageData = append(listOfPageData,
-		pageData{id: parentTopicNumber, subSectionIndex: index,
-			pageType: pType, uriStatus: pType,
-			shortURI: shortURI, parentURI: parentURI, fixedPayload: []byte{},
-			title: title, description: description})
+	listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+		id:        parentTopicNumber,
+		pageType:  pType,
+		parentURI: parentURI,
+		shortURI:  shortURI})
+	listOfPageData = append(listOfPageData, pageData{
+		id:              parentTopicNumber,
+		subSectionIndex: index,
+		pageType:        pType,
+		uriStatus:       pType,
+		shortURI:        shortURI,
+		parentURI:       parentURI,
+		fixedPayload:    []byte{},
+		title:           title,
+		description:     description})
 
 	depth++
 	if depth > maxDepth {
@@ -4060,8 +4146,19 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 				// SO, give up on this URI ...
 				fmt.Printf("URI does not exist:  %v\n", shortURI)
 				appearanceInfo[shortURI]++
-				listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: parentTopicNumber, pageType: pType, parentURI: parentFullURI, shortURI: shortURI})
-				listOfPageData = append(listOfPageData, pageData{id: parentTopicNumber, subSectionIndex: index, pageType: pType, uriStatus: pageBroken, shortURI: shortURI, parentURI: parentFullURI, fixedPayload: []byte{}})
+				listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+					id:        parentTopicNumber,
+					pageType:  pType,
+					parentURI: parentFullURI,
+					shortURI:  shortURI})
+				listOfPageData = append(listOfPageData, pageData{
+					id:              parentTopicNumber,
+					subSectionIndex: index,
+					pageType:        pType,
+					uriStatus:       pageBroken,
+					shortURI:        shortURI,
+					parentURI:       parentFullURI,
+					fixedPayload:    []byte{}})
 
 				return false, ""
 			}
@@ -4118,8 +4215,19 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 			}
 			fmt.Printf("URI does not exist:  %v\n", shortURI)
 			appearanceInfo[shortURI]++
-			listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: parentTopicNumber, pageType: pType, parentURI: parentFullURI, shortURI: shortURI})
-			listOfPageData = append(listOfPageData, pageData{id: parentTopicNumber, subSectionIndex: index, pageType: pType, uriStatus: pageBroken, shortURI: shortURI, parentURI: parentFullURI, fixedPayload: []byte{}})
+			listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
+				id:        parentTopicNumber,
+				pageType:  pType,
+				parentURI: parentFullURI,
+				shortURI:  shortURI})
+			listOfPageData = append(listOfPageData, pageData{
+				id:              parentTopicNumber,
+				subSectionIndex: index,
+				pageType:        pType,
+				uriStatus:       pageBroken,
+				shortURI:        shortURI,
+				parentURI:       parentFullURI,
+				fixedPayload:    []byte{}})
 		}
 	}
 
