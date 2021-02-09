@@ -1327,19 +1327,10 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 
 		// ===========================================
 		if getNodeData(&data, returnedIndexNumber, fullURI, bodyTextFile, checkFile) {
-			// This page has 'highlighted' type which we need to re-map to spotlight ...
-			// First indicate a content page:
+			// This page has 'highlighted' type which has been re-maped to spotlight ... that is on a content page
+			// so, Tag page as also having content:
 			listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{id: returnedIndexNumber, pageType: pageContent, parentURI: parentURI, shortURI: shortURI})
 			listOfPageData = append(listOfPageData, pageData{id: returnedIndexNumber, subSectionIndex: parentID, pageType: pageContent, uriStatus: pageContent, shortURI: shortURI, parentURI: parentURI, fixedPayload: fixedJSON})
-
-			// We can only re-map valid links, so ...
-			for index, link := range *data.HighlightedLinks {
-				if link.valid {
-					// re-process each page, but re-map any links to what will end up as 'spotlight' on a content page
-					// that matches the topic page
-					getPageDataRetry(index, *link.URI, returnedIndexNumber, pageContentHighlightedContent, fullURI, bodyTextFile, checkFile)
-				}
-			}
 		}
 
 		// and ...
@@ -4264,7 +4255,9 @@ func getNodeData(data *DataResponse, parentTopicNumber int, parentFullURI string
 		if len(*data.HighlightedLinks) > 0 {
 			fmt.Printf("Getting: HighlightedLinks\n")
 			for index, link := range *data.HighlightedLinks {
-				valid, lType := getPageDataRetry(index, *link.URI, parentTopicNumber, pageTopicHighlightedLinks, parentFullURI, bodyTextFile, checkFile)
+				// process tha URI as a 'pageContentHighlightedContent', instead of a 'pageTopicHighlightedLinks'
+				// to push it onto a content page
+				valid, lType := getPageDataRetry(index, *link.URI, parentTopicNumber, pageContentHighlightedContent, parentFullURI, bodyTextFile, checkFile)
 				if valid {
 					(*data.HighlightedLinks)[index].valid = true
 					(*data.HighlightedLinks)[index].linkType = lType
@@ -4358,10 +4351,13 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 					// this should not happen ... (it's not been seen on a full site scan)
 					fmt.Printf("oops: pageBroken\n")
 				case pageTopic:
-					if pageType[id] == pageContent {
-						pageType[id] = pageTopicAndContent
-					} else {
-						pageType[id] = data.uriStatus //pageTopic
+					if pageType[id] != pageTopicAndContent {
+						if pageType[id] == pageContent {
+							// add topic to content
+							pageType[id] = pageTopicAndContent
+						} else {
+							pageType[id] = pageTopic
+						}
 					}
 					topicPageCount++
 					parentID := data.subSectionIndex
@@ -4369,6 +4365,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 					idAndName := idRef[id]
 
 					if data.uriStatus == pageTopicBroken {
+						pageType[id] = pageTopicBroken
 						// The URI that was trying to be viewed does not exist.
 						// Therefore we don't have any info on it to put into the topic database.
 						// All we can do to indicate a broken link is assign a sub-topics id that has nothing in it in
@@ -4462,10 +4459,13 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 						}
 					}
 
-					if pageType[id] == pageTopic {
-						pageType[id] = pageTopicAndContent
-					} else {
-						pageType[id] = pageContent
+					if pageType[id] != pageTopicAndContent {
+						if pageType[id] == pageTopic {
+							// add content to topic
+							pageType[id] = pageTopicAndContent
+						} else {
+							pageType[id] = pageContent
+						}
 					}
 
 					contentPageCount++
