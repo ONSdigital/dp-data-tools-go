@@ -1,0 +1,23 @@
+When one accesses the /data endpoint of any ONS web site page ...
+
+(from Carl on 26th Jan 2021):
+The returned json data is what is stored on disc behind zebedee.
+Within the zebedee root directory there is a master directory that holds the structure of the website.
+There will be a bunch of json files in this file structure, which is the json data you see on the /data endpoint.
+
+(my question to Carl):
+I looked at the directory of web content for my local zebedee and noticed that a good number of the json files
+that are the /data returned thing contain a field called breadcrumbs[] which helps to explain why there are
+certain links on the actual HTML web page.
+However none of the json files for any page type returned in the response for any /data endpoint contain the
+field breadcrumbs[].
+I also noticed other fields in the stuff stored on disc that don't seem to appear in in the /data json response.
+
+(from Carl on 27th Jan 2021):
+There is a page object model in Zebedee. When the /data endpoint is hit, Zebedee will deserialise the json file
+into the page model.
+It doesn’t look like the page model contains the breadcrumb[], so I suspect this is where it’s getting lost.
+I guess at some point we stopped reading the breadcrumb from the json file and must be building it dynamically.
+Here is a link to the root package of the page model:
+    https://github.com/ONSdigital/zebedee/tree/develop/zebedee-reader/src/main/java/com/github/onsdigital/zebedee/content/page
+
