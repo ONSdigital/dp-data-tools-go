@@ -4356,8 +4356,7 @@ func getTerminationNodeData(data *DataResponse, parentTopicNumber int, parentFul
 	return info
 }
 
-func getNodeData(data *DataResponse, parentTopicNumber int, parentFullURI string, bodyTextFile io.Writer, checkFile io.Writer) bool {
-	var anyValid bool
+func getNodeData(data *DataResponse, parentTopicNumber int, parentFullURI string, bodyTextFile io.Writer, checkFile io.Writer) (anyValid bool) {
 	// read any child 'highlighted links' and save their page /data
 	if data.HighlightedLinks != nil {
 		if len(*data.HighlightedLinks) > 0 {
@@ -4374,6 +4373,7 @@ func getNodeData(data *DataResponse, parentTopicNumber int, parentFullURI string
 			}
 		}
 	}
+
 	return anyValid
 }
 
