@@ -390,7 +390,7 @@ type chartResponse struct {
 	Subtitle           *string `bson:"subtitle,omitempty"            json:"subtitle,omitempty"`
 	Filename           *string `bson:"filename,omitempty"            json:"filename,omitempty"`
 	Source             *string `bson:"source,omitempty"              json:"source,omitempty"`
-	Notes              *string `bson:"notes,omitemptytrue"           json:"notes,omitempty"`
+	Notes              *string `bson:"notes,omitempty"               json:"notes,omitempty"`
 	AltText            *string `bson:"altText,omitempty"             json:"altText,omitempty"`
 	LabelInterval      *string `bson:"labelInterval,omitempty"       json:"labelInterval,omitempty"`
 	DecimalPlaces      *string `bson:"decimalPlaces,omitempty"       json:"decimalPlaces,omitempty"`
