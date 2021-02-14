@@ -1952,7 +1952,13 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 				fmt.Printf("URI does not exist:  %v\n", fullURI)
 
 				listMu.Lock()
-				listOfPageData = append(listOfPageData, pageData{subSectionIndex: index, pageBroken: true, depth: depth, shortURI: shortURI, parentURI: parentURI, fieldName: fieldName})
+				listOfPageData = append(listOfPageData, pageData{
+					subSectionIndex: index,
+					pageBroken:      true,
+					depth:           depth,
+					shortURI:        shortURI,
+					parentURI:       parentURI,
+					fieldName:       fieldName})
 				listMu.Unlock()
 			} else {
 				fmt.Printf("\nToo many requests\n")
@@ -2431,7 +2437,11 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 
 	// good 200 response, save page for later
 	listMu.Lock()
-	listOfPageData = append(listOfPageData, pageData{subSectionIndex: index, pageBroken: false, shortURI: shortURI, parentURI: parentURI})
+	listOfPageData = append(listOfPageData, pageData{
+		subSectionIndex: index,
+		pageBroken:      false,
+		shortURI:        shortURI,
+		parentURI:       parentURI})
 	listMu.Unlock()
 
 	currentTime := time.Now()
@@ -2604,7 +2614,13 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 				// SO, give up on this URI ..
 				fmt.Printf("URI does not exist:  %v\n", shortURI)
 				listMu.Lock()
-				listOfPageData = append(listOfPageData, pageData{subSectionIndex: index, pageBroken: true, depth: depth, shortURI: shortURI, parentURI: parentFullURI, fieldName: fieldName})
+				listOfPageData = append(listOfPageData, pageData{
+					subSectionIndex: index,
+					pageBroken:      true,
+					depth:           depth,
+					shortURI:        shortURI,
+					parentURI:       parentFullURI,
+					fieldName:       fieldName})
 				listMu.Unlock()
 
 				return false, validURI
@@ -2672,7 +2688,13 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 			}
 			fmt.Printf("URI does not exist:  %v\n", shortURI)
 			listMu.Lock()
-			listOfPageData = append(listOfPageData, pageData{subSectionIndex: index, pageBroken: true, depth: depth, shortURI: shortURI, parentURI: parentFullURI, fieldName: fieldName})
+			listOfPageData = append(listOfPageData, pageData{
+				subSectionIndex: index,
+				pageBroken:      true,
+				depth:           depth,
+				shortURI:        shortURI,
+				parentURI:       parentFullURI,
+				fieldName:       fieldName})
 			listMu.Unlock()
 		}
 	}
