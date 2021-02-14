@@ -1,6 +1,6 @@
 package main
 
-// NOTE: Any changes to the ONS website might stop this App working and it will need adjusting ...
+// NOTE: Any changes to the ONS website might stop this App working and it will need adjusting ..
 //       That is, the struct(s) may need additional fields.
 
 // NOTE: to grab all output info from running this use:
@@ -11,7 +11,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -142,51 +141,37 @@ type Descript struct {
 
 // ItemLinks are highlights
 type ItemLinks struct {
-	URI      *string `bson:"uri,omitempty"  json:"uri,omitempty"`
-	valid    bool    // not read in or saved, but used by this App
-	linkType string  // not read in or saved, but used by this App
+	URI *string `bson:"uri,omitempty"  json:"uri,omitempty"`
 }
 
 // DatasetLinks are highlights
 type DatasetLinks struct {
-	URI      *string `bson:"uri,omitempty"  json:"uri,omitempty"`
-	valid    bool    // not read in or saved, but used by this App
-	linkType string  // not read in or saved, but used by this App
+	URI *string `bson:"uri,omitempty"  json:"uri,omitempty"`
 }
 
 // StatsBulletLinks are stats bulletins
 type StatsBulletLinks struct {
-	URI      *string `bson:"uri,omitempty"  json:"uri,omitempty"`
-	valid    bool    // not read in or saved, but used by this App
-	linkType string  // not read in or saved, but used by this App
+	URI *string `bson:"uri,omitempty"  json:"uri,omitempty"`
 }
 
 // RelatedArticleLinks are related articles
 type RelatedArticleLinks struct {
-	URI      *string `bson:"uri,omitempty"  json:"uri,omitempty"`
-	valid    bool    // not read in or saved, but used by this App
-	linkType string  // not read in or saved, but used by this App
+	URI *string `bson:"uri,omitempty"  json:"uri,omitempty"`
 }
 
 // RelatedMethodLinks are related methodologies
 type RelatedMethodLinks struct {
-	URI      *string `bson:"uri,omitempty"  json:"uri,omitempty"`
-	valid    bool    // not read in or saved, but used by this App
-	linkType string  // not read in or saved, but used by this App
+	URI *string `bson:"uri,omitempty"  json:"uri,omitempty"`
 }
 
 // RelatedMethodologyArticleLinks are related methodology articles
 type RelatedMethodologyArticleLinks struct {
-	URI      *string `bson:"uri,omitempty"  json:"uri,omitempty"`
-	valid    bool    // not read in or saved, but used by this App
-	linkType string  // not read in or saved, but used by this App
+	URI *string `bson:"uri,omitempty"  json:"uri,omitempty"`
 }
 
 // HighlightedContentLinks are highlighted content
 type HighlightedContentLinks struct {
-	URI      *string `bson:"uri,omitempty"  json:"uri,omitempty"`
-	valid    bool    // not read in or saved, but used by this App
-	linkType string  // not read in or saved, but used by this App
+	URI *string `bson:"uri,omitempty"  json:"uri,omitempty"`
 }
 
 // ContactDetails represents an object containing information of the contact
@@ -214,7 +199,7 @@ type FeaturedContentLinks struct {
 }
 
 // ===
-// pageShape used to determine how to decode a content page
+// pageShape used to determine how to decode a page
 type pageShape struct {
 	Type *string `bson:"type,omitempty"  json:"type,omitempty"`
 }
@@ -405,7 +390,7 @@ type chartResponse struct {
 	Subtitle           *string `bson:"subtitle,omitempty"            json:"subtitle,omitempty"`
 	Filename           *string `bson:"filename,omitempty"            json:"filename,omitempty"`
 	Source             *string `bson:"source,omitempty"              json:"source,omitempty"`
-	Notes              *string `bson:"notes,omitemptytrue"               json:"notes,omitempty"`
+	Notes              *string `bson:"notes,omitemptytrue"           json:"notes,omitempty"`
 	AltText            *string `bson:"altText,omitempty"             json:"altText,omitempty"`
 	LabelInterval      *string `bson:"labelInterval,omitempty"       json:"labelInterval,omitempty"`
 	DecimalPlaces      *string `bson:"decimalPlaces,omitempty"       json:"decimalPlaces,omitempty"`
@@ -507,6 +492,7 @@ type result struct {
 	Results         *[]results        `bson:"results,omitempty"          json:"results,omitempty"`
 	Suggestions     *[]string         `bson:"suggestions,omitempty"      json:"suggestions,omitempty"`
 	DocCounts       *map[string]int64 `bson:"docCounts,omitempty"        json:"docCounts,omitempty"`
+	Paginator       *paginator        `bson:"paginator,omitempty"        json:"paginator,omitempty"`
 	// NOTE: DocCounts has not been seen in any data read and its type has been derived from a chat with Jon who
 	//       provided the following link to its java code from where the type now used has been derived:
 	// https://github.com/ONSdigital/babbage/blob/fdfaa41528649c3dfb1165634330bfcb2c535fed/src/main/java/com/github/onsdigital/babbage/search/model/SearchResult.java#L43
@@ -525,7 +511,7 @@ type results struct {
 	// https://github.com/ONSdigital/zebedee/blob/957fb22f141546ae056f76bf1dbc23f4df8407de/zebedee-reader/src/main/java/com/github/onsdigital/zebedee/search/model/SearchDocument.java#L16
 	// and then:
 	// https://docs.oracle.com/javase/7/docs/api/java/net/URI.html
-	// Jon suggests java struct: (but the above works ...)
+	// Jon suggests java struct: (but the above works ..)
 	/*
 		public URI(String scheme,
 		   String userInfo,
@@ -537,20 +523,31 @@ type results struct {
 	*/
 }
 
-type resultsTopics struct {
+type paginator struct {
+	NumberOfPages *int   `bson:"numberOfPages,omitempty"  json:"numberOfPages,omitempty"`
+	CurrentPage   *int   `bson:"currentPage,omitempty"    json:"currentPage,omitempty"`
+	Start         *int   `bson:"start,omitempty"          json:"start,omitempty"`
+	End           *int   `bson:"end,omitempty"            json:"end,omitempty"`
+	Pages         *[]int `bson:"pages,omitempty"          json:"pages,omitempty"`
+}
+
+/*type resultsTopics struct {
 	UserInfo *string `bson:"userInfo,omitempty"  json:"userInfo,omitempty"`
 	Host     *string `bson:"host,omitempty"      json:"host,omitempty"`
 	Port     *int    `bson:"port,omitempty"      json:"port,omitempty"`
 	Path     *string `bson:"path,omitempty"      json:"path,omitempty"`
 	Query    *string `bson:"query,omitempty"     json:"query,omitempty"`
 	Fragment *string `bson:"fragment,omitempty"  json:"fragment,omitempty"`
-}
+}*/
 
 type resultDescription struct {
+	Summary           *string         `bson:"summary,omitempty"            json:"summary,omitempty"`
 	NextRelease       *string         `bson:"nextRelease,omitempty"        json:"nextRelease,omitempty"`
 	Keywords          *[]string       `bson:"keywords,omitempty"           json:"keywords,omitempty"`
 	ReleaseDate       *string         `bson:"releaseDate,omitempty"        json:"releaseDate,omitempty"`
 	Edition           *string         `bson:"edition,omitempty"            json:"edition,omitempty"`
+	Language          *string         `bson:"language,omitempty"           json:"language,omitempty"`
+	DatasetID         *string         `bson:"datasetId,omitempty"          json:"datasetId,omitempty"`
 	Source            *string         `bson:"source,omitempty"             json:"source,omitempty"`
 	Title             *string         `bson:"title,omitempty"              json:"title,omitempty"`
 	MetaDescription   *string         `bson:"metaDescription,omitempty"    json:"metaDescription,omitempty"`
@@ -558,7 +555,10 @@ type resultDescription struct {
 	Abstract          *string         `bson:"_abstract,omitempty"          json:"_abstract,omitempty"`
 	LatestRelease     *bool           `bson:"latestRelease,omitempty"      json:"latestRelease,omitempty"`
 	Unit              *string         `bson:"unit,omitempty"               json:"unit,omitempty"`
+	Headline1         *string         `bson:"headline1,omitempty"          json:"headline1,omitempty"`
+	Headline2         *string         `bson:"headline2,omitempty"          json:"headline2,omitempty"`
 	Contacts          *ContactDetails `bson:"contact,omitempty"            json:"contact,omitempty"`
+	Headline3         *string         `bson:"headline3,omitempty"          json:"headline3,omitempty"`
 	PreUnit           *string         `bson:"preUnit,omitempty"            json:"preUnit,omitempty"`
 }
 
@@ -918,8 +918,7 @@ type cDescription struct {
 
 var attemptedGetCount int32
 
-// create and store an index number for each page for use in creating mongo 'id' for each datafile in collection
-// and for use in the cross referencing.
+// store info about each page to do broken page report
 type pageData struct {
 	subSectionIndex int
 	pageBroken      bool
@@ -954,12 +953,11 @@ func replaceUnicodeWithASCII(b []byte) []byte {
 						fmt.Printf("byte 2: %v\n", b[src+4])
 						fmt.Printf("byte 3: %v\n", b[src+5])
 						panic(err)*/
-						// So, we have to assume that this is an equation and just copy the character ...
+						// So, we have to assume that this is an equation and just copy the character ..
 						b[dst] = b[src]
 					} else {
-						//fmt.Printf("unicode: \\u%s  ASCII: %c\n", hexstring, num[1])
 						b[dst] = num[1] // get ASCII character
-						src = src + 5   // skip past unicode sequence - the for loop increment makes this an increase of 6
+						src += 5        // skip past unicode sequence - the for loop increment makes this an increase of 6
 					}
 				} else {
 					b[dst] = b[src]
@@ -986,7 +984,7 @@ UK manufactures'
 */
 
 func doAndShowDelay71() {
-	fmt.Printf("Got a 429, backing off for 71 seconds ...\n")
+	fmt.Printf("Got a 429, backing off for 71 seconds ..\n")
 	for delay := 0; delay < 71; delay++ {
 		time.Sleep(1 * time.Second)
 		if delay%3 == 0 {
@@ -1067,7 +1065,6 @@ func (c *safeURICollectionName) Store(key, value string) {
 	// Lock so only one goroutine at a time can access the map c.v.
 	defer c.mu.Unlock()
 	c.v[key] = value
-	return
 }
 
 // Length returns the number of values storred.
@@ -1102,21 +1099,21 @@ func saveContentPageToCollection(collectionJsFile *os.File, id *int32, collectio
 	defer saveMutex.Unlock()
 
 	// Increment this collectionName's counter whilst being protected by above mutex
-	*id = *id + 1
+	*id++
 
-	if cfg.SaveSite == false {
+	if !cfg.SaveSite {
 		return
 	}
 
-	_, err := fmt.Fprintf(collectionJsFile, "db."+collectionName+".insertOne({")
+	_, err := fmt.Fprint(collectionJsFile, "db."+collectionName+".insertOne({")
 	check(err)
 
 	// write out an 'id' for this data file
-	_, err = fmt.Fprintf(collectionJsFile, "\n    \"id\": \""+strconv.Itoa(int(*id))+"\",\n")
+	_, err = fmt.Fprint(collectionJsFile, "\n    \"id\": \""+strconv.Itoa(int(*id))+"\",\n")
 	check(err)
 
-	// write out what should be a unique key that can be indexed on ...
-	_, err = fmt.Fprintf(collectionJsFile, "    \"id_uri\": \""+shortURI+"\",\n")
+	// write out what should be a unique key that can be indexed on ..
+	_, err = fmt.Fprint(collectionJsFile, "    \"id_uri\": \""+shortURI+"\",\n")
 	check(err)
 
 	// Strip out the first character which is an opening curly brace so that we get a correctly formed
@@ -1124,71 +1121,71 @@ func saveContentPageToCollection(collectionJsFile *os.File, id *int32, collectio
 	_, err = collectionJsFile.Write(bodyTextCopy[1:])
 	check(err)
 
-	_, err = fmt.Fprintf(collectionJsFile, ")\n")
+	_, err = fmt.Fprint(collectionJsFile, ")\n")
 	check(err)
 }
 
-func addSections(URIList *[]urilist, field *[]sections, parentURI string, depth int) {
+func addSections(uriList *[]urilist, field *[]sections, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "sections", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "sections", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addRelatedData(URIList *[]urilist, field *[]relatedData, parentURI string, depth int) {
+func addRelatedData(uriList *[]urilist, field *[]relatedData, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "relatedData", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "relatedData", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addRelatedDocuments(URIList *[]urilist, field *[]relatedDocuments, parentURI string, depth int) {
+func addRelatedDocuments(uriList *[]urilist, field *[]relatedDocuments, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "relatedDocuments", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "relatedDocuments", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addCharts(URIList *[]urilist, field *[]charts, parentURI string, depth int) {
+func addCharts(uriList *[]urilist, field *[]charts, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "charts", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "charts", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addTables(URIList *[]urilist, field *[]tables, parentURI string, depth int) {
+func addTables(uriList *[]urilist, field *[]tables, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "tables", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "tables", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addImages(URIList *[]urilist, field *[]images, parentURI string, depth int) {
+func addImages(uriList *[]urilist, field *[]images, parentURI string, depth int) {
 	// We can't read an image, so we don't check that the link is OK
 	// If a way could be found to check that a link to a .png or .jpg is OK
 	// then some code could be added to do another audit check.
@@ -1201,7 +1198,7 @@ func addImages(URIList *[]urilist, field *[]images, parentURI string, depth int)
 						fmt.Printf("Picture Parent URI: %s\n", parentURI)
 						fmt.Printf("Picture URI: %s\n", *info.URI)
 					} else {
-						*URIList = append(*URIList, urilist{*info.URI, "images", parentURI, depth, index})
+						*uriList = append(*uriList, urilist{*info.URI, "images", parentURI, depth, index})
 					}
 				}
 			}
@@ -1209,115 +1206,115 @@ func addImages(URIList *[]urilist, field *[]images, parentURI string, depth int)
 	}
 }
 
-func addEquations(URIList *[]urilist, field *[]equations, parentURI string, depth int) {
+func addEquations(uriList *[]urilist, field *[]equations, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "equations", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "equations", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addLinks(URIList *[]urilist, field *[]links, parentURI string, depth int) {
+func addLinks(uriList *[]urilist, field *[]links, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "links", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "links", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addRelatedMethodology(URIList *[]urilist, field *[]relatedMethodology, parentURI string, depth int) {
+func addRelatedMethodology(uriList *[]urilist, field *[]relatedMethodology, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "relatedMethodology", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "relatedMethodology", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addRelatedMethodologyArticle(URIList *[]urilist, field *[]relatedMethodologyArticle, parentURI string, depth int) {
+func addRelatedMethodologyArticle(uriList *[]urilist, field *[]relatedMethodologyArticle, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "relatedMethodologyArticle", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "relatedMethodologyArticle", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addVersions(URIList *[]urilist, field *[]versions, parentURI string, depth int) {
+func addVersions(uriList *[]urilist, field *[]versions, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "versions", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "versions", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addTopics(URIList *[]urilist, field *[]ctopics, parentURI string, depth int) {
+func addTopics(uriList *[]urilist, field *[]ctopics, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "topics", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "topics", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addRelatedDatasets(URIList *[]urilist, field *[]relatedDatasets, parentURI string, depth int) {
+func addRelatedDatasets(uriList *[]urilist, field *[]relatedDatasets, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "relatedDatasets", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "relatedDatasets", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDatasets(URIList *[]urilist, field *[]datasets, parentURI string, depth int) {
+func addDatasets(uriList *[]urilist, field *[]datasets, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "datasets", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "datasets", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addChapters(URIList *[]urilist, field *[]chapters, parentURI string, depth int) {
+func addChapters(uriList *[]urilist, field *[]chapters, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "chapters", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "chapters", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addRelatedFilterableDatasets(URIList *[]urilist, field *[]relatedFilterableDatasets, parentURI string, depth int) {
+func addRelatedFilterableDatasets(uriList *[]urilist, field *[]relatedFilterableDatasets, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
@@ -1326,7 +1323,7 @@ func addRelatedFilterableDatasets(URIList *[]urilist, field *[]relatedFilterable
 						// This is NOT a 'Choose My Data' page, so add it
 						// (we skip CMD pages because they do not have a '/data' suffix indicating
 						//  this is a page that can not be processed)
-						*URIList = append(*URIList, urilist{*info.URI, "relatedFilterableDatasets", parentURI, depth, index})
+						*uriList = append(*uriList, urilist{*info.URI, "relatedFilterableDatasets", parentURI, depth, index})
 					}
 				}
 			}
@@ -1334,132 +1331,132 @@ func addRelatedFilterableDatasets(URIList *[]urilist, field *[]relatedFilterable
 	}
 }
 
-func addSourceDatasets(URIList *[]urilist, field *[]sourceDatasets, parentURI string, depth int) {
+func addSourceDatasets(uriList *[]urilist, field *[]sourceDatasets, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "sourceDatasets", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "sourceDatasets", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addFeaturedContent(URIList *[]urilist, field *[]FeaturedContentLinks, parentURI string, depth int) {
+func addFeaturedContent(uriList *[]urilist, field *[]FeaturedContentLinks, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "sections", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "sections", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDataResponseSections(URIList *[]urilist, field *[]SubLink, parentURI string, depth int) {
+func addDataResponseSections(uriList *[]urilist, field *[]SubLink, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "sections", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "sections", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDataResponseItems(URIList *[]urilist, field *[]ItemLinks, parentURI string, depth int) {
+func addDataResponseItems(uriList *[]urilist, field *[]ItemLinks, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "items", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "items", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDataResponseDatasets(URIList *[]urilist, field *[]DatasetLinks, parentURI string, depth int) {
+func addDataResponseDatasets(uriList *[]urilist, field *[]DatasetLinks, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "datasets", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "datasets", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDataResponseHighlightedLinks(URIList *[]urilist, field *[]HighlightLinks, parentURI string, depth int) {
+func addDataResponseHighlightedLinks(uriList *[]urilist, field *[]HighlightLinks, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "highlightedLinks", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "highlightedLinks", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDataResponseStatsBulletins(URIList *[]urilist, field *[]StatsBulletLinks, parentURI string, depth int) {
+func addDataResponseStatsBulletins(uriList *[]urilist, field *[]StatsBulletLinks, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "statsBulletins", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "statsBulletins", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDataResponseRelatedArticles(URIList *[]urilist, field *[]RelatedArticleLinks, parentURI string, depth int) {
+func addDataResponseRelatedArticles(uriList *[]urilist, field *[]RelatedArticleLinks, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "relatedArticles", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "relatedArticles", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDataResponseRelatedMethodology(URIList *[]urilist, field *[]RelatedMethodLinks, parentURI string, depth int) {
+func addDataResponseRelatedMethodology(uriList *[]urilist, field *[]RelatedMethodLinks, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "relatedMethodology", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "relatedMethodology", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDataResponseRelatedMethodologyArticle(URIList *[]urilist, field *[]RelatedMethodologyArticleLinks, parentURI string, depth int) {
+func addDataResponseRelatedMethodologyArticle(uriList *[]urilist, field *[]RelatedMethodologyArticleLinks, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "relatedMethodologyArticle", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "relatedMethodologyArticle", parentURI, depth, index})
 				}
 			}
 		}
 	}
 }
 
-func addDataResponseHighlightedContent(URIList *[]urilist, field *[]HighlightedContentLinks, parentURI string, depth int) {
+func addDataResponseHighlightedContent(uriList *[]urilist, field *[]HighlightedContentLinks, parentURI string, depth int) {
 	if field != nil {
 		if len(*field) > 0 {
 			for index, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, urilist{*info.URI, "highlightedContent", parentURI, depth, index})
+					*uriList = append(*uriList, urilist{*info.URI, "highlightedContent", parentURI, depth, index})
 				}
 			}
 		}
@@ -1467,352 +1464,352 @@ func addDataResponseHighlightedContent(URIList *[]urilist, field *[]HighlightedC
 }
 
 func getURIListFromProductPage(containintURI string, data *DataResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
-	addDataResponseItems(&URIList, data.Items, parentURI, depth)
-	addDataResponseDatasets(&URIList, data.Datasets, parentURI, depth)
-	addDataResponseHighlightedLinks(&URIList, data.HighlightedLinks, parentURI, depth)
-	addDataResponseStatsBulletins(&URIList, data.StatsBulletins, parentURI, depth)
-	addDataResponseRelatedArticles(&URIList, data.RelatedArticles, parentURI, depth)
-	addDataResponseRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addDataResponseRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
+	addDataResponseItems(&uriList, data.Items, parentURI, depth)
+	addDataResponseDatasets(&uriList, data.Datasets, parentURI, depth)
+	addDataResponseHighlightedLinks(&uriList, data.HighlightedLinks, parentURI, depth)
+	addDataResponseStatsBulletins(&uriList, data.StatsBulletins, parentURI, depth)
+	addDataResponseRelatedArticles(&uriList, data.RelatedArticles, parentURI, depth)
+	addDataResponseRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addDataResponseRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromTaxonomyLandingPage(containintURI string, data *DataResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
-	addDataResponseSections(&URIList, data.Sections, parentURI, depth)
-	addDataResponseHighlightedContent(&URIList, data.HighlightedContent, parentURI, depth)
+	addDataResponseSections(&uriList, data.Sections, parentURI, depth)
+	addDataResponseHighlightedContent(&uriList, data.HighlightedContent, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromHomePage(containintURI string, data *HomePageResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
-	addFeaturedContent(&URIList, data.FeaturedContent, parentURI, depth)
+	addFeaturedContent(&uriList, data.FeaturedContent, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromArticle(containintURI string, data *articleResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
-	addSections(&URIList, data.Sections, parentURI, depth)
-	addRelatedData(&URIList, data.RelatedData, parentURI, depth)
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addCharts(&URIList, data.Charts, parentURI, depth)
-	addTables(&URIList, data.Tables, parentURI, depth)
-	addImages(&URIList, data.Images, parentURI, depth)
-	addEquations(&URIList, data.Equations, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
-	addVersions(&URIList, data.Versions, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addSections(&uriList, data.Sections, parentURI, depth)
+	addRelatedData(&uriList, data.RelatedData, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addCharts(&uriList, data.Charts, parentURI, depth)
+	addTables(&uriList, data.Tables, parentURI, depth)
+	addImages(&uriList, data.Images, parentURI, depth)
+	addEquations(&uriList, data.Equations, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromArticleDownload(containintURI string, data *articleDownloadResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedData(&URIList, data.RelatedData, parentURI, depth)
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addCharts(&URIList, data.Charts, parentURI, depth)
-	addTables(&URIList, data.Tables, parentURI, depth)
-	addImages(&URIList, data.Images, parentURI, depth)
-	addEquations(&URIList, data.Equations, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
-	addVersions(&URIList, data.Versions, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addRelatedData(&uriList, data.RelatedData, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addCharts(&uriList, data.Charts, parentURI, depth)
+	addTables(&uriList, data.Tables, parentURI, depth)
+	addImages(&uriList, data.Images, parentURI, depth)
+	addEquations(&uriList, data.Equations, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromBulletin(containintURI string, data *bulletinResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addSections(&URIList, data.Sections, parentURI, depth)
-	addRelatedData(&URIList, data.RelatedData, parentURI, depth)
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addCharts(&URIList, data.Charts, parentURI, depth)
-	addTables(&URIList, data.Tables, parentURI, depth)
-	addImages(&URIList, data.Images, parentURI, depth)
-	addEquations(&URIList, data.Equations, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
-	addVersions(&URIList, data.Versions, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addSections(&uriList, data.Sections, parentURI, depth)
+	addRelatedData(&uriList, data.RelatedData, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addCharts(&uriList, data.Charts, parentURI, depth)
+	addTables(&uriList, data.Tables, parentURI, depth)
+	addImages(&uriList, data.Images, parentURI, depth)
+	addEquations(&uriList, data.Equations, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromCompendiumData(containintURI string, data *compendiumDataResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDatasets(&URIList, data.RelatedDatasets, parentURI, depth)
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
-	addVersions(&URIList, data.Versions, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addRelatedDatasets(&uriList, data.RelatedDatasets, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromCompendiumLandingPage(containintURI string, data *compendiumLandingPageResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addDatasets(&URIList, data.Datasets, parentURI, depth)
-	addChapters(&URIList, data.Chapters, parentURI, depth)
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addRelatedData(&URIList, data.RelatedData, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addDatasets(&uriList, data.Datasets, parentURI, depth)
+	addChapters(&uriList, data.Chapters, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addRelatedData(&uriList, data.RelatedData, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromDatasetLandingPage(containintURI string, data *datasetLandingPageResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedFilterableDatasets(&URIList, data.RelatedFilterableDatasets, parentURI, depth)
-	addRelatedDatasets(&URIList, data.RelatedDatasets, parentURI, depth)
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addDatasets(&URIList, data.Datasets, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
-	addVersions(&URIList, data.Versions, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addRelatedFilterableDatasets(&uriList, data.RelatedFilterableDatasets, parentURI, depth)
+	addRelatedDatasets(&uriList, data.RelatedDatasets, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addDatasets(&uriList, data.Datasets, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticMethodology(containintURI string, data *staticMethodologyResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
-	addSections(&URIList, data.Sections, parentURI, depth)
-	addRelatedData(&URIList, data.RelatedData, parentURI, depth)
-	addCharts(&URIList, data.Charts, parentURI, depth)
-	addTables(&URIList, data.Tables, parentURI, depth)
-	addImages(&URIList, data.Images, parentURI, depth)
-	addEquations(&URIList, data.Equations, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
-	addVersions(&URIList, data.Versions, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
+	addSections(&uriList, data.Sections, parentURI, depth)
+	addRelatedData(&uriList, data.RelatedData, parentURI, depth)
+	addCharts(&uriList, data.Charts, parentURI, depth)
+	addTables(&uriList, data.Tables, parentURI, depth)
+	addImages(&uriList, data.Images, parentURI, depth)
+	addEquations(&uriList, data.Equations, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticMethodologyDownload(containintURI string, data *staticMethodologyDownloadResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addRelatedDatasets(&URIList, data.RelatedDatasets, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addRelatedDatasets(&uriList, data.RelatedDatasets, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticQmi(containintURI string, data *staticQmiResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addRelatedDatasets(&URIList, data.RelatedDatasets, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addRelatedDatasets(&uriList, data.RelatedDatasets, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromTimeseries(containintURI string, data *timeseriesResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addSourceDatasets(&URIList, data.SourceDatasets, parentURI, depth)
-	addRelatedDatasets(&URIList, data.RelatedDatasets, parentURI, depth)
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addRelatedData(&URIList, data.RelatedData, parentURI, depth)
-	addVersions(&URIList, data.Versions, parentURI, depth)
-	addTopics(&URIList, data.Topics, parentURI, depth)
+	addSourceDatasets(&uriList, data.SourceDatasets, parentURI, depth)
+	addRelatedDatasets(&uriList, data.RelatedDatasets, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addRelatedData(&uriList, data.RelatedData, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
+	addTopics(&uriList, data.Topics, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromRelease(containintURI string, data *releaseResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addRelatedDatasets(&URIList, data.RelatedDatasets, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addRelatedDatasets(&uriList, data.RelatedDatasets, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticPage(containintURI string, data *staticPageResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addLinks(&URIList, data.Links, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticAdhoc(containintURI string, data *staticAdhocResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addLinks(&URIList, data.Links, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromReferenceTables(containintURI string, data *referenceTablesResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromCompendiumChapter(containintURI string, data *compendiumChapterResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addSections(&URIList, data.Sections, parentURI, depth)
-	addRelatedData(&URIList, data.RelatedData, parentURI, depth)
-	addRelatedDocuments(&URIList, data.RelatedDocuments, parentURI, depth)
-	addCharts(&URIList, data.Charts, parentURI, depth)
-	addTables(&URIList, data.Tables, parentURI, depth)
-	addImages(&URIList, data.Images, parentURI, depth)
-	addEquations(&URIList, data.Equations, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
-	addRelatedMethodology(&URIList, data.RelatedMethodology, parentURI, depth)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle, parentURI, depth)
-	addVersions(&URIList, data.Versions, parentURI, depth)
+	addSections(&uriList, data.Sections, parentURI, depth)
+	addRelatedData(&uriList, data.RelatedData, parentURI, depth)
+	addRelatedDocuments(&uriList, data.RelatedDocuments, parentURI, depth)
+	addCharts(&uriList, data.Charts, parentURI, depth)
+	addTables(&uriList, data.Tables, parentURI, depth)
+	addImages(&uriList, data.Images, parentURI, depth)
+	addEquations(&uriList, data.Equations, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
+	addRelatedMethodology(&uriList, data.RelatedMethodology, parentURI, depth)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticLandingPage(containintURI string, data *staticLandingPageResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addSections(&URIList, data.Sections, parentURI, depth)
-	addLinks(&URIList, data.Links, parentURI, depth)
+	addSections(&uriList, data.Sections, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticArticle(containintURI string, data *staticArticleResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addLinks(&URIList, data.Links, parentURI, depth)
-	addSections(&URIList, data.Sections, parentURI, depth)
-	addCharts(&URIList, data.Charts, parentURI, depth)
-	addTables(&URIList, data.Tables, parentURI, depth)
-	addImages(&URIList, data.Images, parentURI, depth)
-	addEquations(&URIList, data.Equations, parentURI, depth)
+	addLinks(&uriList, data.Links, parentURI, depth)
+	addSections(&uriList, data.Sections, parentURI, depth)
+	addCharts(&uriList, data.Charts, parentURI, depth)
+	addTables(&uriList, data.Tables, parentURI, depth)
+	addImages(&uriList, data.Images, parentURI, depth)
+	addEquations(&uriList, data.Equations, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromDataset(containintURI string, data *datasetResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addVersions(&URIList, data.Versions, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromTimeseriesDataset(containintURI string, data *timeseriesDatasetResponse, parentURI string, depth int) []urilist {
-	var URIList []urilist
+	var uriList []urilist
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addVersions(&URIList, data.Versions, parentURI, depth)
+	addVersions(&uriList, data.Versions, parentURI, depth)
 
-	return URIList
+	return uriList
 }
 
 var depth int = 1
@@ -1827,23 +1824,111 @@ type urilist struct {
 
 var dataRead int64
 
-func getPageData(shortURI string, fieldName string, parentURI string, index int, bodyTextFile io.Writer, checkFile io.Writer, depth int) (int, []urilist) {
+func unmarshalFail(uri string, err error, location int) {
+	fmt.Printf("fullURI: %s\n", uri)
+	fmt.Println(err)
+	fmt.Printf("getPageData: json.Unmarshal failed %v\n", location)
+	os.Exit(100)
+}
+
+func marshalFail(uri string, err error, location int) {
+	fmt.Printf("fullURI: %s\n", uri)
+	fmt.Println(err)
+	fmt.Printf("getPageData: json.Marshal failed %v\n", location)
+	os.Exit(101)
+}
+
+func checkMarshaling(fullURI string, err error, location int, payload *[]byte, fixedJSON *[]byte, structName string) {
+	if err != nil {
+		marshalFail(fullURI, err, location)
+	}
+	fixedPayloadJSON := replaceUnicodeWithASCII(*payload)
+
+	// This effectively checks that the struct 'structName' has all the fields needed ..
+	// the 'payLoad' should equal the 'fixedJSON' .. if not structName needs adjusting
+	if !bytes.Equal(fixedPayloadJSON, *fixedJSON) {
+		fmt.Printf("Processing page: %s\n", fullURI)
+		fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix stuct %s\n", location, structName)
+		_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
+		check(err)
+		_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
+		check(err)
+		os.Exit(102)
+	}
+}
+
+func checkMarshalingDeepEqual(fullURI string, err error, location int, payload *[]byte, fixedJSON *[]byte, structName string) {
+	if err != nil {
+		marshalFail(fullURI, err, location)
+	}
+	fixedPayloadJSON := replaceUnicodeWithASCII(*payload)
+
+	// This effectively checks that the struct 'structName' has all the fields needed ..
+	// the 'payLoad' should equal the 'fixedJSON' .. if not structName needs adjusting
+	if !bytes.Equal(fixedPayloadJSON, *fixedJSON) {
+		// The binary comparison will typically fail for struct 'chartResponse'
+		// because it contains map[string]string which after unmarshaling and marshaling ..
+		// items in the maps may not in the same order.
+
+		// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ..
+
+		var prettyJSON1 bytes.Buffer
+		err = json.Indent(&prettyJSON1, fixedPayloadJSON, "", "    ")
+		check(err) // should nt get an error, but just in case
+
+		var prettyJSON2 bytes.Buffer
+		err = json.Indent(&prettyJSON2, *fixedJSON, "", "    ")
+		check(err) // should not get an error, but just in case
+
+		line1 := strings.Split(prettyJSON1.String(), "\n")
+		line2 := strings.Split(prettyJSON2.String(), "\n")
+
+		sort.Strings(line1)
+		sort.Strings(line2)
+
+		// maps don't have their fields sorted which results in otherwise equal lines having and not having commas
+		// on the end of them, so to allow the DeepEqual below to work, the commas on the ends of the lines need removing.
+		for i := 0; i < len(line1); i++ {
+			line1[i] = strings.TrimSuffix(line1[i], ",")
+		}
+		for i := 0; i < len(line2); i++ {
+			line2[i] = strings.TrimSuffix(line2[i], ",")
+		}
+
+		if !reflect.DeepEqual(line1, line2) {
+			fmt.Printf("DeepEqual comparison failed\n")
+			fmt.Printf("Processing page: %s\n", fullURI)
+			fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix stuct %s\n", location, structName)
+			fmt.Printf("It helps to open these files in vscode and right click in file, select format Docuemnt\n")
+			fmt.Printf(" and then save each document and then do a file comparison in an App like meld.")
+			// NOTE: In the files, ignore the '&' character at the begining of one of the lines as this is just
+			//       a result of one of the unmarshaled JSON lines being a pointer.
+			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
+			check(err)
+			_, err = fmt.Fprintf(checkFile, "%s\n", line1)
+			check(err)
+			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
+			check(err)
+			_, err = fmt.Fprintf(bodyTextFile, "%s\n", line2)
+			check(err)
+			os.Exit(103)
+		}
+	}
+}
+
+func getPageData(shortURI string, fieldName string, parentURI string, index int, depth int) (int, []urilist) {
 	// Create a list of URIs
 	var URIList []urilist
 
 	if cfg.FullDepth {
 		if contentDuplicateCheck.Value(shortURI) > 0 {
 			// strange we've seen this link before and filtering elsewhere did not catch it.
-			//fmt.Printf("Repeat link: %s\n", shortURI)
 			return 503, URIList
 		}
 	}
 
-	//fmt.Printf("  Reading: %s\n", shortURI)
-
-	var fullURI string
 	// Add prefix and '/data' to shortURI name
-	fullURI = "https://www.production.onsdigital.co.uk" + shortURI + "/data"
+	var fullURI string = "https://www.production.onsdigital.co.uk" + shortURI + "/data"
 
 	atomic.AddInt32(&attemptedGetCount, 1)
 	if cfg.PlayNice {
@@ -1862,7 +1947,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 	if response.StatusCode != 200 {
 		if response.StatusCode != 404 {
 			if response.StatusCode != 429 {
-				// a 503 is being seen at this point ... (it could be some other error, but whatever it is we do error action)
+				// a 503 is being seen at this point .. (it could be some other error, but whatever it is we do error action)
 				fmt.Printf("\nERROR on ONS website /data field: %v\n\n", response.StatusCode)
 				fmt.Printf("URI does not exist:  %v\n", fullURI)
 
@@ -1887,7 +1972,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 
 	// Take a copy into another block of memory before the call to replaceUnicodeWithASCII()
 	// strips out the unicode characters.
-	// ... thus retaining any unicode to write back out after checks made.
+	// .. thus retaining any unicode to write back out after checks made.
 	var bodyTextCopy []byte = make([]byte, len(bodyText))
 	copy(bodyTextCopy, bodyText)
 
@@ -1917,1129 +2002,426 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		os.Exit(8)
 	}
 
-	// Decode each page into a specific structure according to the 'Type' of the page ...
+	// Decode each page into a specific structure according to the 'Type' of the page ..
 	// NOTE: This is done to ensure that the structure definitions are fully defined to read ALL
 	//       the info in the /data endpoint.
-	if *shape.Type == "home_page" {
+	switch *shape.Type {
+	case "home_page":
 		var data HomePageResponse
 
 		// sanity check the page has some fields for later use
 
 		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 28\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 1)
 		}
 
 		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 28\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'HomePageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not HomePageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 28.\nInspect the saved .json files and fix stuct HomePageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 1, &payload, &fixedJSON, "HomePageResponse")
 
 		saveContentPageToCollection(homePageJsFile, &homePageCount, homePageCollectionName, bodyTextCopy, shortURI)
 		URIList = getURIListFromHomePage(fullURI, &data, shortURI, depth)
 
-		// The 'home_page' has no links to the rest of the site ... so we seed the crawl ...
+		// The 'home_page' has no links to the rest of the site .. so we seed the crawl ..
 		URIList = append(URIList, urilist{"/businessindustryandtrade", "home_page", "/", depth, 0})
 		URIList = append(URIList, urilist{"/economy", "home_page", "/", depth, 1})
 		URIList = append(URIList, urilist{"/employmentandlabourmarket", "home_page", "/", depth, 2})
 		URIList = append(URIList, urilist{"/peoplepopulationandcommunity", "home_page", "/", depth, 3})
-	} else if *shape.Type == "taxonomy_landing_page" {
+
+	case "taxonomy_landing_page":
 		var data DataResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 27\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 2)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 27\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'DataResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not DataResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 27.\nInspect the saved .json files and fix stuct DataResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 2, &payload, &fixedJSON, "DataResponse")
 
 		saveContentPageToCollection(taxonomyLandingPageJsFile, &taxonomyLandingPageCount, taxonomyLandingPageCollectionName, bodyTextCopy, shortURI)
 		URIList = getURIListFromTaxonomyLandingPage(fullURI, &data, shortURI, depth)
-	} else if *shape.Type == "product_page" {
+
+	case "product_page":
 		var data DataResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 13\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 3)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 13\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'DataResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not DataResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 13.\nInspect the saved .json files and fix stuct DataResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 3, &payload, &fixedJSON, "DataResponse")
 
 		saveContentPageToCollection(productPageJsFile, &productPageCount, productPageCollectionName, bodyTextCopy, shortURI)
 		URIList = getURIListFromProductPage(fullURI, &data, shortURI, depth)
-	} else if *shape.Type == "article" {
+
+	case "article":
 		var data articleResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 2\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 4)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 2\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'articleResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not articleResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 2.\nInspect the saved .json files and fix stuct articleResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 4, &payload, &fixedJSON, "articleResponse")
 
 		saveContentPageToCollection(articleJsFile, &articleCount, articleCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromArticle(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "article_download" {
+
+	case "article_download":
 		var data articleDownloadResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 3\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 5)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 3\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'articleDownloadResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not articleDownloadResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 3.\nInspect the saved .json files and fix stuct articleDownloadResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 5, &payload, &fixedJSON, "articleDownloadResponse")
 
 		saveContentPageToCollection(articleDownloadJsFile, &articleDownloadCount, articleDownloadCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromArticleDownload(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "bulletin" {
+
+	case "bulletin":
 		var data bulletinResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 4\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 6)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 4\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'bulletinResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not bulletinResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 4.\nInspect the saved .json files and fix stuct bulletinResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 6, &payload, &fixedJSON, "bulletinResponse")
 
 		saveContentPageToCollection(bulletinJsFile, &bulletinCount, bulletinnCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromBulletin(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "compendium_data" {
+
+	case "compendium_data":
 		var data compendiumDataResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Printf("shortURI: %s\n", shortURI)
+			unmarshalFail(fullURI, err, 7)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 5\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'compendiumDataResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not compendiumDataResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 5.\nInspect the saved .json files and fix stuct compendiumDataResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 7, &payload, &fixedJSON, "compendiumDataResponse")
 
 		saveContentPageToCollection(compendiumDataJsFile, &compendiumDataCount, compendiumDataCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromCompendiumData(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "compendium_landing_page" {
+
+	case "compendium_landing_page":
 		var data compendiumLandingPageResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 6\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 8)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 6\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'compendiumLandingPageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not compendiumLandingPageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 6.\nInspect the saved .json files and fix stuct compendiumLandingPageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 8, &payload, &fixedJSON, "compendiumLandingPageResponse")
 
 		saveContentPageToCollection(compendiumLandingPageJsFile, &compendiumLandingPageCount, compendiumLandingPageCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromCompendiumLandingPage(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "dataset_landing_page" {
+
+	case "dataset_landing_page":
 		var data datasetLandingPageResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 7\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 9)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 7\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'datasetLandingPageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not datasetLandingPageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 7.\nInspect the saved .json files and fix stuct datasetLandingPageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 9, &payload, &fixedJSON, "datasetLandingPageResponse")
 
 		saveContentPageToCollection(datasetLandingPageJsFile, &datasetLandingPageCount, datasetLandingPageCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromDatasetLandingPage(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "static_methodology" {
+
+	case "static_methodology":
 		var data staticMethodologyResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 8\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 10)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 8\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'staticMethodologyResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticMethodologyResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 8.\nInspect the saved .json files and fix stuct staticMethodologyResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 10, &payload, &fixedJSON, "datasetLandingPageResponse")
 
 		saveContentPageToCollection(staticMethodologyJsFile, &staticMethodologyCount, staticMethodologyCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromStaticMethodology(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "static_methodology_download" {
+
+	case "static_methodology_download":
 		var data staticMethodologyDownloadResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 9\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 11)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 9\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'staticMethodologyDownloadResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticMethodologyDownloadResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 9.\nInspect the saved .json files and fix stuct staticMethodologyDownloadResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 11, &payload, &fixedJSON, "staticMethodologyDownloadResponse")
 
 		saveContentPageToCollection(staticMethodologyDownloadJsFile, &staticMethodologyDownloadCount, staticMethodologyDownloadCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromStaticMethodologyDownload(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "static_qmi" {
+
+	case "static_qmi":
 		var data staticQmiResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 10\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 12)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 10\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'staticQmiResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticQmiResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 10.\nInspect the saved .json files and fix stuct staticQmiResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 12, &payload, &fixedJSON, "staticQmiResponse")
 
 		saveContentPageToCollection(staticQmiJsFile, &staticQmiCount, staticQmiCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromStaticQmi(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "timeseries" {
+
+	case "timeseries":
 		var data timeseriesResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 11\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 13)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 11\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'timeseriesResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not timeseriesResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 11.\nInspect the saved .json files and fix stuct timeseriesResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 13, &payload, &fixedJSON, "timeseriesResponse")
 
 		saveContentPageToCollection(timeseriesJsFile, &timeseriesCount, timeseriesCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromTimeseries(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "chart" {
+
+	case "chart":
 		var data chartResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 12\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 14)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 12\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'chartResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not chartResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			// The binary comparison will typically fail for struct 'chartResponse'
-			// because it contains map[string]string which after unmarshaling and marshaling ...
-			// items in the maps may not in the same order.
-
-			// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ...
-
-			var prettyJSON1 bytes.Buffer
-			err = json.Indent(&prettyJSON1, fixedPayloadJSON, "", "")
-			check(err) // should nt get an error, but just in case
-
-			var prettyJSON2 bytes.Buffer
-			err = json.Indent(&prettyJSON2, fixedPayloadJSON, "", "")
-			check(err) // should not get an error, but just in case
-
-			line1 := strings.Split(prettyJSON1.String(), "\n")
-			line2 := strings.Split(prettyJSON2.String(), "\n")
-
-			sort.Strings(line1)
-			sort.Strings(line2)
-
-			if reflect.DeepEqual(line1, line2) != true {
-				fmt.Printf("DeepEqual comparison failed\n")
-
-				fmt.Printf("Processing content page: %s\n", fullURI)
-				fmt.Printf("Unmarshal / Marshal mismatch - 12.\nInspect the saved .json files and fix stuct chartResponse\n")
-				_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-				check(err)
-				_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-				check(err)
-
-				//return 404, ""
-				os.Exit(82)
-			}
-		}
-		// NOTE: this is different to previous pages ...
+		checkMarshalingDeepEqual(fullURI, err, 14, &payload, &fixedJSON, "chartResponse")
 
 		saveContentPageToCollection(chartJsFile, &chartCount, chartCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "table" {
+
+	case "table":
 		var data tableResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 14\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 15)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 14\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'tableResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not tableResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 14.\nInspect the saved .json files and fix stuct tableResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
-
-		// NOTE: this is different to previous pages ...
+		checkMarshaling(fullURI, err, 15, &payload, &fixedJSON, "tableResponse")
 
 		saveContentPageToCollection(tableJsFile, &tableCount, tableCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "equation" {
+
+	case "equation":
 		var data equationResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 15\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 16)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 15\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'equationResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not equationResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 15.\nInspect the saved .json files and fix stuct equationResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
-
-		// NOTE: this is different to previous pages ...
+		checkMarshaling(fullURI, err, 16, &payload, &fixedJSON, "equationResponse")
 
 		saveContentPageToCollection(equationJsFile, &equationCount, equationCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "image" {
+
+	case "image":
 		var data imageResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 16\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 17)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 16\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'imageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not imageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 16.\nInspect the saved .json files and fix stuct imageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
-
-		// NOTE: this is different to previous pages ...
+		checkMarshaling(fullURI, err, 17, &payload, &fixedJSON, "imageResponse")
 
 		saveContentPageToCollection(imageJsFile, &imageCount, imageCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "release" {
+
+	case "release":
 		var data releaseResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 17\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 18)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 17\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'releaseResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not releaseResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 17.\nInspect the saved .json files and fix stuct releaseResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 18, &payload, &fixedJSON, "releaseResponse")
 
 		saveContentPageToCollection(releaseJsFile, &releaseCount, releaseCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromRelease(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "list" {
+
+	case "list":
 		var data listResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 18\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 19)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 18\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'listResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not listResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			// The binary comparison will typically fail for struct 'listResponse'
-			// because the original puts field names in different places in the struct which after unmarshaling and marshaling ...
-			// items in the struct may not in the same order.
-
-			// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ...
-
-			var prettyJSON1 bytes.Buffer
-			err = json.Indent(&prettyJSON1, fixedPayloadJSON, "", "    ")
-			check(err) // should nt get an error, but just in case
-
-			var prettyJSON2 bytes.Buffer
-			err = json.Indent(&prettyJSON2, fixedPayloadJSON, "", "    ")
-			check(err) // should not get an error, but just in case
-
-			line1 := strings.Split(prettyJSON1.String(), "\n")
-			line2 := strings.Split(prettyJSON2.String(), "\n")
-
-			sort.Strings(line1)
-			sort.Strings(line2)
-
-			if reflect.DeepEqual(line1, line2) != true {
-				fmt.Printf("DeepEqual comparison failed\n")
-
-				fmt.Printf("Processing content page: %s\n", fullURI)
-				fmt.Printf("Unmarshal / Marshal mismatch - 18.\nInspect the saved .json files and fix stuct listResponse\n")
-				_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-				check(err)
-				_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-				check(err)
-
-				//return 404, ""
-				os.Exit(82)
-			}
-		}
-
-		// NOTE: this is different to previous pages ...
+		checkMarshalingDeepEqual(fullURI, err, 19, &payload, &fixedJSON, "listResponse")
 
 		saveContentPageToCollection(listJsFile, &listCount, listCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "static_page" {
+
+	case "static_page":
 		var data staticPageResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 19\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 20)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 19\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'staticPageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticPageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 19.\nInspect the saved .json files and fix stuct staticPageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 20, &payload, &fixedJSON, "staticPageResponse")
 
 		saveContentPageToCollection(staticPageJsFile, &staticPageCount, staticPageCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromStaticPage(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "static_adhoc" {
+
+	case "static_adhoc":
 		var data staticAdhocResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 20\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 21)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 20\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'staticAdhocResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticAdhocResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 20.\nInspect the saved .json files and fix stuct staticAdhocResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 21, &payload, &fixedJSON, "staticAdhocResponse")
 
 		saveContentPageToCollection(staticAdhocJsFile, &staticAdhocCount, staticAdhocCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromStaticAdhoc(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "reference_tables" {
+
+	case "reference_tables":
 		var data referenceTablesResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 21\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 22)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 21\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'referenceTablesResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not referenceTablesResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 21.\nInspect the saved .json files and fix stuct referenceTablesResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 22, &payload, &fixedJSON, "referenceTablesResponse")
 
 		saveContentPageToCollection(referenceTablesJsFile, &referenceTablesCount, referenceTablesCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromReferenceTables(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "compendium_chapter" {
+
+	case "compendium_chapter":
 		var data compendiumChapterResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 22\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 23)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 22\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'compendiumChapterResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not compendiumChapterResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 22.\nInspect the saved .json files and fix stuct compendiumChapterResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 23, &payload, &fixedJSON, "compendiumChapterResponse")
 
 		saveContentPageToCollection(compendiumChapterJsFile, &compendiumChapterCount, compendiumChapterCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromCompendiumChapter(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "static_landing_page" {
+
+	case "static_landing_page":
 		var data staticLandingPageResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 23\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 24)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 23\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'staticLandingPageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticLandingPageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 23.\nInspect the saved .json files and fix stuct staticLandingPageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 24, &payload, &fixedJSON, "staticLandingPageResponse")
 
 		saveContentPageToCollection(staticLandingPageJsFile, &staticLandingPageCount, staticLandingPageCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromStaticLandingPage(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "static_article" {
+
+	case "static_article":
 		var data staticArticleResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 24\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 25)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 24\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'staticArticleResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticArticleResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 24.\nInspect the saved .json files and fix stuct staticArticleResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 25, &payload, &fixedJSON, "staticArticleResponse")
 
 		saveContentPageToCollection(staticArticleJsFile, &staticArticleCount, staticArticleCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromStaticArticle(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "dataset" {
+
+	case "dataset":
 		var data datasetResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 25\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 26)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 25\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'datasetResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not datasetResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 25.\nInspect the saved .json files and fix stuct datasetResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 26, &payload, &fixedJSON, "datasetResponse")
 
 		saveContentPageToCollection(datasetJsFile, &datasetCount, datasetCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromDataset(fullURI, &data, shortURI, depth)
 		}
-	} else if *shape.Type == "timeseries_dataset" {
+
+	case "timeseries_dataset":
 		var data timeseriesDatasetResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 26\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 27)
 		}
 
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 26\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'timeseriesDatasetResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not timeseriesDatasetResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 26.\nInspect the saved .json files and fix stuct timeseriesDatasetResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 27, &payload, &fixedJSON, "timeseriesDatasetResponse")
 
 		saveContentPageToCollection(timeseriesDatasetJsFile, &timeseriesDatasetCount, timeseriesDatasetCollectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			URIList = getURIListFromTimeseriesDataset(fullURI, &data, shortURI, depth)
 		}
-	} else {
-		fmt.Printf("Unknown page Type ...\n")
+
+	default:
+		fmt.Printf("Unknown page Type ..\n")
 		fmt.Printf("shape: %s\n", *shape.Type)
 		fmt.Printf("URI: %s\n", fullURI)
 
-		_, err = fmt.Fprintf(bodyTextFile, "Unknown JSON body:\n")
+		_, err = fmt.Fprint(bodyTextFile, "Unknown JSON body:\n")
 		check(err)
 		_, err = bodyTextFile.Write(bodyTextCopy)
 		check(err)
-		_, err = fmt.Fprintf(bodyTextFile, "\n")
+		_, err = fmt.Fprint(bodyTextFile, "\n")
 		check(err)
 
 		os.Exit(82)
 
 		// NOTE:
 		//
-		// home_page : whose uri is "/" ... this would need custom processing to explicitly add sub uri's similar to
-		//             what i'm doing in the fabricate function.
+		// home_page : whose uri is "/" .. this would need custom processing to explicitly add sub uri's
 		//
 		// taxonomy_landing_page : is the the first level down from 'home_page'
 		//
@@ -3053,7 +2435,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 	listMu.Unlock()
 
 	currentTime := time.Now()
-	fmt.Printf(currentTime.Format("2006.01.02 15:04:05  "))
+	fmt.Print(currentTime.Format("2006.01.02 15:04:05  "))
 
 	fmt.Printf("Depth: %d : %v\n", depth, shortURI)
 
@@ -3068,8 +2450,8 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			}
 
 			// some of the URI links have the 'ons' site in them which we don't want, so remove if present:
-			subURI.uri = strings.Replace(subURI.uri, "https://www.ons.gov.uk", "", -1)
-			subURI.uri = strings.Replace(subURI.uri, "http://www.ons.gov.uk", "", -1)
+			subURI.uri = strings.ReplaceAll(subURI.uri, "https://www.ons.gov.uk", "")
+			subURI.uri = strings.ReplaceAll(subURI.uri, "http://www.ons.gov.uk", "")
 
 			if strings.Contains(subURI.uri, "https://") || strings.Contains(subURI.uri, "http://") {
 				fmt.Printf("External site: %s\n", subURI.uri)
@@ -3102,14 +2484,14 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 				fmt.Printf("A URI to /index.html: %s\n%s\n", subURI.uri, fullURI)
 				continue
 			}
-			if strings.Contains(subURI.uri, "#") == true {
+			if strings.Contains(subURI.uri, "#") {
 				hashURIMutex.Lock()
 				hashURI[subURI.uri]++
 				hashURIMutex.Unlock()
 				fmt.Printf("A URI with a '#': %s\n%s\n", subURI.uri, fullURI)
 				continue
 			}
-			if strings.Contains(subURI.uri, "?") == true {
+			if strings.Contains(subURI.uri, "?") {
 				questionURIMutex.Lock()
 				questionURI[subURI.uri]++
 				questionURIMutex.Unlock()
@@ -3118,16 +2500,16 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			}
 			parts := strings.Split(subURI.uri, "/")
 			last := parts[len(parts)-1]
-			var v bool
-			if cfg.SkipVersions == true {
+			var versionFound bool
+			if cfg.SkipVersions {
 				if len(last) > 1 {
 					if last[0] == 'v' && (last[1] >= '0' && last[1] <= '9') {
 						// we found what looks like a version number on the end of the URI path
-						v = true
+						versionFound = true
 					}
 				}
 			}
-			if v == true {
+			if versionFound {
 				skippedVersionURIMutex.Lock()
 				skippedVersionURI[subURI.uri]++
 				skippedVersionURIMutex.Unlock()
@@ -3135,9 +2517,8 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 				continue
 			}
 
-			// build up list to return ...
+			// build up list to return ..
 			validURI = append(validURI, subURI)
-			//fmt.Printf("   Adding: %s\n", subURI.uri)
 		}
 		return 200, validURI
 	}
@@ -3154,14 +2535,14 @@ var hashURIMutex sync.Mutex
 var questionURI = make(map[string]int) // key: shortURI, value: count unique URI's with question mark that has been skipped
 var questionURIMutex sync.Mutex
 
-func getPageDataRetry(index int, shortURI string, fieldName string, parentFullURI string, bodyTextFile io.Writer, checkFile io.Writer, depth int) (bool, []urilist) {
+func getPageDataRetry(index int, shortURI string, fieldName string, parentFullURI string, depth int) (bool, []urilist) {
 	var backOff int = 71
 	var status int
 
 	var validURI []urilist
 
 	for {
-		status, validURI = getPageData(shortURI, fieldName, parentFullURI, index, bodyTextFile, checkFile, depth)
+		status, validURI = getPageData(shortURI, fieldName, parentFullURI, index, depth)
 		if status == 200 {
 			return true, validURI
 		}
@@ -3176,17 +2557,17 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 				fmt.Printf("Seconds remaining: %d\n", backOff-delay)
 			}
 		}
-		backOff = backOff + 60
+		backOff += 60
 		if backOff > 200 {
-			// probably a broken URIm but go try without /data on the end ...
+			// probably a broken URIm but go try without /data on the end ..
 			status = 404
 			break
 		}
 	}
 	if status == 404 {
-		// try reading page without data on the end ...
+		// try reading page without data on the end ..
 		noDataURI := "https://www.ons.gov.uk" + shortURI
-		//noDataURI := "https://www.production.onsdigital.co.uk" + shortURI
+		// noDataURI := "https://www.production.onsdigital.co.uk" + shortURI
 
 		var response *http.Response
 		var err error
@@ -3220,7 +2601,7 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 				// 1. URI on ONS is broke
 				// 2. ONS site is down
 				// 3. Network connection to ONS is down
-				// SO, give up on this URI ...
+				// SO, give up on this URI ..
 				fmt.Printf("URI does not exist:  %v\n", shortURI)
 				listMu.Lock()
 				listOfPageData = append(listOfPageData, pageData{subSectionIndex: index, pageBroken: true, depth: depth, shortURI: shortURI, parentURI: parentFullURI, fieldName: fieldName})
@@ -3256,7 +2637,7 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 			// we have a re-direction, so lets try that with /data
 			backOff = 71
 			for {
-				status, validURI = getPageData(redirectedURI, fieldName, parentFullURI, index, bodyTextFile, checkFile, depth)
+				status, validURI = getPageData(redirectedURI, fieldName, parentFullURI, index, depth)
 				if status == 200 {
 					// redirect worked, and page data was saved in the call to getPageData()
 					fmt.Printf("redirect worked OK\n")
@@ -3273,7 +2654,7 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 						fmt.Printf("Seconds remaining: %d\n", backOff-delay)
 					}
 				}
-				backOff = backOff + 60
+				backOff += 60
 				if backOff > 200 {
 					// probably a broken URI,so give up
 					status = 404
@@ -3302,67 +2683,68 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 func createBrokenLinkFile() {
 	// no locks on listOfPageData needed in this function
 
-	if listOfPageData != nil {
-		fmt.Printf("\nNof listOfPageData: %v\n", len(listOfPageData))
-		if len(listOfPageData) > 0 {
-			brokenLinkTextFile, err := os.Create(observationsDir + "/broken_links.txt")
-			check(err)
-			defer brokenLinkTextFile.Close()
+	if listOfPageData == nil {
+		return
+	}
+	fmt.Printf("\nNof listOfPageData: %v\n", len(listOfPageData))
+	if len(listOfPageData) > 0 {
+		brokenLinkTextFile, err := os.Create(observationsDir + "/broken_links.txt")
+		check(err)
+		defer brokenLinkTextFile.Close()
 
-			brokenLinkWithoutVersionsTextFile, err := os.Create(observationsDir + "/broken_links_without_versions.txt")
-			check(err)
-			defer brokenLinkWithoutVersionsTextFile.Close()
+		brokenLinkWithoutVersionsTextFile, err := os.Create(observationsDir + "/broken_links_without_versions.txt")
+		check(err)
+		defer brokenLinkWithoutVersionsTextFile.Close()
 
-			var errorCount int
-			fmt.Printf("Showing: listOfPageData\n")
-			for _, pagesData := range listOfPageData {
-				if pagesData.pageBroken {
-					errorCount++
-					parentFullURI := pagesData.parentURI
-					if parentFullURI[0] == '/' {
-						parentFullURI = "https://www.ons.gov.uk" + parentFullURI
+		var errorCount int
+		fmt.Printf("Showing: listOfPageData\n")
+		for _, pagesData := range listOfPageData {
+			if pagesData.pageBroken {
+				errorCount++
+				parentFullURI := pagesData.parentURI
+				if parentFullURI[0] == '/' {
+					parentFullURI = "https://www.ons.gov.uk" + parentFullURI
+				}
+				fmt.Printf("Error on page: %v\n    Broken link: ", parentFullURI)
+
+				// save to file
+				_, err = fmt.Fprintf(brokenLinkTextFile, "=================== Depth: %d\n", pagesData.depth)
+				check(err)
+				_, err = fmt.Fprintf(brokenLinkTextFile, "%v - Error on page: %v\n\n", errorCount, parentFullURI)
+				check(err)
+				_, err = fmt.Fprintf(brokenLinkTextFile, "%s:\n", pagesData.fieldName)
+				check(err)
+				_, err = fmt.Fprintf(brokenLinkTextFile, "  %v:\n", pagesData.subSectionIndex)
+				check(err)
+				_, err = fmt.Fprintf(brokenLinkTextFile, "    Broken link: uri: %v\n\n", pagesData.shortURI)
+				check(err)
+				_, err = fmt.Fprintf(brokenLinkTextFile, "    Broken link: %v\n\n", "https://www.ons.gov.uk"+pagesData.shortURI)
+				check(err)
+
+				// see if broken link is from a 'version' page
+				parts := strings.Split(parentFullURI, "/")
+				last := parts[len(parts)-1]
+				var versionFound bool
+				if len(last) > 1 {
+					if last[0] == 'v' && (last[1] >= '0' && last[1] <= '9') {
+						// we found what looks like a version number on the end of the URI path
+						versionFound = true
 					}
-					fmt.Printf("Error on page: %v\n    Broken link: ", parentFullURI)
-
-					// save to file
-					_, err = fmt.Fprintf(brokenLinkTextFile, "=================== Depth: %d\n", pagesData.depth)
+				}
+				if !versionFound {
+					// No version on end of path, save to 'without version' file
+					_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "=================== Depth: %d\n", pagesData.depth)
 					check(err)
-					_, err = fmt.Fprintf(brokenLinkTextFile, "%v - Error on page: %v\n\n", errorCount, parentFullURI)
+					_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "%v - Error on page: %v\n\n", errorCount, parentFullURI)
 					check(err)
-					_, err = fmt.Fprintf(brokenLinkTextFile, "%s:\n", pagesData.fieldName)
+					_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "%s:\n", pagesData.fieldName)
 					check(err)
-					_, err = fmt.Fprintf(brokenLinkTextFile, "  %v:\n", pagesData.subSectionIndex)
+					_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "  %v:\n", pagesData.subSectionIndex)
 					check(err)
-					_, err = fmt.Fprintf(brokenLinkTextFile, "    Broken link: uri: %v\n\n", pagesData.shortURI)
+					_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "    Broken link: uri: %v\n\n", pagesData.shortURI)
 					check(err)
-					_, err = fmt.Fprintf(brokenLinkTextFile, "    Broken link: %v\n\n", "https://www.ons.gov.uk"+pagesData.shortURI)
+					_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "    Broken link: %v\n\n", "https://www.ons.gov.uk"+pagesData.shortURI)
 					check(err)
-
-					// see if broken link is from a 'version' page
-					parts := strings.Split(parentFullURI, "/")
-					last := parts[len(parts)-1]
-					var v bool
-					if len(last) > 1 {
-						if last[0] == 'v' && (last[1] >= '0' && last[1] <= '9') {
-							// we found what looks like a version number on the end of the URI path
-							v = true
-						}
-					}
-					if v == false {
-						// No version on end of path, save to 'without version' file
-						_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "=================== Depth: %d\n", pagesData.depth)
-						check(err)
-						_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "%v - Error on page: %v\n\n", errorCount, parentFullURI)
-						check(err)
-						_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "%s:\n", pagesData.fieldName)
-						check(err)
-						_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "  %v:\n", pagesData.subSectionIndex)
-						check(err)
-						_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "    Broken link: uri: %v\n\n", pagesData.shortURI)
-						check(err)
-						_, err = fmt.Fprintf(brokenLinkWithoutVersionsTextFile, "    Broken link: %v\n\n", "https://www.ons.gov.uk"+pagesData.shortURI)
-						check(err)
-					}
 				}
 			}
 		}
@@ -3477,8 +2859,6 @@ func check(err error) {
 	}
 }
 
-var rootPage DataResponse
-
 var articleJsFile *os.File
 var articleCollectionName string = "article"
 
@@ -3560,25 +2940,28 @@ var taxonomyLandingPageCollectionName string = "taxonomy_landing_page"
 var homePageJsFile *os.File
 var homePageCollectionName string = "home_page"
 
+var bodyTextFile *os.File
+var checkFile *os.File
+
 func initialiseCollectionDatabase(collectionName string, collectionFile *os.File) {
 	line1 := "db = db.getSiblingDB('" + topicsDbName + "')\n"
 	line2 := "db." + collectionName + ".remove({})\n"
 
-	_, err := fmt.Fprintf(collectionFile, line1)
+	_, err := fmt.Fprint(collectionFile, line1)
 	check(err)
-	_, err = fmt.Fprintf(collectionFile, line2)
+	_, err = fmt.Fprint(collectionFile, line2)
 	check(err)
 }
 
 func finaliseCollectionDatabase(collectionName string, collectionFile *os.File) {
 	// Add code to read back each document written (for visual inspection)
 	// NOTE: these lines in script are commented out to speed the process up for long scripts
-	//       they are placed in init script should they need to be uncomented ...
-	_, err := fmt.Fprintf(collectionFile, "//db."+collectionName+".find().forEach(function(doc) {\n")
+	//       they are placed in init script should they need to be uncomented ..
+	_, err := fmt.Fprint(collectionFile, "//db."+collectionName+".find().forEach(function(doc) {\n")
 	check(err)
-	_, err = fmt.Fprintf(collectionFile, "//    printjson(doc);\n")
+	_, err = fmt.Fprint(collectionFile, "//    printjson(doc);\n")
 	check(err)
-	_, err = fmt.Fprintf(collectionFile, "//})\n")
+	_, err = fmt.Fprint(collectionFile, "//})\n")
 	check(err)
 }
 
@@ -3589,7 +2972,7 @@ var observationsDir = "observations"
 
 func ensureDirectoryExists(dirName string) {
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
-		os.Mkdir(dirName, 0700)
+		check(os.Mkdir(dirName, 0700))
 	}
 }
 
@@ -3773,11 +3156,11 @@ func main() {
 	// Open both files in vscode, right click in them and select 'Format Document' to expand the json,
 	// save each expanded .json file and then do a visual diff between them with meld.
 	// It is recommended that you use meld because some timeseries can be over 12,000 lines long.
-	bodyTextFile, err := os.Create(tempDir + "/bodyText_all.json")
+	bodyTextFile, err = os.Create(tempDir + "/bodyText_all.json")
 	check(err)
 	defer bodyTextFile.Close()
 
-	checkFile, err := os.Create(tempDir + "/bodyText_all_processed.json")
+	checkFile, err = os.Create(tempDir + "/bodyText_all_processed.json")
 	check(err)
 	defer checkFile.Close()
 
@@ -3788,8 +3171,8 @@ func main() {
 	var success bool
 
 	// Get initial URI's to search
-	success, validURI = getPageDataRetry(0, "", "root", "", bodyTextFile, checkFile, depth)
-	if success == false {
+	success, validURI = getPageDataRetry(0, "", "root", "", depth)
+	if !success {
 		fmt.Printf("No pages found - Game Over\n")
 		return
 	}
@@ -3828,9 +3211,7 @@ func main() {
 
 		toProcessURI = toProcessURI[:0]
 		// copy the 'next' list for processing
-		for _, item := range validURI {
-			toProcessURI = append(toProcessURI, item)
-		}
+		toProcessURI = append(toProcessURI, validURI...)
 
 		validURI = validURI[:0]
 
@@ -3867,14 +3248,12 @@ func main() {
 				}
 
 				// Get a list of URI's from page
-				_, nextURIList := getPageDataRetry(item.index, item.uri, item.field, item.parentURI, bodyTextFile, checkFile, depth)
+				_, nextURIList := getPageDataRetry(item.index, item.uri, item.field, item.parentURI, depth)
 
 				if len(nextURIList) > 0 {
 					// accumulate the next list of URI's to search
 					validMutex.Lock()
-					for _, nURI := range nextURIList {
-						validURI = append(validURI, nURI)
-					}
+					validURI = append(validURI, nextURIList...)
 					validMutex.Unlock()
 				}
 			}(item)
@@ -3884,7 +3263,7 @@ func main() {
 	}
 
 	if cfg.SaveSite {
-		// close the content database creation files ...
+		// close the content database creation files ..
 
 		finaliseCollectionDatabase(articleCollectionName, articleJsFile)
 		finaliseCollectionDatabase(articleDownloadCollectionName, articleDownloadJsFile)
