@@ -1928,12 +1928,12 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 	}
 
 	// Add prefix and '/data' to shortURI name
-	var fullURI string = "https://www.production.onsdigital.co.uk" + shortURI + "/data"
+	var fullURI = "https://www.production.onsdigital.co.uk" + shortURI + "/data"
 
 	atomic.AddInt32(&attemptedGetCount, 1)
 	if cfg.PlayNice {
 		// a little delay to play nice with ONS site and 'hopefully' not have cloudflare 'reset' the connection
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
 	response, err := http.Get(fullURI)
 	if err != nil {
@@ -2012,7 +2012,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 	// NOTE: This is done to ensure that the structure definitions are fully defined to read ALL
 	//       the info in the /data endpoint.
 	switch *shape.Type {
-	case "home_page":
+	case homePageCollectionName:
 		var data HomePageResponse
 
 		// sanity check the page has some fields for later use
@@ -2035,7 +2035,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		URIList = append(URIList, urilist{"/employmentandlabourmarket", "home_page", "/", depth, 2})
 		URIList = append(URIList, urilist{"/peoplepopulationandcommunity", "home_page", "/", depth, 3})
 
-	case "taxonomy_landing_page":
+	case taxonomyLandingPageCollectionName:
 		var data DataResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2048,7 +2048,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		saveContentPageToCollection(taxonomyLandingPageJsFile, &taxonomyLandingPageCount, taxonomyLandingPageCollectionName, bodyTextCopy, shortURI)
 		URIList = getURIListFromTaxonomyLandingPage(fullURI, &data, shortURI, depth)
 
-	case "product_page":
+	case productPageCollectionName:
 		var data DataResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2061,7 +2061,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		saveContentPageToCollection(productPageJsFile, &productPageCount, productPageCollectionName, bodyTextCopy, shortURI)
 		URIList = getURIListFromProductPage(fullURI, &data, shortURI, depth)
 
-	case "article":
+	case articleCollectionName:
 		var data articleResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2076,7 +2076,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromArticle(fullURI, &data, shortURI, depth)
 		}
 
-	case "article_download":
+	case articleDownloadCollectionName:
 		var data articleDownloadResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2091,7 +2091,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromArticleDownload(fullURI, &data, shortURI, depth)
 		}
 
-	case "bulletin":
+	case bulletinnCollectionName:
 		var data bulletinResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2106,7 +2106,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromBulletin(fullURI, &data, shortURI, depth)
 		}
 
-	case "compendium_data":
+	case compendiumDataCollectionName:
 		var data compendiumDataResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2121,7 +2121,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromCompendiumData(fullURI, &data, shortURI, depth)
 		}
 
-	case "compendium_landing_page":
+	case compendiumLandingPageCollectionName:
 		var data compendiumLandingPageResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2136,7 +2136,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromCompendiumLandingPage(fullURI, &data, shortURI, depth)
 		}
 
-	case "dataset_landing_page":
+	case datasetLandingPageCollectionName:
 		var data datasetLandingPageResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2151,7 +2151,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromDatasetLandingPage(fullURI, &data, shortURI, depth)
 		}
 
-	case "static_methodology":
+	case staticMethodologyCollectionName:
 		var data staticMethodologyResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2166,7 +2166,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromStaticMethodology(fullURI, &data, shortURI, depth)
 		}
 
-	case "static_methodology_download":
+	case staticMethodologyDownloadCollectionName:
 		var data staticMethodologyDownloadResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2181,7 +2181,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromStaticMethodologyDownload(fullURI, &data, shortURI, depth)
 		}
 
-	case "static_qmi":
+	case staticQmiCollectionName:
 		var data staticQmiResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2196,7 +2196,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromStaticQmi(fullURI, &data, shortURI, depth)
 		}
 
-	case "timeseries":
+	case timeseriesCollectionName:
 		var data timeseriesResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2211,7 +2211,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromTimeseries(fullURI, &data, shortURI, depth)
 		}
 
-	case "chart":
+	case chartCollectionName:
 		var data chartResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2224,7 +2224,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		saveContentPageToCollection(chartJsFile, &chartCount, chartCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "table":
+	case tableCollectionName:
 		var data tableResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2237,7 +2237,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		saveContentPageToCollection(tableJsFile, &tableCount, tableCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "equation":
+	case equationCollectionName:
 		var data equationResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2250,7 +2250,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		saveContentPageToCollection(equationJsFile, &equationCount, equationCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "image":
+	case imageCollectionName:
 		var data imageResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2263,7 +2263,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		saveContentPageToCollection(imageJsFile, &imageCount, imageCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "release":
+	case releaseCollectionName:
 		var data releaseResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2278,7 +2278,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromRelease(fullURI, &data, shortURI, depth)
 		}
 
-	case "list":
+	case listCollectionName:
 		var data listResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2291,7 +2291,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		saveContentPageToCollection(listJsFile, &listCount, listCollectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "static_page":
+	case staticPageCollectionName:
 		var data staticPageResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2306,7 +2306,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromStaticPage(fullURI, &data, shortURI, depth)
 		}
 
-	case "static_adhoc":
+	case staticAdhocCollectionName:
 		var data staticAdhocResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2321,7 +2321,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromStaticAdhoc(fullURI, &data, shortURI, depth)
 		}
 
-	case "reference_tables":
+	case referenceTablesCollectionName:
 		var data referenceTablesResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2336,7 +2336,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromReferenceTables(fullURI, &data, shortURI, depth)
 		}
 
-	case "compendium_chapter":
+	case compendiumChapterCollectionName:
 		var data compendiumChapterResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2351,7 +2351,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromCompendiumChapter(fullURI, &data, shortURI, depth)
 		}
 
-	case "static_landing_page":
+	case staticLandingPageCollectionName:
 		var data staticLandingPageResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2366,7 +2366,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromStaticLandingPage(fullURI, &data, shortURI, depth)
 		}
 
-	case "static_article":
+	case staticArticleCollectionName:
 		var data staticArticleResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2381,7 +2381,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromStaticArticle(fullURI, &data, shortURI, depth)
 		}
 
-	case "dataset":
+	case datasetCollectionName:
 		var data datasetResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2396,7 +2396,7 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 			URIList = getURIListFromDataset(fullURI, &data, shortURI, depth)
 		}
 
-	case "timeseries_dataset":
+	case timeseriesDatasetCollectionName:
 		var data timeseriesDatasetResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
@@ -2588,7 +2588,7 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 			atomic.AddInt32(&attemptedGetCount, 1)
 			if cfg.PlayNice {
 				// a little delay to play nice with ONS site and 'hopefully' not have cloudflare 'reset' the connection
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(50 * time.Millisecond)
 			}
 			response, err = http.Get(noDataURI)
 			if err != nil {
@@ -2882,85 +2882,112 @@ func check(err error) {
 }
 
 var articleJsFile *os.File
-var articleCollectionName string = "article"
+
+const articleCollectionName = "article"
 
 var articleDownloadJsFile *os.File
-var articleDownloadCollectionName string = "article_download"
+
+const articleDownloadCollectionName = "article_download"
 
 var bulletinJsFile *os.File
-var bulletinnCollectionName string = "bulletin"
+
+const bulletinnCollectionName = "bulletin"
 
 var compendiumDataJsFile *os.File
-var compendiumDataCollectionName string = "compendium_data"
+
+const compendiumDataCollectionName = "compendium_data"
 
 var compendiumLandingPageJsFile *os.File
-var compendiumLandingPageCollectionName string = "compendium_landing_page"
+
+const compendiumLandingPageCollectionName = "compendium_landing_page"
 
 var datasetLandingPageJsFile *os.File
-var datasetLandingPageCollectionName string = "dataset_landing_page"
+
+const datasetLandingPageCollectionName = "dataset_landing_page"
 
 var staticMethodologyJsFile *os.File
-var staticMethodologyCollectionName string = "static_methodology"
+
+const staticMethodologyCollectionName = "static_methodology"
 
 var staticMethodologyDownloadJsFile *os.File
-var staticMethodologyDownloadCollectionName string = "static_methodology_download"
+
+const staticMethodologyDownloadCollectionName = "static_methodology_download"
 
 var staticQmiJsFile *os.File
-var staticQmiCollectionName string = "static_qmi"
+
+const staticQmiCollectionName = "static_qmi"
 
 var timeseriesJsFile *os.File
-var timeseriesCollectionName string = "timeseries"
+
+const timeseriesCollectionName = "timeseries"
 
 var chartJsFile *os.File
-var chartCollectionName string = "chart"
+
+const chartCollectionName = "chart"
 
 var productPageJsFile *os.File
-var productPageCollectionName string = "product_page"
+
+const productPageCollectionName = "product_page"
 
 var tableJsFile *os.File
-var tableCollectionName string = "table"
+
+const tableCollectionName = "table"
 
 var equationJsFile *os.File
-var equationCollectionName string = "equation"
+
+const equationCollectionName = "equation"
 
 var imageJsFile *os.File
-var imageCollectionName string = "image"
+
+const imageCollectionName = "image"
 
 var releaseJsFile *os.File
-var releaseCollectionName string = "release"
+
+const releaseCollectionName = "release"
 
 var listJsFile *os.File
-var listCollectionName string = "list"
+
+const listCollectionName = "list"
 
 var staticPageJsFile *os.File
-var staticPageCollectionName string = "static_page"
+
+const staticPageCollectionName = "static_page"
 
 var staticAdhocJsFile *os.File
-var staticAdhocCollectionName string = "static_adhoc"
+
+const staticAdhocCollectionName = "static_adhoc"
 
 var referenceTablesJsFile *os.File
-var referenceTablesCollectionName string = "reference_tables"
+
+const referenceTablesCollectionName = "reference_tables"
 
 var compendiumChapterJsFile *os.File
-var compendiumChapterCollectionName string = "compendium_chapter"
+
+const compendiumChapterCollectionName = "compendium_chapter"
 
 var staticLandingPageJsFile *os.File
-var staticLandingPageCollectionName string = "static_landing_page"
+
+const staticLandingPageCollectionName = "static_landing_page"
 
 var staticArticleJsFile *os.File
-var staticArticleCollectionName string = "static_article"
+
+const staticArticleCollectionName = "static_article"
 
 var datasetJsFile *os.File
-var datasetCollectionName string = "dataset"
+
+const datasetCollectionName = "dataset"
 
 var timeseriesDatasetJsFile *os.File
-var timeseriesDatasetCollectionName string = "timeseries_dataset"
+
+const timeseriesDatasetCollectionName = "timeseries_dataset"
 
 var taxonomyLandingPageJsFile *os.File
-var taxonomyLandingPageCollectionName string = "taxonomy_landing_page"
+
+const taxonomyLandingPageCollectionName = "taxonomy_landing_page"
 
 var homePageJsFile *os.File
-var homePageCollectionName string = "home_page"
+
+const homePageCollectionName = "home_page"
 
 var bodyTextFile *os.File
 var checkFile *os.File
@@ -2987,10 +3014,12 @@ func finaliseCollectionDatabase(collectionName string, collectionFile *os.File) 
 	check(err)
 }
 
-var topicsDbName = "topics"
-var initDir = "mongo-init-scripts"
-var tempDir = "temp"
-var observationsDir = "observations"
+const (
+	topicsDbName    = "topics"
+	initDir         = "mongo-init-scripts"
+	tempDir         = "temp"
+	observationsDir = "observations"
+)
 
 func ensureDirectoryExists(dirName string) {
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
