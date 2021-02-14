@@ -1241,7 +1241,7 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 
 	// This effectively checks that the struct 'DataResponse' has all the fields needed ..
 	// the 'payLoad' should equal the 'fixedJSON' .. if not DataResponse needs adjusting
-	if bytes.Equal(payload, fixedJSON) == false {
+	if !bytes.Equal(payload, fixedJSON) {
 		fmt.Printf("Processing topic page: %s\n", fullURI)
 		fmt.Printf("Unmarshal / Marshal mismatch.\nInspect the saved .json files and fix stuct DataResponse\n")
 		_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
@@ -1624,7 +1624,7 @@ func linksGoodSubgraph(uri string, description string, graphVizFile io.Writer, l
 			col = "#F9A12E" // Radiant Yellow
 		case articleDownloadCollectionName:
 			col = "#FC766A" // Living Coral
-		case bulletinnCollectionName:
+		case bulletinCollectionName:
 			col = "#CB4AC7" // Purple
 		case compendiumDataCollectionName:
 			col = "#AE0E36" // Crimson
@@ -1810,7 +1810,7 @@ var taxonomyLandingPageCount int
 var contentDuplicateCheck = make(map[string]int) // key: shortURI, value: 1 or more indicates already saved
 var uriCollectionName = make(map[string]string)  // key: shortURI, value: the name of the colection that the URI is storred in
 
-func saveContentPageToCollection(collectionJsFile *os.File, id string, collectionName string, bodyTextCopy []byte, shortURI string) {
+func saveContentPageToCollection(collectionJsFile *os.File, id *int, collectionName string, bodyTextCopy []byte, shortURI string) {
 	// The original /data endpoint information read has passed tests so now we
 	// write out the original json code together with an extra 'id'
 
@@ -1826,11 +1826,14 @@ func saveContentPageToCollection(collectionJsFile *os.File, id string, collectio
 	contentDuplicateCheck[shortURI]++
 	uriCollectionName[shortURI] = collectionName
 
+	*id++
+	idStr := strconv.Itoa(timeseriesDatasetCount)
+
 	_, err := fmt.Fprintf(collectionJsFile, "db."+collectionName+".insertOne({")
 	check(err)
 
 	// write out an 'id' for this data file
-	_, err = fmt.Fprintf(collectionJsFile, "\n    \"id\": \""+id+"\",\n")
+	_, err = fmt.Fprintf(collectionJsFile, "\n    \"id\": \""+idStr+"\",\n")
 	check(err)
 
 	// write out what should be a unique key that can be indexed on ..
@@ -2545,7 +2548,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 	// Create a list of URIs
 	var uriList []string
 
-	var title, description, collectionName, id string
+	var title, description, collectionName string
 
 	var shape pageShape
 	// Unmarshal body bytes to model
@@ -2574,7 +2577,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 	// Decode each content page into a specific structure according to the 'Type' of the page ..
 	// NOTE: This is done to ensure that the structure definitions are fully defined to read ALL
 	//       the info in the /data endpoint.
-	if *shape.Type == "article" {
+	switch *shape.Type {
+	case "article":
 		// "article" is linked to from these pageType on topics or content nodes
 		// nodeHighlightedLinks
 		// contentRelatedArticles
@@ -2585,33 +2589,13 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 2\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 2)
 		}
 
 		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 2\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 2, &payload, &fixedJSON, "article")
 
-		// This effectively checks that the struct 'articleResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not articleResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 2.\nInspect the saved .json files and fix stuct articleResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -2623,50 +2607,24 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		articleCount++
-		id = strconv.Itoa(articleCount)
 		collectionName = articleCollectionName
 
-		saveContentPageToCollection(articleJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(articleJsFile, &articleCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromArticle(fullURI, &data)
 		}
-	} else if *shape.Type == "article_download" {
+
+	case "article_download":
 		// "article_download" is linked to from these pageType on topics or content nodes
 		// contentRelatedArticles
 		var data articleDownloadResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 3\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 3)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 3\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 3, &payload, &fixedJSON, "article_download")
 
-		// This effectively checks that the struct 'articleDownloadResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not articleDownloadResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 3.\nInspect the saved .json files and fix stuct articleDownloadResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -2678,52 +2636,26 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		articleDownloadCount++
-		id = strconv.Itoa(articleDownloadCount)
 		collectionName = articleDownloadCollectionName
 
-		saveContentPageToCollection(articleDownloadJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(articleDownloadJsFile, &articleDownloadCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromArticleDownload(fullURI, &data)
 		}
-	} else if *shape.Type == "bulletin" {
+
+	case "bulletin":
 		// "bulletin" is linked to from these pageType on topics or content nodes
 		// nodeHighlightedLinks
 		// contentStatsBulletins
 		// contentHighlightedContent
 		var data bulletinResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 4\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 4)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 4\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 4, &payload, &fixedJSON, "bulletin")
 
-		// This effectively checks that the struct 'bulletinResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not bulletinResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 4.\nInspect the saved .json files and fix stuct bulletinResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -2735,50 +2667,24 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		bulletinCount++
-		id = strconv.Itoa(bulletinCount)
-		collectionName = bulletinnCollectionName
+		collectionName = bulletinCollectionName
 
-		saveContentPageToCollection(bulletinJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(bulletinJsFile, &bulletinCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromBulletin(fullURI, &data)
 		}
-	} else if *shape.Type == "compendium_data" {
+
+	case "compendium_data":
 		// "compendium_data" is linked to from these pageType on topics or content nodes
 		// contentDatasets
 		var data compendiumDataResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 5\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 5)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 5\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 5, &payload, &fixedJSON, "compendium_data")
 
-		// This effectively checks that the struct 'compendiumDataResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not compendiumDataResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 5.\nInspect the saved .json files and fix stuct compendiumDataResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -2790,15 +2696,14 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		compendiumDataCount++
-		id = strconv.Itoa(compendiumDataCount)
 		collectionName = compendiumDataCollectionName
 
-		saveContentPageToCollection(compendiumDataJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(compendiumDataJsFile, &compendiumDataCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromCompendiumData(fullURI, &data)
 		}
-	} else if *shape.Type == "compendium_landing_page" {
+
+	case "compendium_landing_page":
 		// "compendium_landing_page" is linked to from these pageType on topics or content nodes
 		// nodeHighlightedLinks
 		// contentRelatedArticles
@@ -2808,33 +2713,13 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 6\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 6)
 		}
 
 		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 6\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 6, &payload, &fixedJSON, "compendium_landing_page")
 
-		// This effectively checks that the struct 'compendiumLandingPageResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not compendiumLandingPageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 6.\nInspect the saved .json files and fix stuct compendiumLandingPageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -2846,50 +2731,24 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		compendiumLandingPageCount++
-		id = strconv.Itoa(compendiumLandingPageCount)
 		collectionName = compendiumLandingPageCollectionName
 
-		saveContentPageToCollection(compendiumLandingPageJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(compendiumLandingPageJsFile, &compendiumLandingPageCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromCompendiumLandingPage(fullURI, &data)
 		}
-	} else if *shape.Type == "dataset_landing_page" {
+
+	case "dataset_landing_page":
 		// "dataset_landing_page" is linked to from these pageType on topics or content nodes
 		// contentDatasets
 		var data datasetLandingPageResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 7\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 7)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 7\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 7, &payload, &fixedJSON, "dataset_landing_page")
 
-		// This effectively checks that the struct 'datasetLandingPageResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not datasetLandingPageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 7.\nInspect the saved .json files and fix stuct datasetLandingPageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -2901,51 +2760,25 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		datasetLandingPageCount++
-		id = strconv.Itoa(datasetLandingPageCount)
 		collectionName = datasetLandingPageCollectionName
 
-		saveContentPageToCollection(datasetLandingPageJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(datasetLandingPageJsFile, &datasetLandingPageCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromDatasetLandingPage(fullURI, &data)
 		}
-	} else if *shape.Type == "static_methodology" {
+
+	case "static_methodology":
 		// "static_methodology" is linked to from these pageType on topics or content nodes
 		// contentRelatedMethodology
 		// contentRelatedMethodologyArticle
 		var data staticMethodologyResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 8\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 8)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 8\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 8, &payload, &fixedJSON, "static_methodology")
 
-		// This effectively checks that the struct 'staticMethodologyResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not staticMethodologyResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 8.\nInspect the saved .json files and fix stuct staticMethodologyResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -2957,50 +2790,24 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		staticMethodologyCount++
-		id = strconv.Itoa(staticMethodologyCount)
 		collectionName = staticMethodologyCollectionName
 
-		saveContentPageToCollection(staticMethodologyJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(staticMethodologyJsFile, &staticMethodologyCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticMethodology(fullURI, &data)
 		}
-	} else if *shape.Type == "static_methodology_download" {
+
+	case "static_methodology_download":
 		// "static_methodology_download" is linked to from these pageType on topics or content nodes
 		// contentRelatedMethodologyArticle
 		var data staticMethodologyDownloadResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 9\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 9)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 9\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 9, &payload, &fixedJSON, "static_methodology_download")
 
-		// This effectively checks that the struct 'staticMethodologyDownloadResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not staticMethodologyDownloadResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 9.\nInspect the saved .json files and fix stuct staticMethodologyDownloadResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3012,50 +2819,24 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		staticMethodologyDownloadCount++
-		id = strconv.Itoa(staticMethodologyDownloadCount)
 		collectionName = staticMethodologyDownloadCollectionName
 
-		saveContentPageToCollection(staticMethodologyDownloadJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(staticMethodologyDownloadJsFile, &staticMethodologyDownloadCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticMethodologyDownload(fullURI, &data)
 		}
-	} else if *shape.Type == "static_qmi" {
+
+	case "static_qmi":
 		// "static_qmi" is linked to from these pageType on topics or content nodes
 		// contentRelatedMethodology
 		var data staticQmiResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 10\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 10)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 10\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 10, &payload, &fixedJSON, "static_qmi")
 
-		// This effectively checks that the struct 'staticQmiResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not staticQmiResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 10.\nInspect the saved .json files and fix stuct staticQmiResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3067,51 +2848,25 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		staticQmiCount++
-		id = strconv.Itoa(staticQmiCount)
 		collectionName = staticQmiCollectionName
 
-		saveContentPageToCollection(staticQmiJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(staticQmiJsFile, &staticQmiCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticQmi(fullURI, &data)
 		}
-	} else if *shape.Type == "timeseries" {
+
+	case "timeseries":
 		// "timeseries" is linked to from these pageType on topics or content nodes
 		// contentItems
 		// contentHighlightedContent
 		var data timeseriesResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 11\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 11)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 11\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 11, &payload, &fixedJSON, "timeseries")
 
-		// This effectively checks that the struct 'timeseriesResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not timeseriesResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 11.\nInspect the saved .json files and fix stuct timeseriesResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3123,74 +2878,23 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		timeseriesCount++
-		id = strconv.Itoa(timeseriesCount)
 		collectionName = timeseriesCollectionName
 
-		saveContentPageToCollection(timeseriesJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(timeseriesJsFile, &timeseriesCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromTimeseries(fullURI, &data)
 		}
-	} else if *shape.Type == "chart" {
+
+	case "chart":
 		// "chart" is linked to from content nodes
 		var data chartResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 12\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 12)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 12\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshalingDeepEqual(fullURI, err, 12, &payload, &fixedJSON, "chart")
 
-		// This effectively checks that the struct 'chartResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not chartResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			// The binary comparison will typically fail for struct 'chartResponse'
-			// because it contains map[string]string which after unmarshaling and marshaling ..
-			// items in the maps may not in the same order.
-
-			// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ..
-
-			var prettyJSON1 bytes.Buffer
-			err = json.Indent(&prettyJSON1, fixedPayloadJSON, "", "")
-			check(err) // should nt get an error, but just in case
-
-			var prettyJSON2 bytes.Buffer
-			err = json.Indent(&prettyJSON2, fixedPayloadJSON, "", "")
-			check(err) // should not get an error, but just in case
-
-			line1 := strings.Split(prettyJSON1.String(), "\n")
-			line2 := strings.Split(prettyJSON2.String(), "\n")
-
-			sort.Strings(line1)
-			sort.Strings(line2)
-
-			if !reflect.DeepEqual(line1, line2) {
-				fmt.Printf("DeepEqual comparison failed\n")
-
-				fmt.Printf("Processing content page: %s\n", fullURI)
-				fmt.Printf("Unmarshal / Marshal mismatch - 12.\nInspect the saved .json files and fix stuct chartResponse\n")
-				_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-				check(err)
-				_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-				check(err)
-
-				os.Exit(82)
-			}
-		}
 		// NOTE: this is different to previous pages ..
 		if data.Title != nil {
 			title = *data.Title
@@ -3203,49 +2907,23 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		chartCount++
-		id = strconv.Itoa(chartCount)
 		collectionName = chartCollectionName
 
-		saveContentPageToCollection(chartJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(chartJsFile, &chartCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "product_page" {
+
+	case "product_page":
 		// NOTE: this is an upper level page being linked back up to
 		// ( this should probably not be being grabbed .. we shall see if its of use )
 		// "product_page" has been linked to from content nodes
 		var data DataResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 13\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 13)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 13\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 13, &payload, &fixedJSON, "product_page")
 
-		// This effectively checks that the struct 'DataResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not DataResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 13.\nInspect the saved .json files and fix stuct DataResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3257,47 +2935,20 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		productPageCount++
-		id = strconv.Itoa(productPageCount)
 		collectionName = productPageCollectionName
 
-		saveContentPageToCollection(productPageJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(productPageJsFile, &productPageCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE .. do NOT grab URI's from this as its a top level page from where we initially came.
-	} else if *shape.Type == "table" {
+
+	case "table":
 		// "table" is linked to from content nodes
 		var data tableResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 14\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 14)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 14\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'tableResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not tableResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 14.\nInspect the saved .json files and fix stuct tableResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 14, &payload, &fixedJSON, "table")
 
 		// NOTE: this is different to previous pages ..
 		if data.Title != nil {
@@ -3307,47 +2958,20 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		description = "** no description **"
 
-		tableCount++
-		id = strconv.Itoa(tableCount)
 		collectionName = tableCollectionName
 
-		saveContentPageToCollection(tableJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(tableJsFile, &tableCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "equation" {
+
+	case "equation":
 		// "equation" is linked to from content nodes
 		var data equationResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 15\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 15)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 15\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'equationResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not equationResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 15.\nInspect the saved .json files and fix stuct equationResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 15, &payload, &fixedJSON, "equation")
 
 		// NOTE: this is different to previous pages ..
 		if data.Title != nil {
@@ -3357,47 +2981,20 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		description = "** no description **"
 
-		equationCount++
-		id = strconv.Itoa(equationCount)
 		collectionName = equationCollectionName
 
-		saveContentPageToCollection(equationJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(equationJsFile, &equationCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "image" {
+
+	case "image":
 		// "image" is linked to from content nodes
 		var data imageResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 16\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 16)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 16\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'imageResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not imageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 16.\nInspect the saved .json files and fix stuct imageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
+		checkMarshaling(fullURI, err, 16, &payload, &fixedJSON, "image")
 
 		// NOTE: this is different to previous pages ..
 		if data.Title != nil {
@@ -3411,47 +3008,21 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		imageCount++
-		id = strconv.Itoa(imageCount)
 		collectionName = imageCollectionName
 
-		saveContentPageToCollection(imageJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(imageJsFile, &imageCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "release" {
+
+	case "release":
 		// "release" is linked to from content nodes
 		var data releaseResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 17\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 17)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 17\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 17, &payload, &fixedJSON, "release")
 
-		// This effectively checks that the struct 'releaseResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not releaseResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 17.\nInspect the saved .json files and fix stuct releaseResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3463,120 +3034,42 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		releaseCount++
-		id = strconv.Itoa(releaseCount)
 		collectionName = releaseCollectionName
 
-		saveContentPageToCollection(releaseJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(releaseJsFile, &releaseCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromRelease(fullURI, &data)
 		}
-	} else if *shape.Type == "list" {
+
+	case "list":
 		// "list" is linked to from content nodes
 		var data listResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 18\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 18)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 18\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
-
-		// This effectively checks that the struct 'listResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not listResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			// The binary comparison will typically fail for struct 'listResponse'
-			// because the original puts field names in different places in the struct which after unmarshaling and marshaling ..
-			// items in the struct may not in the same order.
-
-			// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ..
-
-			var prettyJSON1 bytes.Buffer
-			err = json.Indent(&prettyJSON1, fixedPayloadJSON, "", "    ")
-			check(err) // should nt get an error, but just in case
-
-			var prettyJSON2 bytes.Buffer
-			err = json.Indent(&prettyJSON2, fixedPayloadJSON, "", "    ")
-			check(err) // should not get an error, but just in case
-
-			line1 := strings.Split(prettyJSON1.String(), "\n")
-			line2 := strings.Split(prettyJSON2.String(), "\n")
-
-			sort.Strings(line1)
-			sort.Strings(line2)
-
-			if !reflect.DeepEqual(line1, line2) {
-				fmt.Printf("DeepEqual comparison failed\n")
-
-				fmt.Printf("Processing content page: %s\n", fullURI)
-				fmt.Printf("Unmarshal / Marshal mismatch - 18.\nInspect the saved .json files and fix stuct listResponse\n")
-				_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-				check(err)
-				_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-				check(err)
-
-				os.Exit(82)
-			}
-		}
+		checkMarshalingDeepEqual(fullURI, err, 18, &payload, &fixedJSON, "chart")
 
 		// NOTE: this is different to previous pages ..
 		title = "** no title **"
 		description = "** no description **"
 
-		listCount++
-		id = strconv.Itoa(listCount)
 		collectionName = listCollectionName
 
-		saveContentPageToCollection(listJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(listJsFile, &listCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
-	} else if *shape.Type == "static_page" {
+
+	case "static_page":
 		// "static_page" is linked to from content nodes
 		var data staticPageResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 19\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 19)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 19\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 19, &payload, &fixedJSON, "static_page")
 
-		// This effectively checks that the struct 'staticPageResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not staticPageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 19.\nInspect the saved .json files and fix stuct staticPageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3588,49 +3081,23 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		staticPageCount++
-		id = strconv.Itoa(staticPageCount)
 		collectionName = staticPageCollectionName
 
-		saveContentPageToCollection(staticPageJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(staticPageJsFile, &staticPageCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticPage(fullURI, &data)
 		}
-	} else if *shape.Type == "static_adhoc" {
+
+	case "static_adhoc":
 		// "static_adhoc" is linked to from content nodes
 		var data staticAdhocResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 20\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 20)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 20\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 20, &payload, &fixedJSON, "static_adhoc")
 
-		// This effectively checks that the struct 'staticAdhocResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not staticAdhocResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 20.\nInspect the saved .json files and fix stuct staticAdhocResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3642,49 +3109,23 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		staticAdhocCount++
-		id = strconv.Itoa(staticAdhocCount)
 		collectionName = staticAdhocCollectionName
 
-		saveContentPageToCollection(staticAdhocJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(staticAdhocJsFile, &staticAdhocCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticAdhoc(fullURI, &data)
 		}
-	} else if *shape.Type == "reference_tables" {
+
+	case "reference_tables":
 		// "reference_tables" is linked to from content nodes
 		var data referenceTablesResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 21\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 21)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 21\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 21, &payload, &fixedJSON, "reference_tables")
 
-		// This effectively checks that the struct 'referenceTablesResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not referenceTablesResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 21.\nInspect the saved .json files and fix stuct referenceTablesResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3696,49 +3137,23 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		referenceTablesCount++
-		id = strconv.Itoa(referenceTablesCount)
 		collectionName = referenceTablesCollectionName
 
-		saveContentPageToCollection(referenceTablesJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(referenceTablesJsFile, &referenceTablesCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromReferenceTables(fullURI, &data)
 		}
-	} else if *shape.Type == "compendium_chapter" {
+
+	case "compendium_chapter":
 		// "compendium_chapter" is linked to from content nodes
 		var data compendiumChapterResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 22\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 22)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 22\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 22, &payload, &fixedJSON, "compendium_chapter")
 
-		// This effectively checks that the struct 'compendiumChapterResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not compendiumChapterResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 22.\nInspect the saved .json files and fix stuct compendiumChapterResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3750,49 +3165,23 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		compendiumChapterCount++
-		id = strconv.Itoa(compendiumChapterCount)
 		collectionName = compendiumChapterCollectionName
 
-		saveContentPageToCollection(compendiumChapterJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(compendiumChapterJsFile, &compendiumChapterCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromCompendiumChapter(fullURI, &data)
 		}
-	} else if *shape.Type == "static_landing_page" {
+
+	case "static_landing_page":
 		// "static_landing_page" is linked to from content nodes
 		var data staticLandingPageResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 23\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 23)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 23\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 23, &payload, &fixedJSON, "static_landing_page")
 
-		// This effectively checks that the struct 'staticLandingPageResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not staticLandingPageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 23.\nInspect the saved .json files and fix stuct staticLandingPageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3804,49 +3193,23 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		staticLandingPageCount++
-		id = strconv.Itoa(staticLandingPageCount)
 		collectionName = staticLandingPageCollectionName
 
-		saveContentPageToCollection(staticLandingPageJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(staticLandingPageJsFile, &staticLandingPageCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticLandingPage(fullURI, &data)
 		}
-	} else if *shape.Type == "static_article" {
+
+	case "static_article":
 		// "static_article" is linked to from content nodes
 		var data staticArticleResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 24\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 24)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 24\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 24, &payload, &fixedJSON, "static_article")
 
-		// This effectively checks that the struct 'staticArticleResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not staticArticleResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 24.\nInspect the saved .json files and fix stuct staticArticleResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3858,49 +3221,23 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		staticArticleCount++
-		id = strconv.Itoa(staticArticleCount)
 		collectionName = staticArticleCollectionName
 
-		saveContentPageToCollection(staticArticleJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(staticArticleJsFile, &staticArticleCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticArticle(fullURI, &data)
 		}
-	} else if *shape.Type == "dataset" {
+
+	case "dataset":
 		// "dataset" is linked to from content nodes
 		var data datasetResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 25\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 25)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 25\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 25, &payload, &fixedJSON, "dataset")
 
-		// This effectively checks that the struct 'datasetResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not datasetResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 25.\nInspect the saved .json files and fix stuct datasetResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3912,49 +3249,23 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		datasetCount++
-		id = strconv.Itoa(datasetCount)
 		collectionName = datasetCollectionName
 
-		saveContentPageToCollection(datasetJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(datasetJsFile, &datasetCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromDataset(fullURI, &data)
 		}
-	} else if *shape.Type == "timeseries_dataset" {
+
+	case "timeseries_dataset":
 		// "timeseries_dataset" is linked to from content nodes
 		var data timeseriesDatasetResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 26\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 26)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 26\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 26, &payload, &fixedJSON, "timeseries_dataset")
 
-		// This effectively checks that the struct 'timeseriesDatasetResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not timeseriesDatasetResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 26.\nInspect the saved .json files and fix stuct timeseriesDatasetResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -3966,51 +3277,25 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		timeseriesDatasetCount++
-		id = strconv.Itoa(timeseriesDatasetCount)
 		collectionName = timeseriesDatasetCollectionName
 
-		saveContentPageToCollection(timeseriesDatasetJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(timeseriesDatasetJsFile, &timeseriesDatasetCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromTimeseriesDataset(fullURI, &data)
 		}
-	} else if *shape.Type == "taxonomy_landing_page" {
+
+	case "taxonomy_landing_page":
 		// NOTE: this is an upper level page being linked back up to !!!
 		// ( this should probably not be being grabbed .. we shall see if its of use )
 		// "taxonomy_landing_page" has been linked to from content nodes
 		var data DataResponse
 
-		// sanity check the page has some fields for later use
-
-		// Unmarshal body bytes to model
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Unmarshal failed 27\n")
-			os.Exit(8)
+			unmarshalFail(fullURI, err, 27)
 		}
-
-		// Marshal provided model
 		payload, err := json.Marshal(data)
-		if err != nil {
-			fmt.Printf("fullURI: %s\n", fullURI)
-			fmt.Println(err)
-			fmt.Printf("getPageData: json.Marshal failed 27\n")
-			os.Exit(81)
-		}
-		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
+		checkMarshaling(fullURI, err, 27, &payload, &fixedJSON, "taxonomy_landing_page")
 
-		// This effectively checks that the struct 'taxonomyLandingPageResponse' has all the fields needed ..
-		// the 'payLoad' should equal the 'fixedJSON' .. if not taxonomyLandingPageResponse needs adjusting
-		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
-			fmt.Printf("Processing content page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - 27.\nInspect the saved .json files and fix stuct taxonomyLandingPageResponse\n")
-			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
-			check(err)
-			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
-			check(err)
-			os.Exit(82)
-		}
 		if data.Description.Title != nil {
 			title = *data.Description.Title
 		} else {
@@ -4022,13 +3307,12 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			description = "** no description **"
 		}
 
-		taxonomyLandingPageCount++
-		id = strconv.Itoa(taxonomyLandingPageCount)
 		collectionName = taxonomyLandingPageCollectionName
 
-		saveContentPageToCollection(taxonomyLandingPageJsFile, id, collectionName, bodyTextCopy, shortURI)
+		saveContentPageToCollection(taxonomyLandingPageJsFile, &taxonomyLandingPageCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE .. do NOT grab URI's from this as its a top level page from where we initially came.
-	} else {
+
+	default:
 		fmt.Printf("Unknown page Type ..\n")
 		fmt.Printf("shape: %s\n", *shape.Type)
 		fmt.Printf("URI: %s\n", fullURI)
@@ -5200,7 +4484,7 @@ var articleDownloadJsFile *os.File
 var articleDownloadCollectionName string = "article_download"
 
 var bulletinJsFile *os.File
-var bulletinnCollectionName string = "bulletin"
+var bulletinCollectionName string = "bulletin"
 
 var compendiumDataJsFile *os.File
 var compendiumDataCollectionName string = "compendium_data"
@@ -5329,10 +4613,10 @@ func main() {
 	initialiseCollectionDatabase(articleDownloadCollectionName, articleDownloadJsFile)
 
 	// Create files 'bulletin' content creation file
-	bulletinJsFile, err = os.Create(initDir + "/" + bulletinnCollectionName + "-init.js")
+	bulletinJsFile, err = os.Create(initDir + "/" + bulletinCollectionName + "-init.js")
 	check(err)
 	defer bulletinJsFile.Close()
-	initialiseCollectionDatabase(bulletinnCollectionName, bulletinJsFile)
+	initialiseCollectionDatabase(bulletinCollectionName, bulletinJsFile)
 
 	// Create files 'compendium_data' content creation file
 	compendiumDataJsFile, err = os.Create(initDir + "/" + compendiumDataCollectionName + "-init.js")
@@ -5532,7 +4816,7 @@ func main() {
 
 	finaliseCollectionDatabase(articleCollectionName, articleJsFile)
 	finaliseCollectionDatabase(articleDownloadCollectionName, articleDownloadJsFile)
-	finaliseCollectionDatabase(bulletinnCollectionName, bulletinJsFile)
+	finaliseCollectionDatabase(bulletinCollectionName, bulletinJsFile)
 	finaliseCollectionDatabase(compendiumDataCollectionName, compendiumDataJsFile)
 	finaliseCollectionDatabase(compendiumLandingPageCollectionName, compendiumLandingPageJsFile)
 	finaliseCollectionDatabase(datasetLandingPageCollectionName, datasetLandingPageJsFile)
