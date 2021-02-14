@@ -258,7 +258,7 @@ func pageTypeString(pType allowedPageType) string {
 
 // ===
 
-type contentType int
+/*type contentType int
 
 const (
 	nodeHighlightedLinks             contentType = iota + 1 // article, bulletin, compendium_landing_page
@@ -269,10 +269,10 @@ const (
 	contentRelatedMethodology                               // static_methodology, static_qmi
 	contentRelatedMethodologyArticle                        // static_methodology, static_methodology_download
 	contentHighlightedContent                               // article, bulletin, timeseries
-)
+)*/
 
 // ===
-// pageShape used to determine how to decode a content page
+// pageShape used to determine how to decode a page
 type pageShape struct {
 	Type *string `bson:"type,omitempty"  json:"type,omitempty"`
 }
@@ -565,6 +565,7 @@ type result struct {
 	Results         *[]results        `bson:"results,omitempty"          json:"results,omitempty"`
 	Suggestions     *[]string         `bson:"suggestions,omitempty"      json:"suggestions,omitempty"`
 	DocCounts       *map[string]int64 `bson:"docCounts,omitempty"        json:"docCounts,omitempty"`
+	Paginator       *paginator        `bson:"paginator,omitempty"        json:"paginator,omitempty"`
 	// NOTE: DocCounts has not been seen in any data read and its type has been derived from a chat with Jon who
 	//       provided the following link to its java code from where the type now used has been derived:
 	// https://github.com/ONSdigital/babbage/blob/fdfaa41528649c3dfb1165634330bfcb2c535fed/src/main/java/com/github/onsdigital/babbage/search/model/SearchResult.java#L43
@@ -583,7 +584,7 @@ type results struct {
 	// https://github.com/ONSdigital/zebedee/blob/957fb22f141546ae056f76bf1dbc23f4df8407de/zebedee-reader/src/main/java/com/github/onsdigital/zebedee/search/model/SearchDocument.java#L16
 	// and then:
 	// https://docs.oracle.com/javase/7/docs/api/java/net/URI.html
-	// Jon suggests java struct:
+	// Jon suggests java struct: (but the above works ..)
 	/*
 		public URI(String scheme,
 		   String userInfo,
@@ -595,24 +596,38 @@ type results struct {
 	*/
 }
 
-type resultsTopics struct {
+type paginator struct {
+	NumberOfPages *int   `bson:"numberOfPages,omitempty"  json:"numberOfPages,omitempty"`
+	CurrentPage   *int   `bson:"currentPage,omitempty"    json:"currentPage,omitempty"`
+	Start         *int   `bson:"start,omitempty"          json:"start,omitempty"`
+	End           *int   `bson:"end,omitempty"            json:"end,omitempty"`
+	Pages         *[]int `bson:"pages,omitempty"          json:"pages,omitempty"`
+}
+
+/*type resultsTopics struct {
 	UserInfo *string `bson:"userInfo,omitempty"  json:"userInfo,omitempty"`
 	Host     *string `bson:"host,omitempty"      json:"host,omitempty"`
 	Port     *int    `bson:"port,omitempty"      json:"port,omitempty"`
 	Path     *string `bson:"path,omitempty"      json:"path,omitempty"`
 	Query    *string `bson:"query,omitempty"     json:"query,omitempty"`
 	Fragment *string `bson:"fragment,omitempty"  json:"fragment,omitempty"`
-}
+}*/
 
 type resultDescription struct {
+	Summary           *string         `bson:"summary,omitempty"            json:"summary,omitempty"`
 	NextRelease       *string         `bson:"nextRelease,omitempty"        json:"nextRelease,omitempty"`
 	Keywords          *[]string       `bson:"keywords,omitempty"           json:"keywords,omitempty"`
 	ReleaseDate       *string         `bson:"releaseDate,omitempty"        json:"releaseDate,omitempty"`
+	Language          *string         `bson:"language,omitempty"           json:"language,omitempty"`
+	DatasetID         *string         `bson:"datasetId,omitempty"          json:"datasetId,omitempty"`
 	Edition           *string         `bson:"edition,omitempty"            json:"edition,omitempty"`
 	Source            *string         `bson:"source,omitempty"             json:"source,omitempty"`
 	Title             *string         `bson:"title,omitempty"              json:"title,omitempty"`
 	MetaDescription   *string         `bson:"metaDescription,omitempty"    json:"metaDescription,omitempty"`
 	NationalStatistic *bool           `bson:"nationalStatistic,omitempty"  json:"nationalStatistic,omitempty"`
+	Headline1         *string         `bson:"headline1,omitempty"          json:"headline1,omitempty"`
+	Headline3         *string         `bson:"headline3,omitempty"          json:"headline3,omitempty"`
+	Headline2         *string         `bson:"headline2,omitempty"          json:"headline2,omitempty"`
 	Abstract          *string         `bson:"_abstract,omitempty"          json:"_abstract,omitempty"`
 	LatestRelease     *bool           `bson:"latestRelease,omitempty"      json:"latestRelease,omitempty"`
 	Unit              *string         `bson:"unit,omitempty"               json:"unit,omitempty"`
@@ -1045,9 +1060,8 @@ func replaceUnicodeWithASCII(b []byte) []byte {
 						// So, we have to assume that this is an equation and just copy the character ..
 						b[dst] = b[src]
 					} else {
-						//fmt.Printf("unicode: \\u%s  ASCII: %c\n", hexstring, num[1])
 						b[dst] = num[1] // get ASCII character
-						src = src + 5   // skip past unicode sequence - the for loop increment makes this an increase of 6
+						src += 5        // skip past unicode sequence - the for loop increment makes this an increase of 6
 					}
 				} else {
 					b[dst] = b[src]
@@ -1084,7 +1098,7 @@ func doAndShowDelay71() {
 }
 
 // getPage returns pageURI, index, hasLink
-func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, checkFile io.Writer, parentURI, shortURI string) (string, int, bool, allowedPageType) {
+func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (string, int, bool, allowedPageType) {
 
 	// Add prefix and '/data' to shortURI name
 	//	fullURI := "https://www.ons.gov.uk" + shortURI + "/data"
@@ -1208,8 +1222,6 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 	//     byte ASCII equivalent is (hopefully) (it seems to work for ONS web pages)
 	fixedJSON := replaceUnicodeWithASCII(bodyText)
 
-	//	_, err = fmt.Fprintf(bodyTextFile, "    \"data_page_%d\": %s", pageCount, fixedJSON)
-
 	var data DataResponse
 
 	// Unmarshal body bytes to model
@@ -1218,7 +1230,6 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		fmt.Printf("getPage: json.Unmarshal failed\n")
 		os.Exit(3)
 	}
-	//fmt.Printf("NOF Sections: %d\n", len(data.Sections))
 
 	// Marshal provided model
 	payload, err := json.Marshal(data)
@@ -1271,7 +1282,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 
 		fmt.Printf("%v : Content Page: %v\n", indexNumber, fullURI)
 
-		info := getTerminationNodeData(&data, indexNumber, fullURI, bodyTextFile, checkFile)
+		info := getTerminationNodeData(&data, indexNumber, fullURI)
 		switch info {
 		case contentUnknown:
 			// no content info read, and indicate this with a Yellow border for the content termination node ..
@@ -1304,7 +1315,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		return fullURI, indexNumber, true, pageContent
 	}
 
-	var returnedIndexNumber int = indexNumber
+	returnedIndexNumber := indexNumber // NOTE: the linter complains about this being ineffectual, but its missing the recursion throught getPage()
 
 	if len(*data.Sections) > 0 {
 		indexNumber++
@@ -1403,7 +1414,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 						_, err = fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#30A8A0\", style=filled, label = \"%s\"]\n    }\n", gvLink, gvLink, fmt.Sprintf("Topic - Highlighted: %s\\n", link.linkType)+gvLinkLabel)
 						check(err)
 					} else {
-						_, err = fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#30A8A0\", style=bold, label = \"%s\"]\n    }\n", gvLink, gvLink, fmt.Sprintf("Topic - Highlighted:\\n")+gvLinkLabel)
+						_, err = fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#30A8A0\", style=bold, label = \"%s\"]\n    }\n", gvLink, gvLink, "Topic - Highlighted:\\n"+gvLinkLabel)
 						check(err)
 					}
 				}
@@ -1422,7 +1433,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 			// get a sub section page
 
 			// recursively call self ..
-			retFullURI, retIndex, valid, pgType := getPage(returnedIndexNumber, graphVizFile, bodyTextFile, checkFile, shortURI, *link.URI)
+			retFullURI, retIndex, valid, pgType := getPage(returnedIndexNumber, graphVizFile, shortURI, *link.URI)
 			if valid {
 				// the page is NOT broken ..
 				sectionResults = append(sectionResults, sectionResult{fullURI: retFullURI, id: retIndex, pagType: pgType})
@@ -1490,9 +1501,9 @@ func graphContentChildBrokenLinks(gvPage string, data *DataResponse, graphVizFil
 		if len(*data.Items) > 0 {
 			fmt.Printf("Getting: Items\n")
 			for _, link := range *data.Items {
-				if link.valid == false {
+				if !link.valid {
 					contentChild(*link.URI, gvPage, graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					contentChild(*link.URI, gvPage, graphVizFile)
 				}
 			}
@@ -1504,9 +1515,9 @@ func graphContentChildBrokenLinks(gvPage string, data *DataResponse, graphVizFil
 		if len(*data.Datasets) > 0 {
 			fmt.Printf("Getting: Datasets\n")
 			for _, link := range *data.Datasets {
-				if link.valid == false {
+				if !link.valid {
 					contentChild(*link.URI, gvPage, graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					contentChild(*link.URI, gvPage, graphVizFile)
 				}
 			}
@@ -1518,9 +1529,9 @@ func graphContentChildBrokenLinks(gvPage string, data *DataResponse, graphVizFil
 		if len(*data.StatsBulletins) > 0 {
 			fmt.Printf("Getting: StatsBulletins\n")
 			for _, link := range *data.StatsBulletins {
-				if link.valid == false {
+				if !link.valid {
 					contentChild(*link.URI, gvPage, graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					contentChild(*link.URI, gvPage, graphVizFile)
 				}
 			}
@@ -1532,9 +1543,9 @@ func graphContentChildBrokenLinks(gvPage string, data *DataResponse, graphVizFil
 		if len(*data.RelatedArticles) > 0 {
 			fmt.Printf("Getting: RelatedArticles\n")
 			for _, link := range *data.RelatedArticles {
-				if link.valid == false {
+				if !link.valid {
 					contentChild(*link.URI, gvPage, graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					contentChild(*link.URI, gvPage, graphVizFile)
 				}
 			}
@@ -1546,9 +1557,9 @@ func graphContentChildBrokenLinks(gvPage string, data *DataResponse, graphVizFil
 		if len(*data.RelatedMethodology) > 0 {
 			fmt.Printf("Getting: RelatedMethodology\n")
 			for _, link := range *data.RelatedMethodology {
-				if link.valid == false {
+				if !link.valid {
 					contentChild(*link.URI, gvPage, graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					contentChild(*link.URI, gvPage, graphVizFile)
 				}
 			}
@@ -1560,9 +1571,9 @@ func graphContentChildBrokenLinks(gvPage string, data *DataResponse, graphVizFil
 		if len(*data.RelatedMethodologyArticle) > 0 {
 			fmt.Printf("Getting: RelatedMethodologyArticle\n")
 			for _, link := range *data.RelatedMethodologyArticle {
-				if link.valid == false {
+				if !link.valid {
 					contentChild(*link.URI, gvPage, graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					contentChild(*link.URI, gvPage, graphVizFile)
 				}
 			}
@@ -1574,9 +1585,9 @@ func graphContentChildBrokenLinks(gvPage string, data *DataResponse, graphVizFil
 		if len(*data.HighlightedContent) > 0 {
 			fmt.Printf("Getting: HighlightedContent\n")
 			for _, link := range *data.HighlightedContent {
-				if link.valid == false {
+				if !link.valid {
 					contentChild(*link.URI, gvPage, graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					contentChild(*link.URI, gvPage, graphVizFile)
 				}
 			}
@@ -1674,9 +1685,9 @@ func graphContentChildBrokenLinksSubgraph(gvPage string, data *DataResponse, gra
 		if len(*data.Items) > 0 {
 			fmt.Printf("Getting: Items\n")
 			for _, link := range *data.Items {
-				if link.valid == false {
+				if !link.valid {
 					linksBrokenSubgraph(*link.URI, "Items", graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					linksGoodSubgraph(*link.URI, "Items", graphVizFile, link.linkType)
 				}
 			}
@@ -1688,9 +1699,9 @@ func graphContentChildBrokenLinksSubgraph(gvPage string, data *DataResponse, gra
 		if len(*data.Datasets) > 0 {
 			fmt.Printf("Getting: Datasets\n")
 			for _, link := range *data.Datasets {
-				if link.valid == false {
+				if !link.valid {
 					linksBrokenSubgraph(*link.URI, "Datasets", graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					linksGoodSubgraph(*link.URI, "Datasets", graphVizFile, link.linkType)
 				}
 			}
@@ -1702,9 +1713,9 @@ func graphContentChildBrokenLinksSubgraph(gvPage string, data *DataResponse, gra
 		if len(*data.StatsBulletins) > 0 {
 			fmt.Printf("Getting: StatsBulletins\n")
 			for _, link := range *data.StatsBulletins {
-				if link.valid == false {
+				if !link.valid {
 					linksBrokenSubgraph(*link.URI, "StatsBulletins", graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					linksGoodSubgraph(*link.URI, "StatsBulletins", graphVizFile, link.linkType)
 				}
 			}
@@ -1716,9 +1727,9 @@ func graphContentChildBrokenLinksSubgraph(gvPage string, data *DataResponse, gra
 		if len(*data.RelatedArticles) > 0 {
 			fmt.Printf("Getting: RelatedArticles\n")
 			for _, link := range *data.RelatedArticles {
-				if link.valid == false {
+				if !link.valid {
 					linksBrokenSubgraph(*link.URI, "RelatedArticles", graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					linksGoodSubgraph(*link.URI, "RelatedArticles", graphVizFile, link.linkType)
 				}
 			}
@@ -1730,9 +1741,9 @@ func graphContentChildBrokenLinksSubgraph(gvPage string, data *DataResponse, gra
 		if len(*data.RelatedMethodology) > 0 {
 			fmt.Printf("Getting: RelatedMethodology\n")
 			for _, link := range *data.RelatedMethodology {
-				if link.valid == false {
+				if !link.valid {
 					linksBrokenSubgraph(*link.URI, "RelatedMethodology", graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					linksGoodSubgraph(*link.URI, "RelatedMethodology", graphVizFile, link.linkType)
 				}
 			}
@@ -1744,9 +1755,9 @@ func graphContentChildBrokenLinksSubgraph(gvPage string, data *DataResponse, gra
 		if len(*data.RelatedMethodologyArticle) > 0 {
 			fmt.Printf("Getting: RelatedMethodologyArticle\n")
 			for _, link := range *data.RelatedMethodologyArticle {
-				if link.valid == false {
+				if !link.valid {
 					linksBrokenSubgraph(*link.URI, "RelatedMethodologyArticle", graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					linksGoodSubgraph(*link.URI, "RelatedMethodologyArticle", graphVizFile, link.linkType)
 				}
 			}
@@ -1758,9 +1769,9 @@ func graphContentChildBrokenLinksSubgraph(gvPage string, data *DataResponse, gra
 		if len(*data.HighlightedContent) > 0 {
 			fmt.Printf("Getting: HighlightedContent\n")
 			for _, link := range *data.HighlightedContent {
-				if link.valid == false {
+				if !link.valid {
 					linksBrokenSubgraph(*link.URI, "HighlightedContent", graphVizFile)
-				} else if cfg.GraphAllContent == true {
+				} else if cfg.GraphAllContent {
 					linksGoodSubgraph(*link.URI, "HighlightedContent", graphVizFile, link.linkType)
 				}
 			}
@@ -1835,67 +1846,67 @@ func saveContentPageToCollection(collectionJsFile *os.File, id string, collectio
 	check(err)
 }
 
-func addSections(URIList *[]string, field *[]sections) {
+func addSections(uriList *[]string, field *[]sections) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addRelatedData(URIList *[]string, field *[]relatedData) {
+func addRelatedData(uriList *[]string, field *[]relatedData) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addRelatedDocuments(URIList *[]string, field *[]relatedDocuments) {
+func addRelatedDocuments(uriList *[]string, field *[]relatedDocuments) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addCharts(URIList *[]string, field *[]charts) {
+func addCharts(uriList *[]string, field *[]charts) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addTables(URIList *[]string, field *[]tables) {
+func addTables(uriList *[]string, field *[]tables) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addImages(URIList *[]string, field *[]images) {
+func addImages(uriList *[]string, field *[]images) {
 	// We can't read an image, so we don't check that the link is OK ..
 	// and thus this code is commented out
 	// If a way could be found to check that a link to a .png or .jpg is OK
@@ -1904,122 +1915,122 @@ func addImages(URIList *[]string, field *[]images) {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}*/
 }
 
-func addEquations(URIList *[]string, field *[]equations) {
+func addEquations(uriList *[]string, field *[]equations) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addLinks(URIList *[]string, field *[]links) {
+func addLinks(uriList *[]string, field *[]links) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addRelatedMethodology(URIList *[]string, field *[]relatedMethodology) {
+func addRelatedMethodology(uriList *[]string, field *[]relatedMethodology) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addRelatedMethodologyArticle(URIList *[]string, field *[]relatedMethodologyArticle) {
+func addRelatedMethodologyArticle(uriList *[]string, field *[]relatedMethodologyArticle) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addVersions(URIList *[]string, field *[]versions) {
+func addVersions(uriList *[]string, field *[]versions) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addTopics(URIList *[]string, field *[]ctopics) {
+func addTopics(uriList *[]string, field *[]ctopics) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addRelatedDatasets(URIList *[]string, field *[]relatedDatasets) {
+func addRelatedDatasets(uriList *[]string, field *[]relatedDatasets) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addDatasets(URIList *[]string, field *[]datasets) {
+func addDatasets(uriList *[]string, field *[]datasets) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addChapters(URIList *[]string, field *[]chapters) {
+func addChapters(uriList *[]string, field *[]chapters) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
 	}
 }
 
-func addRelatedFilterableDatasets(URIList *[]string, field *[]relatedFilterableDatasets) {
+func addRelatedFilterableDatasets(uriList *[]string, field *[]relatedFilterableDatasets) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
@@ -2028,7 +2039,7 @@ func addRelatedFilterableDatasets(URIList *[]string, field *[]relatedFilterableD
 						// This is NOT a 'Choose My Data' page, so add it
 						// (we skip CMD pages because they do not have a '/data' suffix indicating
 						//  this is a page that can not be processed)
-						*URIList = append(*URIList, *info.URI)
+						*uriList = append(*uriList, *info.URI)
 					}
 				}
 			}
@@ -2036,12 +2047,12 @@ func addRelatedFilterableDatasets(URIList *[]string, field *[]relatedFilterableD
 	}
 }
 
-func addSourceDatasets(URIList *[]string, field *[]sourceDatasets) {
+func addSourceDatasets(uriList *[]string, field *[]sourceDatasets) {
 	if field != nil {
 		if len(*field) > 0 {
 			for _, info := range *field {
 				if info.URI != nil {
-					*URIList = append(*URIList, *info.URI)
+					*uriList = append(*uriList, *info.URI)
 				}
 			}
 		}
@@ -2049,327 +2060,419 @@ func addSourceDatasets(URIList *[]string, field *[]sourceDatasets) {
 }
 
 func getURIListFromArticle(containintURI string, data *articleResponse) []string {
-	var URIList []string
+	var uriList []string
 
-	addSections(&URIList, data.Sections)
-	addRelatedData(&URIList, data.RelatedData)
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addCharts(&URIList, data.Charts)
-	addTables(&URIList, data.Tables)
-	addImages(&URIList, data.Images)
-	addEquations(&URIList, data.Equations)
-	addLinks(&URIList, data.Links)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle)
-	addVersions(&URIList, data.Versions)
-	addTopics(&URIList, data.Topics)
+	addSections(&uriList, data.Sections)
+	addRelatedData(&uriList, data.RelatedData)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addCharts(&uriList, data.Charts)
+	addTables(&uriList, data.Tables)
+	addImages(&uriList, data.Images)
+	addEquations(&uriList, data.Equations)
+	addLinks(&uriList, data.Links)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle)
+	addVersions(&uriList, data.Versions)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromArticleDownload(containintURI string, data *articleDownloadResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedData(&URIList, data.RelatedData)
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addCharts(&URIList, data.Charts)
-	addTables(&URIList, data.Tables)
-	addImages(&URIList, data.Images)
-	addEquations(&URIList, data.Equations)
-	addLinks(&URIList, data.Links)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle)
-	addVersions(&URIList, data.Versions)
-	addTopics(&URIList, data.Topics)
+	addRelatedData(&uriList, data.RelatedData)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addCharts(&uriList, data.Charts)
+	addTables(&uriList, data.Tables)
+	addImages(&uriList, data.Images)
+	addEquations(&uriList, data.Equations)
+	addLinks(&uriList, data.Links)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle)
+	addVersions(&uriList, data.Versions)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromBulletin(containintURI string, data *bulletinResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addSections(&URIList, data.Sections)
-	addRelatedData(&URIList, data.RelatedData)
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addCharts(&URIList, data.Charts)
-	addTables(&URIList, data.Tables)
-	addImages(&URIList, data.Images)
-	addEquations(&URIList, data.Equations)
-	addLinks(&URIList, data.Links)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle)
-	addVersions(&URIList, data.Versions)
-	addTopics(&URIList, data.Topics)
+	addSections(&uriList, data.Sections)
+	addRelatedData(&uriList, data.RelatedData)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addCharts(&uriList, data.Charts)
+	addTables(&uriList, data.Tables)
+	addImages(&uriList, data.Images)
+	addEquations(&uriList, data.Equations)
+	addLinks(&uriList, data.Links)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle)
+	addVersions(&uriList, data.Versions)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromCompendiumData(containintURI string, data *compendiumDataResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDatasets(&URIList, data.RelatedDatasets)
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle)
-	addVersions(&URIList, data.Versions)
-	addTopics(&URIList, data.Topics)
+	addRelatedDatasets(&uriList, data.RelatedDatasets)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle)
+	addVersions(&uriList, data.Versions)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromCompendiumLandingPage(containintURI string, data *compendiumLandingPageResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addDatasets(&URIList, data.Datasets)
-	addChapters(&URIList, data.Chapters)
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addRelatedData(&URIList, data.RelatedData)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle)
-	addTopics(&URIList, data.Topics)
+	addDatasets(&uriList, data.Datasets)
+	addChapters(&uriList, data.Chapters)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addRelatedData(&uriList, data.RelatedData)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromDatasetLandingPage(containintURI string, data *datasetLandingPageResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedFilterableDatasets(&URIList, data.RelatedFilterableDatasets)
-	addRelatedDatasets(&URIList, data.RelatedDatasets)
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addDatasets(&URIList, data.Datasets)
-	addLinks(&URIList, data.Links)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle)
-	addVersions(&URIList, data.Versions)
-	addTopics(&URIList, data.Topics)
+	addRelatedFilterableDatasets(&uriList, data.RelatedFilterableDatasets)
+	addRelatedDatasets(&uriList, data.RelatedDatasets)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addDatasets(&uriList, data.Datasets)
+	addLinks(&uriList, data.Links)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle)
+	addVersions(&uriList, data.Versions)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticMethodology(containintURI string, data *staticMethodologyResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addLinks(&URIList, data.Links)
-	addSections(&URIList, data.Sections)
-	addRelatedData(&URIList, data.RelatedData)
-	addCharts(&URIList, data.Charts)
-	addTables(&URIList, data.Tables)
-	addImages(&URIList, data.Images)
-	addEquations(&URIList, data.Equations)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle)
-	addVersions(&URIList, data.Versions)
-	addTopics(&URIList, data.Topics)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addLinks(&uriList, data.Links)
+	addSections(&uriList, data.Sections)
+	addRelatedData(&uriList, data.RelatedData)
+	addCharts(&uriList, data.Charts)
+	addTables(&uriList, data.Tables)
+	addImages(&uriList, data.Images)
+	addEquations(&uriList, data.Equations)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle)
+	addVersions(&uriList, data.Versions)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticMethodologyDownload(containintURI string, data *staticMethodologyDownloadResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addRelatedDatasets(&URIList, data.RelatedDatasets)
-	addLinks(&URIList, data.Links)
-	addTopics(&URIList, data.Topics)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addRelatedDatasets(&uriList, data.RelatedDatasets)
+	addLinks(&uriList, data.Links)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticQmi(containintURI string, data *staticQmiResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addRelatedDatasets(&URIList, data.RelatedDatasets)
-	addLinks(&URIList, data.Links)
-	addTopics(&URIList, data.Topics)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addRelatedDatasets(&uriList, data.RelatedDatasets)
+	addLinks(&uriList, data.Links)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromTimeseries(containintURI string, data *timeseriesResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addSourceDatasets(&URIList, data.SourceDatasets)
-	addRelatedDatasets(&URIList, data.RelatedDatasets)
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addRelatedData(&URIList, data.RelatedData)
-	addVersions(&URIList, data.Versions)
-	addTopics(&URIList, data.Topics)
+	addSourceDatasets(&uriList, data.SourceDatasets)
+	addRelatedDatasets(&uriList, data.RelatedDatasets)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addRelatedData(&uriList, data.RelatedData)
+	addVersions(&uriList, data.Versions)
+	addTopics(&uriList, data.Topics)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromRelease(containintURI string, data *releaseResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addRelatedDatasets(&URIList, data.RelatedDatasets)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle)
-	addLinks(&URIList, data.Links)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addRelatedDatasets(&uriList, data.RelatedDatasets)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle)
+	addLinks(&uriList, data.Links)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticPage(containintURI string, data *staticPageResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addLinks(&URIList, data.Links)
+	addLinks(&uriList, data.Links)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticAdhoc(containintURI string, data *staticAdhocResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addLinks(&URIList, data.Links)
+	addLinks(&uriList, data.Links)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromReferenceTables(containintURI string, data *referenceTablesResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromCompendiumChapter(containintURI string, data *compendiumChapterResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addSections(&URIList, data.Sections)
-	addRelatedData(&URIList, data.RelatedData)
-	addRelatedDocuments(&URIList, data.RelatedDocuments)
-	addCharts(&URIList, data.Charts)
-	addTables(&URIList, data.Tables)
-	addImages(&URIList, data.Images)
-	addEquations(&URIList, data.Equations)
-	addLinks(&URIList, data.Links)
-	addRelatedMethodology(&URIList, data.RelatedMethodology)
-	addRelatedMethodologyArticle(&URIList, data.RelatedMethodologyArticle)
-	addVersions(&URIList, data.Versions)
+	addSections(&uriList, data.Sections)
+	addRelatedData(&uriList, data.RelatedData)
+	addRelatedDocuments(&uriList, data.RelatedDocuments)
+	addCharts(&uriList, data.Charts)
+	addTables(&uriList, data.Tables)
+	addImages(&uriList, data.Images)
+	addEquations(&uriList, data.Equations)
+	addLinks(&uriList, data.Links)
+	addRelatedMethodology(&uriList, data.RelatedMethodology)
+	addRelatedMethodologyArticle(&uriList, data.RelatedMethodologyArticle)
+	addVersions(&uriList, data.Versions)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticLandingPage(containintURI string, data *staticLandingPageResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addSections(&URIList, data.Sections)
-	addLinks(&URIList, data.Links)
+	addSections(&uriList, data.Sections)
+	addLinks(&uriList, data.Links)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromStaticArticle(containintURI string, data *staticArticleResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addLinks(&URIList, data.Links)
-	addSections(&URIList, data.Sections)
-	addCharts(&URIList, data.Charts)
-	addTables(&URIList, data.Tables)
-	addImages(&URIList, data.Images)
-	addEquations(&URIList, data.Equations)
+	addLinks(&uriList, data.Links)
+	addSections(&uriList, data.Sections)
+	addCharts(&uriList, data.Charts)
+	addTables(&uriList, data.Tables)
+	addImages(&uriList, data.Images)
+	addEquations(&uriList, data.Equations)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromDataset(containintURI string, data *datasetResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addVersions(&URIList, data.Versions)
+	addVersions(&uriList, data.Versions)
 
-	return URIList
+	return uriList
 }
 
 func getURIListFromTimeseriesDataset(containintURI string, data *timeseriesDatasetResponse) []string {
-	var URIList []string
+	var uriList []string
 
 	if cfg.OnlyFirstFullDepth {
-		return URIList
+		return uriList
 	}
 
-	addVersions(&URIList, data.Versions)
+	addVersions(&uriList, data.Versions)
 
-	return URIList
+	return uriList
 }
 
 var depth int = 1
 var maxDepth = depth
 
-func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, parentURI string, index int, bodyTextFile io.Writer, checkFile io.Writer) (int, string) {
+func unmarshalFail(uri string, err error, location int) {
+	fmt.Printf("fullURI: %s\n", uri)
+	fmt.Println(err)
+	fmt.Printf("getPageData: json.Unmarshal failed %v\n", location)
+	os.Exit(100)
+}
+
+func marshalFail(uri string, err error, location int) {
+	fmt.Printf("fullURI: %s\n", uri)
+	fmt.Println(err)
+	fmt.Printf("getPageData: json.Marshal failed %v\n", location)
+	os.Exit(101)
+}
+
+func checkMarshaling(fullURI string, err error, location int, payload *[]byte, fixedJSON *[]byte, structName string) {
+	if err != nil {
+		marshalFail(fullURI, err, location)
+	}
+	fixedPayloadJSON := replaceUnicodeWithASCII(*payload)
+
+	// This effectively checks that the struct 'structName' has all the fields needed ..
+	// the 'payLoad' should equal the 'fixedJSON' .. if not structName needs adjusting
+	if !bytes.Equal(fixedPayloadJSON, *fixedJSON) {
+		fmt.Printf("Processing page: %s\n", fullURI)
+		fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix stuct %s\n", location, structName)
+		_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
+		check(err)
+		_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
+		check(err)
+		os.Exit(102)
+	}
+}
+
+func checkMarshalingDeepEqual(fullURI string, err error, location int, payload *[]byte, fixedJSON *[]byte, structName string) {
+	if err != nil {
+		marshalFail(fullURI, err, location)
+	}
+	fixedPayloadJSON := replaceUnicodeWithASCII(*payload)
+
+	// This effectively checks that the struct 'structName' has all the fields needed ..
+	// the 'payLoad' should equal the 'fixedJSON' .. if not structName needs adjusting
+	if !bytes.Equal(fixedPayloadJSON, *fixedJSON) {
+		// The binary comparison will typically fail for struct 'chartResponse'
+		// because it contains map[string]string which after unmarshaling and marshaling ..
+		// items in the maps may not in the same order.
+
+		// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ..
+
+		var prettyJSON1 bytes.Buffer
+		err = json.Indent(&prettyJSON1, fixedPayloadJSON, "", "    ")
+		check(err) // should nt get an error, but just in case
+
+		var prettyJSON2 bytes.Buffer
+		err = json.Indent(&prettyJSON2, *fixedJSON, "", "    ")
+		check(err) // should not get an error, but just in case
+
+		line1 := strings.Split(prettyJSON1.String(), "\n")
+		line2 := strings.Split(prettyJSON2.String(), "\n")
+
+		sort.Strings(line1)
+		sort.Strings(line2)
+
+		// maps don't have their fields sorted which results in otherwise equal lines having and not having commas
+		// on the end of them, so to allow the DeepEqual below to work, the commas on the ends of the lines need removing.
+		for i := 0; i < len(line1); i++ {
+			line1[i] = strings.TrimSuffix(line1[i], ",")
+		}
+		for i := 0; i < len(line2); i++ {
+			line2[i] = strings.TrimSuffix(line2[i], ",")
+		}
+
+		if !reflect.DeepEqual(line1, line2) {
+			fmt.Printf("DeepEqual comparison failed\n")
+			fmt.Printf("Processing page: %s\n", fullURI)
+			fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix stuct %s\n", location, structName)
+			fmt.Printf("It helps to open these files in vscode and right click in file, select format Docuemnt\n")
+			fmt.Printf(" and then save each document and then do a file comparison in an App like meld.")
+			// NOTE: In the files, ignore the '&' character at the begining of one of the lines as this is just
+			//       a result of one of the unmarshaled JSON lines being a pointer.
+			_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
+			check(err)
+			_, err = fmt.Fprintf(checkFile, "%s\n", line1)
+			check(err)
+			_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
+			check(err)
+			_, err = fmt.Fprintf(bodyTextFile, "%s\n", line2)
+			check(err)
+			os.Exit(103)
+		}
+	}
+}
+
+func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, parentURI string, index int) (int, string) {
 	if cfg.FullDepth {
 		if contentDuplicateCheck[shortURI] > 0 {
 			// strange we've seen this link before and filtering elsewhere did not catch it.
@@ -2440,7 +2543,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 	fixedJSON := replaceUnicodeWithASCII(bodyText)
 
 	// Create a list of URIs
-	var URIList []string
+	var uriList []string
 
 	var title, description, collectionName, id string
 
@@ -2526,7 +2629,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(articleJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromArticle(fullURI, &data)
+			uriList = getURIListFromArticle(fullURI, &data)
 		}
 	} else if *shape.Type == "article_download" {
 		// "article_download" is linked to from these pageType on topics or content nodes
@@ -2581,7 +2684,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(articleDownloadJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromArticleDownload(fullURI, &data)
+			uriList = getURIListFromArticleDownload(fullURI, &data)
 		}
 	} else if *shape.Type == "bulletin" {
 		// "bulletin" is linked to from these pageType on topics or content nodes
@@ -2638,7 +2741,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(bulletinJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromBulletin(fullURI, &data)
+			uriList = getURIListFromBulletin(fullURI, &data)
 		}
 	} else if *shape.Type == "compendium_data" {
 		// "compendium_data" is linked to from these pageType on topics or content nodes
@@ -2693,7 +2796,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(compendiumDataJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromCompendiumData(fullURI, &data)
+			uriList = getURIListFromCompendiumData(fullURI, &data)
 		}
 	} else if *shape.Type == "compendium_landing_page" {
 		// "compendium_landing_page" is linked to from these pageType on topics or content nodes
@@ -2749,7 +2852,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(compendiumLandingPageJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromCompendiumLandingPage(fullURI, &data)
+			uriList = getURIListFromCompendiumLandingPage(fullURI, &data)
 		}
 	} else if *shape.Type == "dataset_landing_page" {
 		// "dataset_landing_page" is linked to from these pageType on topics or content nodes
@@ -2804,7 +2907,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(datasetLandingPageJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromDatasetLandingPage(fullURI, &data)
+			uriList = getURIListFromDatasetLandingPage(fullURI, &data)
 		}
 	} else if *shape.Type == "static_methodology" {
 		// "static_methodology" is linked to from these pageType on topics or content nodes
@@ -2860,7 +2963,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(staticMethodologyJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromStaticMethodology(fullURI, &data)
+			uriList = getURIListFromStaticMethodology(fullURI, &data)
 		}
 	} else if *shape.Type == "static_methodology_download" {
 		// "static_methodology_download" is linked to from these pageType on topics or content nodes
@@ -2915,7 +3018,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(staticMethodologyDownloadJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromStaticMethodologyDownload(fullURI, &data)
+			uriList = getURIListFromStaticMethodologyDownload(fullURI, &data)
 		}
 	} else if *shape.Type == "static_qmi" {
 		// "static_qmi" is linked to from these pageType on topics or content nodes
@@ -2970,7 +3073,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(staticQmiJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromStaticQmi(fullURI, &data)
+			uriList = getURIListFromStaticQmi(fullURI, &data)
 		}
 	} else if *shape.Type == "timeseries" {
 		// "timeseries" is linked to from these pageType on topics or content nodes
@@ -3026,7 +3129,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(timeseriesJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromTimeseries(fullURI, &data)
+			uriList = getURIListFromTimeseries(fullURI, &data)
 		}
 	} else if *shape.Type == "chart" {
 		// "chart" is linked to from content nodes
@@ -3075,7 +3178,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			sort.Strings(line1)
 			sort.Strings(line2)
 
-			if reflect.DeepEqual(line1, line2) != true {
+			if !reflect.DeepEqual(line1, line2) {
 				fmt.Printf("DeepEqual comparison failed\n")
 
 				fmt.Printf("Processing content page: %s\n", fullURI)
@@ -3085,7 +3188,6 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 				_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
 				check(err)
 
-				//return 404, ""
 				os.Exit(82)
 			}
 		}
@@ -3161,9 +3263,6 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(productPageJsFile, id, collectionName, bodyTextCopy, shortURI)
 		// NOTE .. do NOT grab URI's from this as its a top level page from where we initially came.
-		if cfg.FullDepth {
-			//			URIList = getURIListFromProductPage(fullURI, &data)
-		}
 	} else if *shape.Type == "table" {
 		// "table" is linked to from content nodes
 		var data tableResponse
@@ -3370,7 +3469,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(releaseJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromRelease(fullURI, &data)
+			uriList = getURIListFromRelease(fullURI, &data)
 		}
 	} else if *shape.Type == "list" {
 		// "list" is linked to from content nodes
@@ -3419,7 +3518,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			sort.Strings(line1)
 			sort.Strings(line2)
 
-			if reflect.DeepEqual(line1, line2) != true {
+			if !reflect.DeepEqual(line1, line2) {
 				fmt.Printf("DeepEqual comparison failed\n")
 
 				fmt.Printf("Processing content page: %s\n", fullURI)
@@ -3429,7 +3528,6 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 				_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
 				check(err)
 
-				//return 404, ""
 				os.Exit(82)
 			}
 		}
@@ -3496,7 +3594,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(staticPageJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromStaticPage(fullURI, &data)
+			uriList = getURIListFromStaticPage(fullURI, &data)
 		}
 	} else if *shape.Type == "static_adhoc" {
 		// "static_adhoc" is linked to from content nodes
@@ -3550,7 +3648,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(staticAdhocJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromStaticAdhoc(fullURI, &data)
+			uriList = getURIListFromStaticAdhoc(fullURI, &data)
 		}
 	} else if *shape.Type == "reference_tables" {
 		// "reference_tables" is linked to from content nodes
@@ -3604,7 +3702,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(referenceTablesJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromReferenceTables(fullURI, &data)
+			uriList = getURIListFromReferenceTables(fullURI, &data)
 		}
 	} else if *shape.Type == "compendium_chapter" {
 		// "compendium_chapter" is linked to from content nodes
@@ -3658,7 +3756,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(compendiumChapterJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromCompendiumChapter(fullURI, &data)
+			uriList = getURIListFromCompendiumChapter(fullURI, &data)
 		}
 	} else if *shape.Type == "static_landing_page" {
 		// "static_landing_page" is linked to from content nodes
@@ -3712,7 +3810,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(staticLandingPageJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromStaticLandingPage(fullURI, &data)
+			uriList = getURIListFromStaticLandingPage(fullURI, &data)
 		}
 	} else if *shape.Type == "static_article" {
 		// "static_article" is linked to from content nodes
@@ -3766,7 +3864,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(staticArticleJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromStaticArticle(fullURI, &data)
+			uriList = getURIListFromStaticArticle(fullURI, &data)
 		}
 	} else if *shape.Type == "dataset" {
 		// "dataset" is linked to from content nodes
@@ -3820,7 +3918,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(datasetJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromDataset(fullURI, &data)
+			uriList = getURIListFromDataset(fullURI, &data)
 		}
 	} else if *shape.Type == "timeseries_dataset" {
 		// "timeseries_dataset" is linked to from content nodes
@@ -3874,7 +3972,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(timeseriesDatasetJsFile, id, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
-			URIList = getURIListFromTimeseriesDataset(fullURI, &data)
+			uriList = getURIListFromTimeseriesDataset(fullURI, &data)
 		}
 	} else if *shape.Type == "taxonomy_landing_page" {
 		// NOTE: this is an upper level page being linked back up to !!!
@@ -3930,9 +4028,6 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		saveContentPageToCollection(taxonomyLandingPageJsFile, id, collectionName, bodyTextCopy, shortURI)
 		// NOTE .. do NOT grab URI's from this as its a top level page from where we initially came.
-		if cfg.FullDepth {
-			//	URIList = getURIListFromTaxonomyLandingPage(fullURI, &data)
-		}
 	} else {
 		fmt.Printf("Unknown page Type ..\n")
 		fmt.Printf("shape: %s\n", *shape.Type)
@@ -3990,13 +4085,13 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 	fmt.Printf("Index: %d   Depth: %d - %v - %v : %v\n", indexNumber, depth, parentTopicNumber, pType, shortURI)
 
-	if len(URIList) > 0 {
+	if len(uriList) > 0 {
 		// iterate over list and call getPageDataRetry
 		// doing this should only increase the size of the collections other that topic or content
 		// and have no impact on graphs.
 		// it will also probably increase the number of duplicates.
 
-		for _, subURI := range URIList {
+		for _, subURI := range uriList {
 			// Recurse thru sub URI's, if not already seen (or some other exclusion applies)
 
 			if strings.Contains(subURI, "http://www.ons.gov.uk") {
@@ -4004,8 +4099,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			}
 
 			// some of the URI links have the 'ons' site in them which we don't want, so remove if present:
-			subURI = strings.Replace(subURI, "https://www.ons.gov.uk", "", -1)
-			subURI = strings.Replace(subURI, "http://www.ons.gov.uk", "", -1)
+			subURI = strings.ReplaceAll(subURI, "https://www.ons.gov.uk", "")
+			subURI = strings.ReplaceAll(subURI, "http://www.ons.gov.uk", "")
 
 			if strings.Contains(subURI, "https://") || strings.Contains(subURI, "http://") {
 				fmt.Printf("External site: %s\n", subURI)
@@ -4038,28 +4133,28 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 				fmt.Printf("A URI to /index.html: %s\n%s\n", subURI, fullURI)
 				continue
 			}
-			if strings.Contains(subURI, "#") == true {
+			if strings.Contains(subURI, "#") {
 				hashURI[subURI]++
 				fmt.Printf("A URI with a '#': %s\n%s\n", subURI, fullURI)
 				continue
 			}
-			if strings.Contains(subURI, "?") == true {
+			if strings.Contains(subURI, "?") {
 				questionURI[subURI]++
 				fmt.Printf("A URI with a '?': %s\n%s\n", subURI, fullURI)
 				continue
 			}
 			parts := strings.Split(subURI, "/")
 			last := parts[len(parts)-1]
-			var v bool
-			if cfg.SkipVersions == true {
+			var versionFound bool
+			if cfg.SkipVersions {
 				if len(last) > 1 {
 					if last[0] == 'v' && (last[1] >= '0' && last[1] <= '9') {
 						// we found what looks like a version number on the end of the URI path
-						v = true
+						versionFound = true
 					}
 				}
 			}
-			if v == true {
+			if versionFound {
 				skippedVersionURI[subURI]++
 				fmt.Printf("Skipping URI with version on end: %s\n", subURI)
 				continue
@@ -4082,10 +4177,10 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 	var status int
 	var lType string
 
-	//return
+	// return
 
 	for {
-		status, lType = getPageData(shortURI, parentTopicNumber, pType, parentFullURI, index, bodyTextFile, checkFile)
+		status, lType = getPageData(shortURI, parentTopicNumber, pType, parentFullURI, index)
 		if status == 200 {
 			return true, lType
 		}
@@ -4100,7 +4195,7 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 				fmt.Printf("Index: %d   Seconds remaining: %d\n", indexNumber, backOff-delay)
 			}
 		}
-		backOff = backOff + 60
+		backOff += 60
 		if backOff > 200 {
 			// probably a broken URIm but go try without /data on the end ..
 			status = 404
@@ -4110,7 +4205,7 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 	if status == 404 {
 		// try reading page without data on the end ..
 		noDataURI := "https://www.ons.gov.uk" + shortURI
-		//noDataURI := "https://www.production.onsdigital.co.uk" + shortURI
+		// noDataURI := "https://www.production.onsdigital.co.uk" + shortURI
 
 		var response *http.Response
 		var err error
@@ -4180,7 +4275,7 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 			// we have a re-direction, so lets try that with /data
 			backOff = 71
 			for {
-				status, lType = getPageData(redirectedURI, parentTopicNumber, pType, parentFullURI, index, bodyTextFile, checkFile)
+				status, lType = getPageData(redirectedURI, parentTopicNumber, pType, parentFullURI, index)
 				if status == 200 {
 					// redirect worked, and page data was saved in the call to getPageData()
 					fmt.Printf("redirect worked OK\n")
@@ -4197,7 +4292,7 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 						fmt.Printf("Index: %d   Seconds remaining: %d\n", indexNumber, backOff-delay)
 					}
 				}
-				backOff = backOff + 60
+				backOff += 60
 				if backOff > 200 {
 					// probably a broken URI,so give up
 					status = 404
@@ -4240,10 +4335,10 @@ node
 terminal node
 */
 
-func getTerminationNodeData(data *DataResponse, parentTopicNumber int, parentFullURI string, bodyTextFile io.Writer, checkFile io.Writer) contentInfo {
+func getTerminationNodeData(data *DataResponse, parentTopicNumber int, parentFullURI string) contentInfo {
 	var info contentInfo = contentNone
 
-	if cfg.ScrapeContent == false {
+	if !cfg.ScrapeContent {
 		// skip looking for content
 		return contentUnknown
 	}
@@ -4410,7 +4505,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 
 	uniqueParts := uniqueListString(lastPart)
 	sort.Strings(uniqueParts)
-	//uniqueParts[4] = uniqueParts[4] + "_-_test" // put this in to check that test below works
+	// uniqueParts[4] = uniqueParts[4] + "_-_test" // put this in to check that test below works
 
 	if len(lastPart) != len(uniqueParts) {
 		fmt.Printf("SHOW STOPPER - duplicates exist in the end part of indexNames, inspect following list:\n")
@@ -4469,7 +4564,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 					}
 					topicPageCount++
 					parentID := data.subSectionIndex
-					//idAndName := strconv.Itoa(data.id) + " - " + data.shortURI
+					// idAndName := strconv.Itoa(data.id) + " - " + data.shortURI
 					idAndName := idRef[id]
 
 					if data.uriStatus == pageTopicBroken {
@@ -4485,10 +4580,8 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 						// needs to be removed ..
 						if topics[parentID].Next.SubtopicIds == nil {
 							topics[parentID].Next.SubtopicIds = &[]string{idAndName}
-						} else {
-							if !stringInSlice(idAndName, *topics[parentID].Next.SubtopicIds) {
-								*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
-							}
+						} else if !stringInSlice(idAndName, *topics[parentID].Next.SubtopicIds) {
+							*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
 						}
 					} else {
 						topics[id].ID = idAndName
@@ -4542,14 +4635,12 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 				case pageTopicSubtopicID:
 					// Add topic node id into parent SubtopicsIds list
 					parentID := data.subSectionIndex
-					//idAndName := strconv.Itoa(data.id) + " - " + data.shortURI
+					// idAndName := strconv.Itoa(data.id) + " - " + data.shortURI
 					idAndName := idRef[id]
 					if topics[parentID].Next.SubtopicIds == nil {
 						topics[parentID].Next.SubtopicIds = &[]string{idAndName}
-					} else {
-						if !stringInSlice(idAndName, *topics[parentID].Next.SubtopicIds) {
-							*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
-						}
+					} else if !stringInSlice(idAndName, *topics[parentID].Next.SubtopicIds) {
+						*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
 					}
 
 				case pageContent:
@@ -4557,14 +4648,12 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 
 					// Add topic termination node id into parent SubtopicsIds list
 					parentID := data.subSectionIndex
-					//idAndName := strconv.Itoa(data.id) + " - " + data.shortURI
+					// idAndName := strconv.Itoa(data.id) + " - " + data.shortURI
 					idAndName := idRef[id]
 					if topics[parentID].Next.SubtopicIds == nil {
 						topics[parentID].Next.SubtopicIds = &[]string{idAndName}
-					} else {
-						if !stringInSlice(idAndName, *topics[parentID].Next.SubtopicIds) {
-							*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
-						}
+					} else if !stringInSlice(idAndName, *topics[parentID].Next.SubtopicIds) {
+						*topics[parentID].Next.SubtopicIds = append(*topics[parentID].Next.SubtopicIds, idAndName)
 					}
 
 					if pageType[id] != pageTopicAndContent {
@@ -4645,7 +4734,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 			}
 		}
 		if contentState != "" {
-			//content[id].ID = strconv.Itoa(id) + " - " + indexNames[id]
+			// content[id].ID = strconv.Itoa(id) + " - " + indexNames[id]
 			content[id].ID = idRef[id]
 
 			var totalItems int
@@ -4761,9 +4850,9 @@ func createTopicJsScript(topics []TopicResponseStore) {
 	line1 := "db = db.getSiblingDB('" + topicsDbName + "')\n"
 	line2 := "db." + topicsDbCollection + ".remove({})\n"
 
-	_, err = fmt.Fprintf(topicsJsFile, line1)
+	_, err = fmt.Fprint(topicsJsFile, line1)
 	check(err)
-	_, err = fmt.Fprintf(topicsJsFile, line2)
+	_, err = fmt.Fprint(topicsJsFile, line2)
 	check(err)
 
 	// write each document (topic node)
@@ -4809,9 +4898,9 @@ func createContentJsScript(content []ContentResponse) {
 	line1 := "db = db.getSiblingDB('" + topicsDbName + "')\n"
 	line2 := "db." + contentDbCollection + ".remove({})\n"
 
-	_, err = fmt.Fprintf(contentJsFile, line1)
+	_, err = fmt.Fprint(contentJsFile, line1)
 	check(err)
-	_, err = fmt.Fprintf(contentJsFile, line2)
+	_, err = fmt.Fprint(contentJsFile, line2)
 	check(err)
 
 	// write each document (topic node)
@@ -5182,13 +5271,16 @@ var timeseriesDatasetCollectionName string = "timeseries_dataset"
 var taxonomyLandingPageJsFile *os.File
 var taxonomyLandingPageCollectionName string = "taxonomy_landing_page"
 
+var bodyTextFile *os.File
+var checkFile *os.File
+
 func initialiseCollectionDatabase(collectionName string, collectionFile *os.File) {
 	line1 := "db = db.getSiblingDB('" + topicsDbName + "')\n"
 	line2 := "db." + collectionName + ".remove({})\n"
 
-	_, err := fmt.Fprintf(collectionFile, line1)
+	_, err := fmt.Fprint(collectionFile, line1)
 	check(err)
-	_, err = fmt.Fprintf(collectionFile, line2)
+	_, err = fmt.Fprint(collectionFile, line2)
 	check(err)
 }
 
@@ -5196,11 +5288,11 @@ func finaliseCollectionDatabase(collectionName string, collectionFile *os.File) 
 	// Add code to read back each document written (for visual inspection)
 	// NOTE: these lines in script are commented out to speed the process up for long scripts
 	//       they are placed in init script should they need to be uncomented ..
-	_, err := fmt.Fprintf(collectionFile, "//db."+collectionName+".find().forEach(function(doc) {\n")
+	_, err := fmt.Fprint(collectionFile, "//db."+collectionName+".find().forEach(function(doc) {\n")
 	check(err)
-	_, err = fmt.Fprintf(collectionFile, "//    printjson(doc);\n")
+	_, err = fmt.Fprint(collectionFile, "//    printjson(doc);\n")
 	check(err)
-	_, err = fmt.Fprintf(collectionFile, "//})\n")
+	_, err = fmt.Fprint(collectionFile, "//})\n")
 	check(err)
 }
 
@@ -5210,7 +5302,7 @@ var observationsDir = "observations"
 
 func ensureDirectoryExists(dirName string) {
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
-		os.Mkdir(dirName, 0700)
+		check(os.Mkdir(dirName, 0700))
 	}
 }
 
@@ -5400,11 +5492,11 @@ func main() {
 	// Open both files in vscode, right click in them and select 'Format Document' to expand the json,
 	// save each expanded .json file and then do a visual diff between them with meld.
 	// It is recommended that you use meld because some timeseries can be over 12,000 lines long.
-	bodyTextFile, err := os.Create(tempDir + "/bodyText_all.json")
+	bodyTextFile, err = os.Create(tempDir + "/bodyText_all.json")
 	check(err)
 	defer bodyTextFile.Close()
 
-	checkFile, err := os.Create(tempDir + "/bodyText_all_processed.json")
+	checkFile, err = os.Create(tempDir + "/bodyText_all_processed.json")
 	check(err)
 	defer checkFile.Close()
 
@@ -5426,7 +5518,7 @@ func main() {
 	time.Sleep(1 * time.Second)
 
 	// iterate and recurse through ONS site starting at specified: rootPath ..
-	getPage(1, graphVizFile, bodyTextFile, checkFile, "", rootPath)
+	getPage(1, graphVizFile, "", rootPath)
 
 	// Close the whole graph:
 	_, err = fmt.Fprintf(graphVizFile, "}\n")
