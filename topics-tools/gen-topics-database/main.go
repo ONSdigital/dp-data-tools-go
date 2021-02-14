@@ -2475,6 +2475,24 @@ func checkMarshalingDeepEqual(fullURI string, err error, location int, payload *
 	}
 }
 
+const noTitle string = "** no title **"
+
+func extractTitle(title *string) string {
+	if title != nil {
+		return *title
+	}
+	return noTitle
+}
+
+const noDescription string = "** no description **"
+
+func extractDescription(description *string) string {
+	if description != nil {
+		return *description
+	}
+	return noDescription
+}
+
 func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, parentURI string, index int) (int, string) {
 	if cfg.FullDepth {
 		if contentDuplicateCheck[shortURI] > 0 {
@@ -2548,7 +2566,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 	// Create a list of URIs
 	var uriList []string
 
-	var title, description, collectionName string
+	var title, description string
 
 	var shape pageShape
 	// Unmarshal body bytes to model
@@ -2577,7 +2595,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 	// Decode each content page into a specific structure according to the 'Type' of the page ..
 	// NOTE: This is done to ensure that the structure definitions are fully defined to read ALL
 	//       the info in the /data endpoint.
-	switch *shape.Type {
+	collectionName := *shape.Type
+	switch collectionName {
 	case "article":
 		// "article" is linked to from these pageType on topics or content nodes
 		// nodeHighlightedLinks
@@ -2596,26 +2615,16 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		payload, err := json.Marshal(data)
 		checkMarshaling(fullURI, err, 2, &payload, &fixedJSON, "article")
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = articleCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(articleJsFile, &articleCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromArticle(fullURI, &data)
 		}
 
-	case "article_download":
-		// "article_download" is linked to from these pageType on topics or content nodes
+	case articleDownloadCollectionName:
+		// articleDownloadCollectionName is linked to from these pageType on topics or content nodes
 		// contentRelatedArticles
 		var data articleDownloadResponse
 
@@ -2623,28 +2632,18 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			unmarshalFail(fullURI, err, 3)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 3, &payload, &fixedJSON, "article_download")
+		checkMarshaling(fullURI, err, 3, &payload, &fixedJSON, articleDownloadCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = articleDownloadCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(articleDownloadJsFile, &articleDownloadCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromArticleDownload(fullURI, &data)
 		}
 
-	case "bulletin":
-		// "bulletin" is linked to from these pageType on topics or content nodes
+	case bulletinCollectionName:
+		// bulletinCollectionName is linked to from these pageType on topics or content nodes
 		// nodeHighlightedLinks
 		// contentStatsBulletins
 		// contentHighlightedContent
@@ -2654,28 +2653,18 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			unmarshalFail(fullURI, err, 4)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 4, &payload, &fixedJSON, "bulletin")
+		checkMarshaling(fullURI, err, 4, &payload, &fixedJSON, bulletinCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = bulletinCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(bulletinJsFile, &bulletinCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromBulletin(fullURI, &data)
 		}
 
-	case "compendium_data":
-		// "compendium_data" is linked to from these pageType on topics or content nodes
+	case compendiumDataCollectionName:
+		// compendiumDataCollectionName is linked to from these pageType on topics or content nodes
 		// contentDatasets
 		var data compendiumDataResponse
 
@@ -2683,28 +2672,18 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			unmarshalFail(fullURI, err, 5)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 5, &payload, &fixedJSON, "compendium_data")
+		checkMarshaling(fullURI, err, 5, &payload, &fixedJSON, compendiumDataCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = compendiumDataCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(compendiumDataJsFile, &compendiumDataCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromCompendiumData(fullURI, &data)
 		}
 
-	case "compendium_landing_page":
-		// "compendium_landing_page" is linked to from these pageType on topics or content nodes
+	case compendiumLandingPageCollectionName:
+		// compendiumLandingPageCollectionName is linked to from these pageType on topics or content nodes
 		// nodeHighlightedLinks
 		// contentRelatedArticles
 		var data compendiumLandingPageResponse
@@ -2718,28 +2697,18 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		// Marshal provided model
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 6, &payload, &fixedJSON, "compendium_landing_page")
+		checkMarshaling(fullURI, err, 6, &payload, &fixedJSON, compendiumLandingPageCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = compendiumLandingPageCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(compendiumLandingPageJsFile, &compendiumLandingPageCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromCompendiumLandingPage(fullURI, &data)
 		}
 
-	case "dataset_landing_page":
-		// "dataset_landing_page" is linked to from these pageType on topics or content nodes
+	case datasetLandingPageCollectionName:
+		// datasetLandingPageCollectionName is linked to from these pageType on topics or content nodes
 		// contentDatasets
 		var data datasetLandingPageResponse
 
@@ -2747,28 +2716,18 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			unmarshalFail(fullURI, err, 7)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 7, &payload, &fixedJSON, "dataset_landing_page")
+		checkMarshaling(fullURI, err, 7, &payload, &fixedJSON, datasetLandingPageCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = datasetLandingPageCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(datasetLandingPageJsFile, &datasetLandingPageCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromDatasetLandingPage(fullURI, &data)
 		}
 
-	case "static_methodology":
-		// "static_methodology" is linked to from these pageType on topics or content nodes
+	case staticMethodologyCollectionName:
+		// staticMethodologyCollectionName is linked to from these pageType on topics or content nodes
 		// contentRelatedMethodology
 		// contentRelatedMethodologyArticle
 		var data staticMethodologyResponse
@@ -2777,28 +2736,18 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			unmarshalFail(fullURI, err, 8)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 8, &payload, &fixedJSON, "static_methodology")
+		checkMarshaling(fullURI, err, 8, &payload, &fixedJSON, staticMethodologyCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = staticMethodologyCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(staticMethodologyJsFile, &staticMethodologyCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticMethodology(fullURI, &data)
 		}
 
-	case "static_methodology_download":
-		// "static_methodology_download" is linked to from these pageType on topics or content nodes
+	case staticMethodologyDownloadCollectionName:
+		// staticMethodologyDownloadCollectionName is linked to from these pageType on topics or content nodes
 		// contentRelatedMethodologyArticle
 		var data staticMethodologyDownloadResponse
 
@@ -2806,28 +2755,18 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			unmarshalFail(fullURI, err, 9)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 9, &payload, &fixedJSON, "static_methodology_download")
+		checkMarshaling(fullURI, err, 9, &payload, &fixedJSON, staticMethodologyDownloadCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = staticMethodologyDownloadCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(staticMethodologyDownloadJsFile, &staticMethodologyDownloadCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticMethodologyDownload(fullURI, &data)
 		}
 
-	case "static_qmi":
-		// "static_qmi" is linked to from these pageType on topics or content nodes
+	case staticQmiCollectionName:
+		// staticQmiCollectionName is linked to from these pageType on topics or content nodes
 		// contentRelatedMethodology
 		var data staticQmiResponse
 
@@ -2835,28 +2774,18 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			unmarshalFail(fullURI, err, 10)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 10, &payload, &fixedJSON, "static_qmi")
+		checkMarshaling(fullURI, err, 10, &payload, &fixedJSON, staticQmiCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = staticQmiCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(staticQmiJsFile, &staticQmiCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticQmi(fullURI, &data)
 		}
 
-	case "timeseries":
-		// "timeseries" is linked to from these pageType on topics or content nodes
+	case timeseriesCollectionName:
+		// timeseriesCollectionName is linked to from these pageType on topics or content nodes
 		// contentItems
 		// contentHighlightedContent
 		var data timeseriesResponse
@@ -2865,449 +2794,295 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			unmarshalFail(fullURI, err, 11)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 11, &payload, &fixedJSON, "timeseries")
+		checkMarshaling(fullURI, err, 11, &payload, &fixedJSON, timeseriesCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = timeseriesCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(timeseriesJsFile, &timeseriesCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromTimeseries(fullURI, &data)
 		}
 
-	case "chart":
-		// "chart" is linked to from content nodes
+	case chartCollectionName:
+		// chartCollectionName is linked to from content nodes
 		var data chartResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 12)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshalingDeepEqual(fullURI, err, 12, &payload, &fixedJSON, "chart")
+		checkMarshalingDeepEqual(fullURI, err, 12, &payload, &fixedJSON, chartCollectionName)
 
 		// NOTE: this is different to previous pages ..
-		if data.Title != nil {
-			title = *data.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Subtitle != nil {
-			description = *data.Subtitle
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = chartCollectionName
+		title = extractTitle(data.Title)
+		description = extractDescription(data.Subtitle)
 
 		saveContentPageToCollection(chartJsFile, &chartCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "product_page":
+	case productPageCollectionName:
 		// NOTE: this is an upper level page being linked back up to
 		// ( this should probably not be being grabbed .. we shall see if its of use )
-		// "product_page" has been linked to from content nodes
+		// productPageCollectionName has been linked to from content nodes
 		var data DataResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 13)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 13, &payload, &fixedJSON, "product_page")
+		checkMarshaling(fullURI, err, 13, &payload, &fixedJSON, productPageCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = productPageCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(productPageJsFile, &productPageCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE .. do NOT grab URI's from this as its a top level page from where we initially came.
 
-	case "table":
-		// "table" is linked to from content nodes
+	case tableCollectionName:
+		// tableCollectionName is linked to from content nodes
 		var data tableResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 14)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 14, &payload, &fixedJSON, "table")
+		checkMarshaling(fullURI, err, 14, &payload, &fixedJSON, tableCollectionName)
 
 		// NOTE: this is different to previous pages ..
-		if data.Title != nil {
-			title = *data.Title
-		} else {
-			title = "** no title **"
-		}
-		description = "** no description **"
-
-		collectionName = tableCollectionName
+		title = extractTitle(data.Title)
+		description = noDescription
 
 		saveContentPageToCollection(tableJsFile, &tableCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "equation":
-		// "equation" is linked to from content nodes
+	case equationCollectionName:
+		// equationCollectionName is linked to from content nodes
 		var data equationResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 15)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 15, &payload, &fixedJSON, "equation")
+		checkMarshaling(fullURI, err, 15, &payload, &fixedJSON, equationCollectionName)
 
 		// NOTE: this is different to previous pages ..
-		if data.Title != nil {
-			title = *data.Title
-		} else {
-			title = "** no title **"
-		}
-		description = "** no description **"
-
-		collectionName = equationCollectionName
+		title = extractTitle(data.Title)
+		description = noDescription
 
 		saveContentPageToCollection(equationJsFile, &equationCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "image":
-		// "image" is linked to from content nodes
+	case imageCollectionName:
+		// imageCollectionName is linked to from content nodes
 		var data imageResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 16)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 16, &payload, &fixedJSON, "image")
+		checkMarshaling(fullURI, err, 16, &payload, &fixedJSON, imageCollectionName)
 
 		// NOTE: this is different to previous pages ..
-		if data.Title != nil {
-			title = *data.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Subtitle != nil {
-			description = *data.Subtitle
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = imageCollectionName
+		title = extractTitle(data.Title)
+		description = extractDescription(data.Subtitle)
 
 		saveContentPageToCollection(imageJsFile, &imageCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "release":
-		// "release" is linked to from content nodes
+	case releaseCollectionName:
+		// releaseCollectionName is linked to from content nodes
 		var data releaseResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 17)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 17, &payload, &fixedJSON, "release")
+		checkMarshaling(fullURI, err, 17, &payload, &fixedJSON, releaseCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = releaseCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(releaseJsFile, &releaseCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromRelease(fullURI, &data)
 		}
 
-	case "list":
-		// "list" is linked to from content nodes
+	case listCollectionName:
+		// listCollectionName is linked to from content nodes
 		var data listResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 18)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshalingDeepEqual(fullURI, err, 18, &payload, &fixedJSON, "chart")
+		checkMarshalingDeepEqual(fullURI, err, 18, &payload, &fixedJSON, listCollectionName)
 
 		// NOTE: this is different to previous pages ..
-		title = "** no title **"
-		description = "** no description **"
-
-		collectionName = listCollectionName
+		title = noTitle
+		description = noDescription
 
 		saveContentPageToCollection(listJsFile, &listCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE: this page has no URI links to add to list
 
-	case "static_page":
-		// "static_page" is linked to from content nodes
+	case staticPageCollectionName:
+		// staticPageCollectionName is linked to from content nodes
 		var data staticPageResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 19)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 19, &payload, &fixedJSON, "static_page")
+		checkMarshaling(fullURI, err, 19, &payload, &fixedJSON, staticPageCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = staticPageCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(staticPageJsFile, &staticPageCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticPage(fullURI, &data)
 		}
 
-	case "static_adhoc":
-		// "static_adhoc" is linked to from content nodes
+	case staticAdhocCollectionName:
+		// staticAdhocCollectionName is linked to from content nodes
 		var data staticAdhocResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 20)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 20, &payload, &fixedJSON, "static_adhoc")
+		checkMarshaling(fullURI, err, 20, &payload, &fixedJSON, staticAdhocCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = staticAdhocCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(staticAdhocJsFile, &staticAdhocCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticAdhoc(fullURI, &data)
 		}
 
-	case "reference_tables":
-		// "reference_tables" is linked to from content nodes
+	case referenceTablesCollectionName:
+		// referenceTablesCollectionName is linked to from content nodes
 		var data referenceTablesResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 21)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 21, &payload, &fixedJSON, "reference_tables")
+		checkMarshaling(fullURI, err, 21, &payload, &fixedJSON, referenceTablesCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = referenceTablesCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(referenceTablesJsFile, &referenceTablesCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromReferenceTables(fullURI, &data)
 		}
 
-	case "compendium_chapter":
-		// "compendium_chapter" is linked to from content nodes
+	case compendiumChapterCollectionName:
+		// compendiumChapterCollectionName is linked to from content nodes
 		var data compendiumChapterResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 22)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 22, &payload, &fixedJSON, "compendium_chapter")
+		checkMarshaling(fullURI, err, 22, &payload, &fixedJSON, compendiumChapterCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = compendiumChapterCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(compendiumChapterJsFile, &compendiumChapterCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromCompendiumChapter(fullURI, &data)
 		}
 
-	case "static_landing_page":
-		// "static_landing_page" is linked to from content nodes
+	case staticLandingPageCollectionName:
+		// staticLandingPageCollectionName is linked to from content nodes
 		var data staticLandingPageResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 23)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 23, &payload, &fixedJSON, "static_landing_page")
+		checkMarshaling(fullURI, err, 23, &payload, &fixedJSON, staticLandingPageCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = staticLandingPageCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(staticLandingPageJsFile, &staticLandingPageCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticLandingPage(fullURI, &data)
 		}
 
-	case "static_article":
-		// "static_article" is linked to from content nodes
+	case staticArticleCollectionName:
+		// staticArticleCollectionName is linked to from content nodes
 		var data staticArticleResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 24)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 24, &payload, &fixedJSON, "static_article")
+		checkMarshaling(fullURI, err, 24, &payload, &fixedJSON, staticArticleCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = staticArticleCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(staticArticleJsFile, &staticArticleCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromStaticArticle(fullURI, &data)
 		}
 
-	case "dataset":
-		// "dataset" is linked to from content nodes
+	case datasetCollectionName:
+		// datasetCollectionName is linked to from content nodes
 		var data datasetResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 25)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 25, &payload, &fixedJSON, "dataset")
+		checkMarshaling(fullURI, err, 25, &payload, &fixedJSON, datasetCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = datasetCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(datasetJsFile, &datasetCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromDataset(fullURI, &data)
 		}
 
-	case "timeseries_dataset":
-		// "timeseries_dataset" is linked to from content nodes
+	case timeseriesDatasetCollectionName:
+		// timeseriesDatasetCollectionName is linked to from content nodes
 		var data timeseriesDatasetResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 26)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 26, &payload, &fixedJSON, "timeseries_dataset")
+		checkMarshaling(fullURI, err, 26, &payload, &fixedJSON, timeseriesDatasetCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = timeseriesDatasetCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(timeseriesDatasetJsFile, &timeseriesDatasetCount, collectionName, bodyTextCopy, shortURI)
 		if cfg.FullDepth {
 			uriList = getURIListFromTimeseriesDataset(fullURI, &data)
 		}
 
-	case "taxonomy_landing_page":
+	case taxonomyLandingPageCollectionName:
 		// NOTE: this is an upper level page being linked back up to !!!
 		// ( this should probably not be being grabbed .. we shall see if its of use )
-		// "taxonomy_landing_page" has been linked to from content nodes
+		// taxonomyLandingPageCollectionName has been linked to from content nodes
 		var data DataResponse
 
 		if err := json.Unmarshal(fixedJSON, &data); err != nil {
 			unmarshalFail(fullURI, err, 27)
 		}
 		payload, err := json.Marshal(data)
-		checkMarshaling(fullURI, err, 27, &payload, &fixedJSON, "taxonomy_landing_page")
+		checkMarshaling(fullURI, err, 27, &payload, &fixedJSON, taxonomyLandingPageCollectionName)
 
-		if data.Description.Title != nil {
-			title = *data.Description.Title
-		} else {
-			title = "** no title **"
-		}
-		if data.Description.MetaDescription != nil {
-			description = *data.Description.MetaDescription
-		} else {
-			description = "** no description **"
-		}
-
-		collectionName = taxonomyLandingPageCollectionName
+		title = extractTitle(data.Description.Title)
+		description = extractDescription(data.Description.MetaDescription)
 
 		saveContentPageToCollection(taxonomyLandingPageJsFile, &taxonomyLandingPageCount, collectionName, bodyTextCopy, shortURI)
 		// NOTE .. do NOT grab URI's from this as its a top level page from where we initially came.
@@ -3884,7 +3659,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 						if savedPageData.Description.MetaDescription != nil {
 							topics[id].Next.Description = *savedPageData.Description.MetaDescription
 						} else {
-							topics[id].Next.Description = "** no description **"
+							topics[id].Next.Description = noDescription
 						}
 						topics[id].Next.Title = *savedPageData.Description.Title
 
@@ -3966,7 +3741,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 					if savedPageData.Description.MetaDescription != nil {
 						topics[id].Next.Description = *savedPageData.Description.MetaDescription
 					} else {
-						topics[id].Next.Description = "** no description **"
+						topics[id].Next.Description = noDescription
 					}
 					topics[id].Next.Title = *savedPageData.Description.Title
 
@@ -4478,82 +4253,108 @@ func rootPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 var articleJsFile *os.File
-var articleCollectionName string = "article"
+
+const articleCollectionName string = "article"
 
 var articleDownloadJsFile *os.File
-var articleDownloadCollectionName string = "article_download"
+
+const articleDownloadCollectionName string = "article_download"
 
 var bulletinJsFile *os.File
-var bulletinCollectionName string = "bulletin"
+
+const bulletinCollectionName string = "bulletin"
 
 var compendiumDataJsFile *os.File
-var compendiumDataCollectionName string = "compendium_data"
+
+const compendiumDataCollectionName string = "compendium_data"
 
 var compendiumLandingPageJsFile *os.File
-var compendiumLandingPageCollectionName string = "compendium_landing_page"
+
+const compendiumLandingPageCollectionName string = "compendium_landing_page"
 
 var datasetLandingPageJsFile *os.File
-var datasetLandingPageCollectionName string = "dataset_landing_page"
+
+const datasetLandingPageCollectionName string = "dataset_landing_page"
 
 var staticMethodologyJsFile *os.File
-var staticMethodologyCollectionName string = "static_methodology"
+
+const staticMethodologyCollectionName string = "static_methodology"
 
 var staticMethodologyDownloadJsFile *os.File
-var staticMethodologyDownloadCollectionName string = "static_methodology_download"
+
+const staticMethodologyDownloadCollectionName string = "static_methodology_download"
 
 var staticQmiJsFile *os.File
-var staticQmiCollectionName string = "static_qmi"
+
+const staticQmiCollectionName string = "static_qmi"
 
 var timeseriesJsFile *os.File
-var timeseriesCollectionName string = "timeseries"
+
+const timeseriesCollectionName string = "timeseries"
 
 var chartJsFile *os.File
-var chartCollectionName string = "chart"
+
+const chartCollectionName string = "chart"
 
 var productPageJsFile *os.File
-var productPageCollectionName string = "product_page"
+
+const productPageCollectionName string = "product_page"
 
 var tableJsFile *os.File
-var tableCollectionName string = "table"
+
+const tableCollectionName string = "table"
 
 var equationJsFile *os.File
-var equationCollectionName string = "equation"
+
+const equationCollectionName string = "equation"
 
 var imageJsFile *os.File
-var imageCollectionName string = "image"
+
+const imageCollectionName string = "image"
 
 var releaseJsFile *os.File
-var releaseCollectionName string = "release"
+
+const releaseCollectionName string = "release"
 
 var listJsFile *os.File
-var listCollectionName string = "list"
+
+const listCollectionName string = "list"
 
 var staticPageJsFile *os.File
-var staticPageCollectionName string = "static_page"
+
+const staticPageCollectionName string = "static_page"
 
 var staticAdhocJsFile *os.File
-var staticAdhocCollectionName string = "static_adhoc"
+
+const staticAdhocCollectionName string = "static_adhoc"
 
 var referenceTablesJsFile *os.File
-var referenceTablesCollectionName string = "reference_tables"
+
+const referenceTablesCollectionName string = "reference_tables"
 
 var compendiumChapterJsFile *os.File
-var compendiumChapterCollectionName string = "compendium_chapter"
+
+const compendiumChapterCollectionName string = "compendium_chapter"
 
 var staticLandingPageJsFile *os.File
-var staticLandingPageCollectionName string = "static_landing_page"
+
+const staticLandingPageCollectionName string = "static_landing_page"
 
 var staticArticleJsFile *os.File
-var staticArticleCollectionName string = "static_article"
+
+const staticArticleCollectionName string = "static_article"
 
 var datasetJsFile *os.File
-var datasetCollectionName string = "dataset"
+
+const datasetCollectionName string = "dataset"
 
 var timeseriesDatasetJsFile *os.File
-var timeseriesDatasetCollectionName string = "timeseries_dataset"
+
+const timeseriesDatasetCollectionName string = "timeseries_dataset"
 
 var taxonomyLandingPageJsFile *os.File
-var taxonomyLandingPageCollectionName string = "taxonomy_landing_page"
+
+const taxonomyLandingPageCollectionName string = "taxonomy_landing_page"
 
 var bodyTextFile *os.File
 var checkFile *os.File
