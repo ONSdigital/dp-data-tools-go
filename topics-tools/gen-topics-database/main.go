@@ -11,7 +11,7 @@ package main
 //    OR: (if flags: GraphAllContent and ColourContent are both true)
 //       dot -Tsvg t-big-colour.gv -o t-big-colour.gv.svg
 
-// NOTE: Any changes to the ONS website might stop this App working and it will need adjusting ...
+// NOTE: Any changes to the ONS website might stop this App working and it will need adjusting ..
 //       That is, the struct(s) may need additional fields.
 
 // NOTE: to grab all output info from running this use:
@@ -1042,7 +1042,7 @@ func replaceUnicodeWithASCII(b []byte) []byte {
 						fmt.Printf("byte 2: %v\n", b[src+4])
 						fmt.Printf("byte 3: %v\n", b[src+5])
 						panic(err)*/
-						// So, we have to assume that this is an equation and just copy the character ...
+						// So, we have to assume that this is an equation and just copy the character ..
 						b[dst] = b[src]
 					} else {
 						//fmt.Printf("unicode: \\u%s  ASCII: %c\n", hexstring, num[1])
@@ -1074,7 +1074,7 @@ UK manufactures'
 */
 
 func doAndShowDelay71() {
-	fmt.Printf("Got a 429, backing off for 71 seconds ...\n")
+	fmt.Printf("Got a 429, backing off for 71 seconds ..\n")
 	for delay := 0; delay < 71; delay++ {
 		time.Sleep(1 * time.Second)
 		if delay%3 == 0 {
@@ -1133,7 +1133,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 			// 1. URI on ONS is broke
 			// 2. ONS site is down
 			// 3. Network connection to ONS is down
-			// SO, give up on this URI ...
+			// SO, give up on this URI ..
 
 			// the node that is linked to is broken - that is it does not exist
 			indexNumber++
@@ -1228,8 +1228,8 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		os.Exit(4)
 	}
 
-	// This effectively checks that the struct 'DataResponse' has all the fields needed ...
-	// the 'payLoad' should equal the 'fixedJSON' ... if not DataResponse needs adjusting
+	// This effectively checks that the struct 'DataResponse' has all the fields needed ..
+	// the 'payLoad' should equal the 'fixedJSON' .. if not DataResponse needs adjusting
 	if bytes.Equal(payload, fixedJSON) == false {
 		fmt.Printf("Processing topic page: %s\n", fullURI)
 		fmt.Printf("Unmarshal / Marshal mismatch.\nInspect the saved .json files and fix stuct DataResponse\n")
@@ -1274,11 +1274,11 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		info := getTerminationNodeData(&data, indexNumber, fullURI, bodyTextFile, checkFile)
 		switch info {
 		case contentUnknown:
-			// no content info read, and indicate this with a Yellow border for the content termination node ...
+			// no content info read, and indicate this with a Yellow border for the content termination node ..
 			_, err = fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#E0F020\", style=bold, label = \"%s\"]\n", gvPage, gvPage, gvPageLabel+"\n ** NO Content **"+fmt.Sprintf("\\n%v", indexNumber))
 			check(err)
 		case contentNone:
-			// no content info exists, and indicate this with a RED background for the content termination node ...
+			// no content info exists, and indicate this with a RED background for the content termination node ..
 			_, err = fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#E02020\", style=filled, label = \"%s\"]\n", gvPage, gvPage, gvPageLabel+"\n ** NO Content **"+fmt.Sprintf("\\n%v", indexNumber))
 			check(err)
 		case contentExists:
@@ -1296,7 +1296,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		check(err)
 
 		if info != contentUnknown {
-			// and ...
+			// and ..
 			// write out graph any content child 'broken links' termination node as their own subgraph's
 			graphContentChildBrokenLinksSubgraph(gvPage, &data, graphVizFile)
 		}
@@ -1371,7 +1371,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 
 		// ===========================================
 		if getNodeData(&data, returnedIndexNumber, fullURI, bodyTextFile, checkFile) {
-			// This page has 'highlighted' type which has been re-maped to spotlight ... that is on a content page
+			// This page has 'highlighted' type which has been re-maped to spotlight .. that is on a content page
 			// so, Tag page as also having content:
 			listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
 				id:        returnedIndexNumber,
@@ -1388,7 +1388,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 				fixedPayload:    fixedJSON})
 		}
 
-		// and ...
+		// and ..
 		// write out any child 'highlighted links' termination node as their own subgraph's
 		if data.HighlightedLinks != nil {
 			if len(*data.HighlightedLinks) > 0 {
@@ -1421,10 +1421,10 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 		for _, link := range *data.Sections {
 			// get a sub section page
 
-			// recursively call self ...
+			// recursively call self ..
 			retFullURI, retIndex, valid, pgType := getPage(returnedIndexNumber, graphVizFile, bodyTextFile, checkFile, shortURI, *link.URI)
 			if valid {
-				// the page is NOT broken ...
+				// the page is NOT broken ..
 				sectionResults = append(sectionResults, sectionResult{fullURI: retFullURI, id: retIndex, pagType: pgType})
 				if pgType == pageTopic {
 					// save the sub topics id's
@@ -1465,7 +1465,7 @@ func getPage(parentID int, graphVizFile io.Writer, bodyTextFile io.Writer, check
 			parentURI:       "https://www.ons.gov.uk" + parentURI + "/data",
 			fixedPayload:    []byte{}})
 
-		fmt.Printf("ERROR: page has no topic or content links ...\n%v\n", fullURI)
+		fmt.Printf("ERROR: page has no topic or content links ..\n%v\n", fullURI)
 		_, err := fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#E0F020\", style=filled, label = \"%s\"]\n    }\n", gvPage, gvPage, gvPageLabel+"\n ** MISSING: topic & content **"+fmt.Sprintf("\\n%v", indexNumber))
 		check(err)
 		return fullURI, indexNumber, false, pageTopicBroken
@@ -1822,7 +1822,7 @@ func saveContentPageToCollection(collectionJsFile *os.File, id string, collectio
 	_, err = fmt.Fprintf(collectionJsFile, "\n    \"id\": \""+id+"\",\n")
 	check(err)
 
-	// write out what should be a unique key that can be indexed on ...
+	// write out what should be a unique key that can be indexed on ..
 	_, err = fmt.Fprintf(collectionJsFile, "    \"id_uri\": \""+shortURI+"\",\n")
 	check(err)
 
@@ -1896,7 +1896,7 @@ func addTables(URIList *[]string, field *[]tables) {
 }
 
 func addImages(URIList *[]string, field *[]images) {
-	// We can't read an image, so we don't check that the link is OK ...
+	// We can't read an image, so we don't check that the link is OK ..
 	// and thus this code is commented out
 	// If a way could be found to check that a link to a .png or .jpg is OK
 	// then this could be put back in:
@@ -2399,7 +2399,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 	if response.StatusCode != 200 {
 		if response.StatusCode != 404 {
 			if response.StatusCode != 429 {
-				// a 503 is being seen at this point ... (it could be some other error, but whatever it is we do error action)
+				// a 503 is being seen at this point .. (it could be some other error, but whatever it is we do error action)
 				fmt.Printf("\nERROR on ONS website /data field: %v\n\n", response.StatusCode)
 				fmt.Printf("URI does not exist:  %v\n", fullURI)
 
@@ -2433,7 +2433,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 	// Take a copy into another block of memory before the call to replaceUnicodeWithASCII()
 	// strips out the unicode characters.
-	// ... thus retaining any unicode to write back out after checks made.
+	// .. thus retaining any unicode to write back out after checks made.
 	var bodyTextCopy []byte = make([]byte, len(bodyText))
 	copy(bodyTextCopy, bodyText)
 
@@ -2468,7 +2468,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		os.Exit(8)
 	}
 
-	// Decode each content page into a specific structure according to the 'Type' of the page ...
+	// Decode each content page into a specific structure according to the 'Type' of the page ..
 	// NOTE: This is done to ensure that the structure definitions are fully defined to read ALL
 	//       the info in the /data endpoint.
 	if *shape.Type == "article" {
@@ -2498,8 +2498,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'articleResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not articleResponse needs adjusting
+		// This effectively checks that the struct 'articleResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not articleResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 2.\nInspect the saved .json files and fix stuct articleResponse\n")
@@ -2553,8 +2553,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'articleDownloadResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not articleDownloadResponse needs adjusting
+		// This effectively checks that the struct 'articleDownloadResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not articleDownloadResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 3.\nInspect the saved .json files and fix stuct articleDownloadResponse\n")
@@ -2610,8 +2610,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'bulletinResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not bulletinResponse needs adjusting
+		// This effectively checks that the struct 'bulletinResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not bulletinResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 4.\nInspect the saved .json files and fix stuct bulletinResponse\n")
@@ -2665,8 +2665,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'compendiumDataResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not compendiumDataResponse needs adjusting
+		// This effectively checks that the struct 'compendiumDataResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not compendiumDataResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 5.\nInspect the saved .json files and fix stuct compendiumDataResponse\n")
@@ -2721,8 +2721,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'compendiumLandingPageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not compendiumLandingPageResponse needs adjusting
+		// This effectively checks that the struct 'compendiumLandingPageResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not compendiumLandingPageResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 6.\nInspect the saved .json files and fix stuct compendiumLandingPageResponse\n")
@@ -2776,8 +2776,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'datasetLandingPageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not datasetLandingPageResponse needs adjusting
+		// This effectively checks that the struct 'datasetLandingPageResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not datasetLandingPageResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 7.\nInspect the saved .json files and fix stuct datasetLandingPageResponse\n")
@@ -2832,8 +2832,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'staticMethodologyResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticMethodologyResponse needs adjusting
+		// This effectively checks that the struct 'staticMethodologyResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not staticMethodologyResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 8.\nInspect the saved .json files and fix stuct staticMethodologyResponse\n")
@@ -2887,8 +2887,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'staticMethodologyDownloadResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticMethodologyDownloadResponse needs adjusting
+		// This effectively checks that the struct 'staticMethodologyDownloadResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not staticMethodologyDownloadResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 9.\nInspect the saved .json files and fix stuct staticMethodologyDownloadResponse\n")
@@ -2942,8 +2942,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'staticQmiResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticQmiResponse needs adjusting
+		// This effectively checks that the struct 'staticQmiResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not staticQmiResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 10.\nInspect the saved .json files and fix stuct staticQmiResponse\n")
@@ -2998,8 +2998,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'timeseriesResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not timeseriesResponse needs adjusting
+		// This effectively checks that the struct 'timeseriesResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not timeseriesResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 11.\nInspect the saved .json files and fix stuct timeseriesResponse\n")
@@ -3052,14 +3052,14 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'chartResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not chartResponse needs adjusting
+		// This effectively checks that the struct 'chartResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not chartResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			// The binary comparison will typically fail for struct 'chartResponse'
-			// because it contains map[string]string which after unmarshaling and marshaling ...
+			// because it contains map[string]string which after unmarshaling and marshaling ..
 			// items in the maps may not in the same order.
 
-			// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ...
+			// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ..
 
 			var prettyJSON1 bytes.Buffer
 			err = json.Indent(&prettyJSON1, fixedPayloadJSON, "", "")
@@ -3089,7 +3089,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 				os.Exit(82)
 			}
 		}
-		// NOTE: this is different to previous pages ...
+		// NOTE: this is different to previous pages ..
 		if data.Title != nil {
 			title = *data.Title
 		} else {
@@ -3109,7 +3109,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		// NOTE: this page has no URI links to add to list
 	} else if *shape.Type == "product_page" {
 		// NOTE: this is an upper level page being linked back up to
-		// ( this should probably not be being grabbed ... we shall see if its of use )
+		// ( this should probably not be being grabbed .. we shall see if its of use )
 		// "product_page" has been linked to from content nodes
 		var data DataResponse
 
@@ -3133,8 +3133,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'DataResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not DataResponse needs adjusting
+		// This effectively checks that the struct 'DataResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not DataResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 13.\nInspect the saved .json files and fix stuct DataResponse\n")
@@ -3160,7 +3160,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		collectionName = productPageCollectionName
 
 		saveContentPageToCollection(productPageJsFile, id, collectionName, bodyTextCopy, shortURI)
-		// NOTE ... do NOT grab URI's from this as its a top level page from where we initially came.
+		// NOTE .. do NOT grab URI's from this as its a top level page from where we initially came.
 		if cfg.FullDepth {
 			//			URIList = getURIListFromProductPage(fullURI, &data)
 		}
@@ -3188,8 +3188,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'tableResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not tableResponse needs adjusting
+		// This effectively checks that the struct 'tableResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not tableResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 14.\nInspect the saved .json files and fix stuct tableResponse\n")
@@ -3200,7 +3200,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			os.Exit(82)
 		}
 
-		// NOTE: this is different to previous pages ...
+		// NOTE: this is different to previous pages ..
 		if data.Title != nil {
 			title = *data.Title
 		} else {
@@ -3238,8 +3238,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'equationResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not equationResponse needs adjusting
+		// This effectively checks that the struct 'equationResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not equationResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 15.\nInspect the saved .json files and fix stuct equationResponse\n")
@@ -3250,7 +3250,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			os.Exit(82)
 		}
 
-		// NOTE: this is different to previous pages ...
+		// NOTE: this is different to previous pages ..
 		if data.Title != nil {
 			title = *data.Title
 		} else {
@@ -3288,8 +3288,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'imageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not imageResponse needs adjusting
+		// This effectively checks that the struct 'imageResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not imageResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 16.\nInspect the saved .json files and fix stuct imageResponse\n")
@@ -3300,7 +3300,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			os.Exit(82)
 		}
 
-		// NOTE: this is different to previous pages ...
+		// NOTE: this is different to previous pages ..
 		if data.Title != nil {
 			title = *data.Title
 		} else {
@@ -3342,8 +3342,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'releaseResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not releaseResponse needs adjusting
+		// This effectively checks that the struct 'releaseResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not releaseResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 17.\nInspect the saved .json files and fix stuct releaseResponse\n")
@@ -3396,14 +3396,14 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'listResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not listResponse needs adjusting
+		// This effectively checks that the struct 'listResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not listResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			// The binary comparison will typically fail for struct 'listResponse'
-			// because the original puts field names in different places in the struct which after unmarshaling and marshaling ...
+			// because the original puts field names in different places in the struct which after unmarshaling and marshaling ..
 			// items in the struct may not in the same order.
 
-			// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ...
+			// So, we do a an unraveling of the binary JSON to lines of text, sort and then compare ..
 
 			var prettyJSON1 bytes.Buffer
 			err = json.Indent(&prettyJSON1, fixedPayloadJSON, "", "    ")
@@ -3434,7 +3434,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 			}
 		}
 
-		// NOTE: this is different to previous pages ...
+		// NOTE: this is different to previous pages ..
 		title = "** no title **"
 		description = "** no description **"
 
@@ -3468,8 +3468,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'staticPageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticPageResponse needs adjusting
+		// This effectively checks that the struct 'staticPageResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not staticPageResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 19.\nInspect the saved .json files and fix stuct staticPageResponse\n")
@@ -3522,8 +3522,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'staticAdhocResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticAdhocResponse needs adjusting
+		// This effectively checks that the struct 'staticAdhocResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not staticAdhocResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 20.\nInspect the saved .json files and fix stuct staticAdhocResponse\n")
@@ -3576,8 +3576,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'referenceTablesResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not referenceTablesResponse needs adjusting
+		// This effectively checks that the struct 'referenceTablesResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not referenceTablesResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 21.\nInspect the saved .json files and fix stuct referenceTablesResponse\n")
@@ -3630,8 +3630,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'compendiumChapterResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not compendiumChapterResponse needs adjusting
+		// This effectively checks that the struct 'compendiumChapterResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not compendiumChapterResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 22.\nInspect the saved .json files and fix stuct compendiumChapterResponse\n")
@@ -3684,8 +3684,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'staticLandingPageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticLandingPageResponse needs adjusting
+		// This effectively checks that the struct 'staticLandingPageResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not staticLandingPageResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 23.\nInspect the saved .json files and fix stuct staticLandingPageResponse\n")
@@ -3738,8 +3738,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'staticArticleResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not staticArticleResponse needs adjusting
+		// This effectively checks that the struct 'staticArticleResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not staticArticleResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 24.\nInspect the saved .json files and fix stuct staticArticleResponse\n")
@@ -3792,8 +3792,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'datasetResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not datasetResponse needs adjusting
+		// This effectively checks that the struct 'datasetResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not datasetResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 25.\nInspect the saved .json files and fix stuct datasetResponse\n")
@@ -3846,8 +3846,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'timeseriesDatasetResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not timeseriesDatasetResponse needs adjusting
+		// This effectively checks that the struct 'timeseriesDatasetResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not timeseriesDatasetResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 26.\nInspect the saved .json files and fix stuct timeseriesDatasetResponse\n")
@@ -3878,7 +3878,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 	} else if *shape.Type == "taxonomy_landing_page" {
 		// NOTE: this is an upper level page being linked back up to !!!
-		// ( this should probably not be being grabbed ... we shall see if its of use )
+		// ( this should probably not be being grabbed .. we shall see if its of use )
 		// "taxonomy_landing_page" has been linked to from content nodes
 		var data DataResponse
 
@@ -3902,8 +3902,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		}
 		fixedPayloadJSON := replaceUnicodeWithASCII(payload)
 
-		// This effectively checks that the struct 'taxonomyLandingPageResponse' has all the fields needed ...
-		// the 'payLoad' should equal the 'fixedJSON' ... if not taxonomyLandingPageResponse needs adjusting
+		// This effectively checks that the struct 'taxonomyLandingPageResponse' has all the fields needed ..
+		// the 'payLoad' should equal the 'fixedJSON' .. if not taxonomyLandingPageResponse needs adjusting
 		if bytes.Equal(fixedPayloadJSON, fixedJSON) == false {
 			fmt.Printf("Processing content page: %s\n", fullURI)
 			fmt.Printf("Unmarshal / Marshal mismatch - 27.\nInspect the saved .json files and fix stuct taxonomyLandingPageResponse\n")
@@ -3929,12 +3929,12 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		collectionName = taxonomyLandingPageCollectionName
 
 		saveContentPageToCollection(taxonomyLandingPageJsFile, id, collectionName, bodyTextCopy, shortURI)
-		// NOTE ... do NOT grab URI's from this as its a top level page from where we initially came.
+		// NOTE .. do NOT grab URI's from this as its a top level page from where we initially came.
 		if cfg.FullDepth {
 			//	URIList = getURIListFromTaxonomyLandingPage(fullURI, &data)
 		}
 	} else {
-		fmt.Printf("Unknown page Type ...\n")
+		fmt.Printf("Unknown page Type ..\n")
 		fmt.Printf("shape: %s\n", *shape.Type)
 		fmt.Printf("URI: %s\n", fullURI)
 
@@ -3949,7 +3949,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 
 		// NOTE:
 		//
-		// home_page : whose uri is "/" ... this would need custom processing to explicitly add sub uri's similar to
+		// home_page : whose uri is "/" .. this would need custom processing to explicitly add sub uri's similar to
 		//             what i'm doing in the fabricate function.
 		//
 		// taxonomy_landing_page : is the the first level down from 'home_page'
@@ -4064,7 +4064,7 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 				fmt.Printf("Skipping URI with version on end: %s\n", subURI)
 				continue
 			}
-			// do the recursion ...
+			// do the recursion ..
 			getPageDataRetry(0, subURI, 0, pType, shortURI, bodyTextFile, checkFile)
 		}
 	}
@@ -4102,13 +4102,13 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 		}
 		backOff = backOff + 60
 		if backOff > 200 {
-			// probably a broken URIm but go try without /data on the end ...
+			// probably a broken URIm but go try without /data on the end ..
 			status = 404
 			break
 		}
 	}
 	if status == 404 {
-		// try reading page without data on the end ...
+		// try reading page without data on the end ..
 		noDataURI := "https://www.ons.gov.uk" + shortURI
 		//noDataURI := "https://www.production.onsdigital.co.uk" + shortURI
 
@@ -4143,7 +4143,7 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 				// 1. URI on ONS is broke
 				// 2. ONS site is down
 				// 3. Network connection to ONS is down
-				// SO, give up on this URI ...
+				// SO, give up on this URI ..
 				fmt.Printf("URI does not exist:  %v\n", shortURI)
 				appearanceInfo[shortURI]++
 				listOfDuplicateInfo = append(listOfDuplicateInfo, duplicateInfo{
@@ -4456,7 +4456,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 			if data.id == id {
 				switch data.pageType {
 				case pageBroken:
-					// this should not happen ... (it's not been seen on a full site scan)
+					// this should not happen .. (it's not been seen on a full site scan)
 					fmt.Printf("oops: pageBroken\n")
 				case pageTopic:
 					if pageType[id] != pageTopicAndContent {
@@ -4480,9 +4480,9 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 						// the mongo database (a blank place holder).
 						// NOTE: as of 30th Dec' 2020 the dp-topic-api subtopics endpoint can't indicate to the caller
 						//       if a subtopic link is broken if it is in a list of 2 or more subtopics and at least one
-						//       of them is OK ... check that this is still the case !!!
+						//       of them is OK .. check that this is still the case !!!
 						// !!! it might be that we don't want to carry broken links forward and code in this if block
-						// needs to be removed ...
+						// needs to be removed ..
 						if topics[parentID].Next.SubtopicIds == nil {
 							topics[parentID].Next.SubtopicIds = &[]string{idAndName}
 						} else {
@@ -4525,7 +4525,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 					}
 
 				case pageTopicBroken:
-					// this should not happen ... (it's not been seen on a full site scan)
+					// this should not happen .. (it's not been seen on a full site scan)
 					fmt.Printf("oops: pageTopicBroken\n")
 				/*case pageTopicHighlightedLinks: // Topic spotlight
 				var spotlight TypeLinkObject
@@ -4696,7 +4696,7 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 
 	var baseURI string = "http://localhost:25300/topics/"
 
-	// assign topic Links ...
+	// assign topic Links ..
 	for id := 1; id <= indexNumber; id++ {
 		var self LinkObject
 		var subtopics LinkObject
@@ -4753,7 +4753,7 @@ var topicsDbCollection = "topics"
 var initDir = "mongo-init-scripts"
 
 func createTopicJsScript(topics []TopicResponseStore) {
-	// do the topic database ...
+	// do the topic database ..
 	topicsJsFile, err := os.Create(initDir + "/" + topicsDbName + "-init.js")
 	check(err)
 	defer topicsJsFile.Close()
@@ -4801,7 +4801,7 @@ func createTopicJsScript(topics []TopicResponseStore) {
 var contentDbCollection = "content"
 
 func createContentJsScript(content []ContentResponse) {
-	// do the content database ...
+	// do the content database ..
 	contentJsFile, err := os.Create(initDir + "/" + contentDbCollection + "-init.js")
 	check(err)
 	defer contentJsFile.Close()
@@ -5195,7 +5195,7 @@ func initialiseCollectionDatabase(collectionName string, collectionFile *os.File
 func finaliseCollectionDatabase(collectionName string, collectionFile *os.File) {
 	// Add code to read back each document written (for visual inspection)
 	// NOTE: these lines in script are commented out to speed the process up for long scripts
-	//       they are placed in init script should they need to be uncomented ...
+	//       they are placed in init script should they need to be uncomented ..
 	_, err := fmt.Fprintf(collectionFile, "//db."+collectionName+".find().forEach(function(doc) {\n")
 	check(err)
 	_, err = fmt.Fprintf(collectionFile, "//    printjson(doc);\n")
@@ -5422,10 +5422,10 @@ func main() {
 		check(err)
 	}()
 
-	// give server a little time to start before accessing it ...
+	// give server a little time to start before accessing it ..
 	time.Sleep(1 * time.Second)
 
-	// iterate and recurse through ONS site starting at specified: rootPath ...
+	// iterate and recurse through ONS site starting at specified: rootPath ..
 	getPage(1, graphVizFile, bodyTextFile, checkFile, "", rootPath)
 
 	// Close the whole graph:
@@ -5436,7 +5436,7 @@ func main() {
 
 	fmt.Printf("\nindexNumber: %d\n", indexNumber)
 
-	// close the content database creation files ...
+	// close the content database creation files ..
 
 	finaliseCollectionDatabase(articleCollectionName, articleJsFile)
 	finaliseCollectionDatabase(articleDownloadCollectionName, articleDownloadJsFile)
