@@ -258,18 +258,18 @@ func pageTypeString(pType allowedPageType) string {
 
 // ===
 
-/*type contentType int
+/*
+the output page types are derived from particular original page types as per:
 
-const (
-	nodeHighlightedLinks             contentType = iota + 1 // article, bulletin, compendium_landing_page
-	contentItems                                            // timeseries
-	contentDatasets                                         // compendium_data, dataset_landing_page
-	contentStatsBulletins                                   // bulletin
-	contentRelatedArticles                                  // article, article_download, compendium_landing_page
-	contentRelatedMethodology                               // static_methodology, static_qmi
-	contentRelatedMethodologyArticle                        // static_methodology, static_methodology_download
-	contentHighlightedContent                               // article, bulletin, timeseries
-)*/
+	nodeHighlightedLinks               <== article, bulletin, compendium_landing_page
+	contentItems                       <== timeseries
+	contentDatasets                    <== compendium_data, dataset_landing_page
+	contentStatsBulletins              <== bulletin
+	contentRelatedArticles             <== article, article_download, compendium_landing_page
+	contentRelatedMethodology          <== static_methodology, static_qmi
+	contentRelatedMethodologyArticle   <== static_methodology, static_methodology_download
+	contentHighlightedContent          <== article, bulletin, timeseries
+*/
 
 // ===
 // pageShape used to determine how to decode a page
@@ -1243,7 +1243,7 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 	// the 'payLoad' should equal the 'fixedJSON' .. if not DataResponse needs adjusting
 	if !bytes.Equal(payload, fixedJSON) {
 		fmt.Printf("Processing topic page: %s\n", fullURI)
-		fmt.Printf("Unmarshal / Marshal mismatch.\nInspect the saved .json files and fix stuct DataResponse\n")
+		fmt.Printf("Unmarshal / Marshal mismatch.\nInspect the saved .json files and fix struct DataResponse\n")
 		_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
 		check(err)
 		_, err = fmt.Fprintf(checkFile, "%s\n", payload)
@@ -1315,7 +1315,7 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 		return fullURI, indexNumber, true, pageContent
 	}
 
-	returnedIndexNumber := indexNumber // NOTE: the linter complains about this being ineffectual, but its missing the recursion throught getPage()
+	returnedIndexNumber := indexNumber // NOTE: the linter complains about this being ineffectual, but its missing the recursion through getPage()
 
 	if len(*data.Sections) > 0 {
 		indexNumber++
@@ -1827,7 +1827,7 @@ func saveContentPageToCollection(collectionJsFile *os.File, id *int, collectionN
 	uriCollectionName[shortURI] = collectionName
 
 	*id++
-	idStr := strconv.Itoa(timeseriesDatasetCount)
+	idStr := strconv.Itoa(*id)
 
 	_, err := fmt.Fprintf(collectionJsFile, "db."+collectionName+".insertOne({")
 	check(err)
@@ -2407,7 +2407,7 @@ func checkMarshaling(fullURI string, err error, location int, payload *[]byte, f
 	// the 'payLoad' should equal the 'fixedJSON' .. if not structName needs adjusting
 	if !bytes.Equal(fixedPayloadJSON, *fixedJSON) {
 		fmt.Printf("Processing page: %s\n", fullURI)
-		fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix stuct %s\n", location, structName)
+		fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix struct %s\n", location, structName)
 		_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
 		check(err)
 		_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
@@ -2457,7 +2457,7 @@ func checkMarshalingDeepEqual(fullURI string, err error, location int, payload *
 		if !reflect.DeepEqual(line1, line2) {
 			fmt.Printf("DeepEqual comparison failed\n")
 			fmt.Printf("Processing page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix stuct %s\n", location, structName)
+			fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix struct %s\n", location, structName)
 			fmt.Printf("It helps to open these files in vscode and right click in file, select format Docuemnt\n")
 			fmt.Printf(" and then save each document and then do a file comparison in an App like meld.")
 			// NOTE: In the files, ignore the '&' character at the begining of one of the lines as this is just
@@ -3236,8 +3236,6 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 	var status int
 	var lType string
 
-	// return
-
 	for {
 		status, lType = getPageData(shortURI, parentTopicNumber, pType, parentFullURI, index)
 		if status == 200 {
@@ -3679,17 +3677,6 @@ func populateTopicAndContentStructs(topics []TopicResponseStore, content []Conte
 				case pageTopicBroken:
 					// this should not happen .. (it's not been seen on a full site scan)
 					fmt.Printf("oops: pageTopicBroken\n")
-				/*case pageTopicHighlightedLinks: // Topic spotlight
-				var spotlight TypeLinkObject
-
-				spotlight.HRef = data.shortURI
-				spotlight.Title = data.title
-
-				if topics[id].Next.Spotlight == nil {
-					topics[id].Next.Spotlight = &[]TypeLinkObject{spotlight}
-				} else {
-					*topics[id].Next.Spotlight = append(*topics[id].Next.Spotlight, spotlight)
-				}*/
 
 				case pageTopicSubtopicID:
 					// Add topic node id into parent SubtopicsIds list
