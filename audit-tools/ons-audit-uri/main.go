@@ -1848,7 +1848,7 @@ func checkMarshaling(fullURI string, err error, location int, payload *[]byte, f
 	// the 'payLoad' should equal the 'fixedJSON' .. if not structName needs adjusting
 	if !bytes.Equal(fixedPayloadJSON, *fixedJSON) {
 		fmt.Printf("Processing page: %s\n", fullURI)
-		fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix stuct %s\n", location, structName)
+		fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix struct %s\n", location, structName)
 		_, err = fmt.Fprintf(bodyTextFile, "%s\n", fixedJSON)
 		check(err)
 		_, err = fmt.Fprintf(checkFile, "%s\n", fixedPayloadJSON)
@@ -1898,7 +1898,7 @@ func checkMarshalingDeepEqual(fullURI string, err error, location int, payload *
 		if !reflect.DeepEqual(line1, line2) {
 			fmt.Printf("DeepEqual comparison failed\n")
 			fmt.Printf("Processing page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix stuct %s\n", location, structName)
+			fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix struct %s\n", location, structName)
 			fmt.Printf("It helps to open these files in vscode and right click in file, select format Docuemnt\n")
 			fmt.Printf(" and then save each document and then do a file comparison in an App like meld.")
 			// NOTE: In the files, ignore the '&' character at the begining of one of the lines as this is just
