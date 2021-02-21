@@ -596,15 +596,10 @@ type results struct {
 	*/
 }
 
-type paginator struct {
-	NumberOfPages *int   `bson:"numberOfPages,omitempty"  json:"numberOfPages,omitempty"`
-	CurrentPage   *int   `bson:"currentPage,omitempty"    json:"currentPage,omitempty"`
-	Start         *int   `bson:"start,omitempty"          json:"start,omitempty"`
-	End           *int   `bson:"end,omitempty"            json:"end,omitempty"`
-	Pages         *[]int `bson:"pages,omitempty"          json:"pages,omitempty"`
-}
+/*
+NOTE: this may need to be used in above commented out code at some point ..
 
-/*type resultsTopics struct {
+type resultsTopics struct {
 	UserInfo *string `bson:"userInfo,omitempty"  json:"userInfo,omitempty"`
 	Host     *string `bson:"host,omitempty"      json:"host,omitempty"`
 	Port     *int    `bson:"port,omitempty"      json:"port,omitempty"`
@@ -612,6 +607,14 @@ type paginator struct {
 	Query    *string `bson:"query,omitempty"     json:"query,omitempty"`
 	Fragment *string `bson:"fragment,omitempty"  json:"fragment,omitempty"`
 }*/
+
+type paginator struct {
+	NumberOfPages *int   `bson:"numberOfPages,omitempty"  json:"numberOfPages,omitempty"`
+	CurrentPage   *int   `bson:"currentPage,omitempty"    json:"currentPage,omitempty"`
+	Start         *int   `bson:"start,omitempty"          json:"start,omitempty"`
+	End           *int   `bson:"end,omitempty"            json:"end,omitempty"`
+	Pages         *[]int `bson:"pages,omitempty"          json:"pages,omitempty"`
+}
 
 type resultDescription struct {
 	Summary           *string         `bson:"summary,omitempty"            json:"summary,omitempty"`
@@ -1158,7 +1161,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 				id:        indexNumber,
 				pageType:  pageTopic,
 				parentURI: parentURI,
-				shortURI:  shortURI})
+				shortURI:  shortURI,
+			})
 			listOfPageData = append(listOfPageData, pageData{
 				id:              indexNumber,
 				subSectionIndex: parentID,
@@ -1166,7 +1170,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 				uriStatus:       pageTopicBroken,
 				shortURI:        shortURI,
 				parentURI:       "https://www.ons.gov.uk" + parentURI + "/data",
-				fixedPayload:    []byte{}})
+				fixedPayload:    []byte{},
+			})
 
 			fmt.Printf("\nERROR on ONS website /data field: %v\n\n", response.StatusCode)
 			fmt.Printf("URI does not exist:  %v\n", fullURI)
@@ -1187,7 +1192,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 			id:        indexNumber,
 			pageType:  pageTopic,
 			parentURI: parentURI,
-			shortURI:  shortURI})
+			shortURI:  shortURI,
+		})
 		listOfPageData = append(listOfPageData, pageData{
 			id:              indexNumber,
 			subSectionIndex: parentID,
@@ -1195,7 +1201,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 			uriStatus:       pageTopicBroken,
 			shortURI:        shortURI,
 			parentURI:       "https://www.ons.gov.uk" + parentURI + "/data",
-			fixedPayload:    []byte{}})
+			fixedPayload:    []byte{},
+		})
 
 		fmt.Printf("\nERROR on ONS website /data field: %v\n\n", response.StatusCode)
 		fmt.Printf("URI does not exist:  %v\n", fullURI)
@@ -1270,7 +1277,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 			id:        indexNumber,
 			pageType:  pageContent,
 			parentURI: parentURI,
-			shortURI:  shortURI})
+			shortURI:  shortURI,
+		})
 		listOfPageData = append(listOfPageData, pageData{
 			id:              indexNumber,
 			subSectionIndex: parentID,
@@ -1278,7 +1286,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 			uriStatus:       pageContent,
 			shortURI:        shortURI,
 			parentURI:       parentURI,
-			fixedPayload:    fixedJSON})
+			fixedPayload:    fixedJSON,
+		})
 
 		fmt.Printf("%v : Content Page: %v\n", indexNumber, fullURI)
 
@@ -1326,7 +1335,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 			id:        indexNumber,
 			pageType:  pageTopic,
 			parentURI: parentURI,
-			shortURI:  shortURI})
+			shortURI:  shortURI,
+		})
 		listOfPageData = append(listOfPageData, pageData{
 			id:              indexNumber,
 			subSectionIndex: parentID,
@@ -1334,7 +1344,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 			uriStatus:       pageTopic,
 			shortURI:        shortURI,
 			parentURI:       parentURI,
-			fixedPayload:    fixedJSON})
+			fixedPayload:    fixedJSON,
+		})
 		returnedIndexNumber = indexNumber
 
 		fmt.Printf("%v : Topic Page: %v\n", indexNumber, fullURI)
@@ -1388,7 +1399,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 				id:        returnedIndexNumber,
 				pageType:  pageContent,
 				parentURI: parentURI,
-				shortURI:  shortURI})
+				shortURI:  shortURI,
+			})
 			listOfPageData = append(listOfPageData, pageData{
 				id:              returnedIndexNumber,
 				subSectionIndex: parentID,
@@ -1396,7 +1408,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 				uriStatus:       pageContent,
 				shortURI:        shortURI,
 				parentURI:       parentURI,
-				fixedPayload:    fixedJSON})
+				fixedPayload:    fixedJSON,
+			})
 		}
 
 		// and ..
@@ -1440,7 +1453,14 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 				if pgType == pageTopic {
 					// save the sub topics id's
 					// 'returnedIndexNumber' is the parent ID of 'retIndex'
-					listOfPageData = append(listOfPageData, pageData{id: retIndex, subSectionIndex: returnedIndexNumber, pageType: pageTopicSubtopicID, uriStatus: pageTopicSubtopicID, shortURI: *link.URI, parentURI: shortURI})
+					listOfPageData = append(listOfPageData, pageData{
+						id:              retIndex,
+						subSectionIndex: returnedIndexNumber,
+						pageType:        pageTopicSubtopicID,
+						uriStatus:       pageTopicSubtopicID,
+						shortURI:        *link.URI,
+						parentURI:       shortURI,
+					})
 				}
 			}
 		}
@@ -1466,7 +1486,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 			id:        indexNumber,
 			pageType:  pageTopic,
 			parentURI: parentURI,
-			shortURI:  shortURI})
+			shortURI:  shortURI,
+		})
 		listOfPageData = append(listOfPageData, pageData{
 			id:              indexNumber,
 			subSectionIndex: parentID,
@@ -1474,7 +1495,8 @@ func getPage(parentID int, graphVizFile io.Writer, parentURI, shortURI string) (
 			uriStatus:       pageTopicBroken,
 			shortURI:        shortURI,
 			parentURI:       "https://www.ons.gov.uk" + parentURI + "/data",
-			fixedPayload:    []byte{}})
+			fixedPayload:    []byte{},
+		})
 
 		fmt.Printf("ERROR: page has no topic or content links ..\n%v\n", fullURI)
 		_, err := fmt.Fprintf(graphVizFile, "    subgraph %s {\n        %s [shape = box, color=\"#E0F020\", style=filled, label = \"%s\"]\n    }\n", gvPage, gvPage, gvPageLabel+"\n ** MISSING: topic & content **"+fmt.Sprintf("\\n%v", indexNumber))
@@ -2532,7 +2554,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 					id:        parentTopicNumber,
 					pageType:  pType,
 					parentURI: parentURI,
-					shortURI:  shortURI})
+					shortURI:  shortURI,
+				})
 				listOfPageData = append(listOfPageData, pageData{
 					id:              parentTopicNumber,
 					subSectionIndex: index,
@@ -2540,7 +2563,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 					uriStatus:       pageBroken,
 					shortURI:        shortURI,
 					parentURI:       parentURI,
-					fixedPayload:    []byte{}})
+					fixedPayload:    []byte{},
+				})
 			} else {
 				fmt.Printf("\nToo many requests\n")
 				// caller will call this function again for a 429
@@ -3118,7 +3142,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		id:        parentTopicNumber,
 		pageType:  pType,
 		parentURI: parentURI,
-		shortURI:  shortURI})
+		shortURI:  shortURI,
+	})
 	listOfPageData = append(listOfPageData, pageData{
 		id:              parentTopicNumber,
 		subSectionIndex: index,
@@ -3128,7 +3153,8 @@ func getPageData(shortURI string, parentTopicNumber int, pType allowedPageType, 
 		parentURI:       parentURI,
 		fixedPayload:    []byte{},
 		title:           title,
-		description:     description})
+		description:     description,
+	})
 
 	depth++
 	if depth > maxDepth {
@@ -3302,7 +3328,8 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 					id:        parentTopicNumber,
 					pageType:  pType,
 					parentURI: parentFullURI,
-					shortURI:  shortURI})
+					shortURI:  shortURI,
+				})
 				listOfPageData = append(listOfPageData, pageData{
 					id:              parentTopicNumber,
 					subSectionIndex: index,
@@ -3310,7 +3337,8 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 					uriStatus:       pageBroken,
 					shortURI:        shortURI,
 					parentURI:       parentFullURI,
-					fixedPayload:    []byte{}})
+					fixedPayload:    []byte{},
+				})
 
 				return false, ""
 			}
@@ -3371,7 +3399,8 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 				id:        parentTopicNumber,
 				pageType:  pType,
 				parentURI: parentFullURI,
-				shortURI:  shortURI})
+				shortURI:  shortURI,
+			})
 			listOfPageData = append(listOfPageData, pageData{
 				id:              parentTopicNumber,
 				subSectionIndex: index,
@@ -3379,7 +3408,8 @@ func getPageDataRetry(index int, shortURI string, parentTopicNumber int, pType a
 				uriStatus:       pageBroken,
 				shortURI:        shortURI,
 				parentURI:       parentFullURI,
-				fixedPayload:    []byte{}})
+				fixedPayload:    []byte{},
+			})
 		}
 	}
 
