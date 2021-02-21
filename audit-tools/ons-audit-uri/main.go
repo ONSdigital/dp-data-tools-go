@@ -1958,7 +1958,8 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 					depth:           depth,
 					shortURI:        shortURI,
 					parentURI:       parentURI,
-					fieldName:       fieldName})
+					fieldName:       fieldName,
+				})
 				listMu.Unlock()
 			} else {
 				fmt.Printf("\nToo many requests\n")
@@ -2441,7 +2442,8 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		subSectionIndex: index,
 		pageBroken:      false,
 		shortURI:        shortURI,
-		parentURI:       parentURI})
+		parentURI:       parentURI,
+	})
 	listMu.Unlock()
 
 	currentTime := time.Now()
@@ -2620,7 +2622,8 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 					depth:           depth,
 					shortURI:        shortURI,
 					parentURI:       parentFullURI,
-					fieldName:       fieldName})
+					fieldName:       fieldName,
+				})
 				listMu.Unlock()
 
 				return false, validURI
@@ -2694,7 +2697,8 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 				depth:           depth,
 				shortURI:        shortURI,
 				parentURI:       parentFullURI,
-				fieldName:       fieldName})
+				fieldName:       fieldName,
+			})
 			listMu.Unlock()
 		}
 	}
