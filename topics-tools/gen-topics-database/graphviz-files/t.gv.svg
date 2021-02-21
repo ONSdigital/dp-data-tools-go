@@ -310,7 +310,7 @@
 <g id="node30" class="node">
 <title>economy_economicoutputandproductivity_output_articles_economicactivityfasterindicatorsuk_latest</title>
 <polygon fill="#30a8a0" stroke="#30a8a0" points="920.8435,-5736.6006 704.6447,-5736.6006 704.6447,-5611.3994 920.8435,-5611.3994 920.8435,-5736.6006"/>
-<text text-anchor="middle" x="812.7441" y="-5720.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted:</text>
+<text text-anchor="middle" x="812.7441" y="-5720.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted: article</text>
 <text text-anchor="middle" x="812.7441" y="-5703.4" font-family="Times,serif" font-size="14.00" fill="#000000">/economy</text>
 <text text-anchor="middle" x="812.7441" y="-5686.6" font-family="Times,serif" font-size="14.00" fill="#000000">/economicoutputandproductivity</text>
 <text text-anchor="middle" x="812.7441" y="-5669.8" font-family="Times,serif" font-size="14.00" fill="#000000">/output</text>
@@ -842,8 +842,8 @@
 <!-- economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest -->
 <g id="node46" class="node">
 <title>economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest</title>
-<polygon fill="#30a8a0" stroke="#30a8a0" points="1585.1217,-5711.3002 1317.2057,-5711.3002 1317.2057,-5602.6998 1585.1217,-5602.6998 1585.1217,-5711.3002"/>
-<text text-anchor="middle" x="1451.1637" y="-5694.8" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted:</text>
+<polygon fill="#30a8a0" stroke="#30a8a0" points="1596.2823,-5711.3002 1306.0451,-5711.3002 1306.0451,-5602.6998 1596.2823,-5602.6998 1596.2823,-5711.3002"/>
+<text text-anchor="middle" x="1451.1637" y="-5694.8" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted: compendium_landing_page</text>
 <text text-anchor="middle" x="1451.1637" y="-5678" font-family="Times,serif" font-size="14.00" fill="#000000">/economy</text>
 <text text-anchor="middle" x="1451.1637" y="-5661.2" font-family="Times,serif" font-size="14.00" fill="#000000">/grossdomesticproductgdp</text>
 <text text-anchor="middle" x="1451.1637" y="-5644.4" font-family="Times,serif" font-size="14.00" fill="#000000">/compendium</text>
@@ -853,8 +853,8 @@
 <!-- economy_nationalaccounts&#45;&gt;economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest -->
 <g id="edge45" class="edge">
 <title>economy_nationalaccounts&#45;&gt;economy_grossdomesticproductgdp_compendium_unitedkingdomnationalaccountsthebluebook_latest</title>
-<path fill="none" stroke="#000000" d="M902.9821,-5831.4861C911.1298,-5828.4529 919.2006,-5825.2742 926.8865,-5822 1016.5069,-5783.822 1028.9289,-5752.1432 1120.8865,-5720 1180.27,-5699.2429 1248.1847,-5684.7975 1306.925,-5675.0282"/>
-<polygon fill="#000000" stroke="#000000" points="1307.7188,-5678.4451 1317.0241,-5673.3794 1306.5907,-5671.5366 1307.7188,-5678.4451"/>
+<path fill="none" stroke="#000000" d="M902.9821,-5831.4861C911.1298,-5828.4529 919.2006,-5825.2742 926.8865,-5822 1016.5069,-5783.822 1028.9289,-5752.1432 1120.8865,-5720 1176.6384,-5700.5122 1239.9101,-5686.5879 1296.0495,-5676.8734"/>
+<polygon fill="#000000" stroke="#000000" points="1296.8089,-5680.2946 1306.0812,-5675.1688 1295.6362,-5673.3935 1296.8089,-5680.2946"/>
 </g>
 <!-- economy_regionalaccounts_grossdisposablehouseholdincome -->
 <g id="node49" class="node">
@@ -1033,7 +1033,7 @@
 <g id="node58" class="node">
 <title>employmentandlabourmarket_peopleinwork_employmentandemployeetypes_bulletins_uklabourmarket_latest</title>
 <polygon fill="#30a8a0" stroke="#30a8a0" points="1548.2353,-4789.6006 1354.0921,-4789.6006 1354.0921,-4664.3994 1548.2353,-4664.3994 1548.2353,-4789.6006"/>
-<text text-anchor="middle" x="1451.1637" y="-4773.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted:</text>
+<text text-anchor="middle" x="1451.1637" y="-4773.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted: bulletin</text>
 <text text-anchor="middle" x="1451.1637" y="-4756.4" font-family="Times,serif" font-size="14.00" fill="#000000">/employmentandlabourmarket</text>
 <text text-anchor="middle" x="1451.1637" y="-4739.6" font-family="Times,serif" font-size="14.00" fill="#000000">/peopleinwork</text>
 <text text-anchor="middle" x="1451.1637" y="-4722.8" font-family="Times,serif" font-size="14.00" fill="#000000">/employmentandemployeetypes</text>
@@ -1051,7 +1051,7 @@
 <g id="node59" class="node">
 <title>employmentandlabourmarket_peopleinwork_earningsandworkinghours_bulletins_annualsurveyofhoursandearnings_latest</title>
 <polygon fill="#30a8a0" stroke="#30a8a0" points="1553.5993,-4933.6006 1348.7281,-4933.6006 1348.7281,-4808.3994 1553.5993,-4808.3994 1553.5993,-4933.6006"/>
-<text text-anchor="middle" x="1451.1637" y="-4917.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted:</text>
+<text text-anchor="middle" x="1451.1637" y="-4917.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted: bulletin</text>
 <text text-anchor="middle" x="1451.1637" y="-4900.4" font-family="Times,serif" font-size="14.00" fill="#000000">/employmentandlabourmarket</text>
 <text text-anchor="middle" x="1451.1637" y="-4883.6" font-family="Times,serif" font-size="14.00" fill="#000000">/peopleinwork</text>
 <text text-anchor="middle" x="1451.1637" y="-4866.8" font-family="Times,serif" font-size="14.00" fill="#000000">/earningsandworkinghours</text>
@@ -1624,7 +1624,7 @@
 <g id="node110" class="node">
 <title>peoplepopulationandcommunity_culturalidentity_sexuality_bulletins_integratedhouseholdsurvey_latest</title>
 <polygon fill="#30a8a0" stroke="#30a8a0" points="1551.7521,-1266.6006 1350.5753,-1266.6006 1350.5753,-1141.3994 1551.7521,-1141.3994 1551.7521,-1266.6006"/>
-<text text-anchor="middle" x="1451.1637" y="-1250.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted:</text>
+<text text-anchor="middle" x="1451.1637" y="-1250.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted: bulletin</text>
 <text text-anchor="middle" x="1451.1637" y="-1233.4" font-family="Times,serif" font-size="14.00" fill="#000000">/peoplepopulationandcommunity</text>
 <text text-anchor="middle" x="1451.1637" y="-1216.6" font-family="Times,serif" font-size="14.00" fill="#000000">/culturalidentity</text>
 <text text-anchor="middle" x="1451.1637" y="-1199.8" font-family="Times,serif" font-size="14.00" fill="#000000">/sexuality</text>
@@ -1762,7 +1762,7 @@
 <g id="node119" class="node">
 <title>peoplepopulationandcommunity_populationandmigration_populationestimates_articles_overviewoftheukpopulation_latest</title>
 <polygon fill="#30a8a0" stroke="#30a8a0" points="1551.7521,-379.6006 1350.5753,-379.6006 1350.5753,-254.3994 1551.7521,-254.3994 1551.7521,-379.6006"/>
-<text text-anchor="middle" x="1451.1637" y="-363.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted:</text>
+<text text-anchor="middle" x="1451.1637" y="-363.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted: article</text>
 <text text-anchor="middle" x="1451.1637" y="-346.4" font-family="Times,serif" font-size="14.00" fill="#000000">/peoplepopulationandcommunity</text>
 <text text-anchor="middle" x="1451.1637" y="-329.6" font-family="Times,serif" font-size="14.00" fill="#000000">/populationandmigration</text>
 <text text-anchor="middle" x="1451.1637" y="-312.8" font-family="Times,serif" font-size="14.00" fill="#000000">/populationestimates</text>
@@ -1780,7 +1780,7 @@
 <g id="node120" class="node">
 <title>peoplepopulationandcommunity_populationandmigration_internationalmigration_articles_noteonthedifferencebetweennationalinsurancenumberregistrationsandtheestimateoflongterminternationalmigration_latest</title>
 <polygon fill="#30a8a0" stroke="#30a8a0" points="1781.2183,-235.6006 1121.1092,-235.6006 1121.1092,-110.3994 1781.2183,-110.3994 1781.2183,-235.6006"/>
-<text text-anchor="middle" x="1451.1637" y="-219.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted:</text>
+<text text-anchor="middle" x="1451.1637" y="-219.2" font-family="Times,serif" font-size="14.00" fill="#000000">Topic &#45; Highlighted: article</text>
 <text text-anchor="middle" x="1451.1637" y="-202.4" font-family="Times,serif" font-size="14.00" fill="#000000">/peoplepopulationandcommunity</text>
 <text text-anchor="middle" x="1451.1637" y="-185.6" font-family="Times,serif" font-size="14.00" fill="#000000">/populationandmigration</text>
 <text text-anchor="middle" x="1451.1637" y="-168.8" font-family="Times,serif" font-size="14.00" fill="#000000">/internationalmigration</text>
