@@ -1,0 +1,7 @@
+module github.com/ONSdigital/dp-data-tools/content-tools/update-cdids
+
+go 1.15
+
+require (
+	github.com/ONSdigital/log.go v1.0.1
+)
