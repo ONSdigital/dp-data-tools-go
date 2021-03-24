@@ -47,6 +47,7 @@ func main() {
 		fmt.Errorf("Error occurred while creating collection. Stopping the script. error: %s", err.Error())
 		return
 	}
+	fmt.Printf("created collection: %s", collectionID)
 
 	log.Event(ctx, "successfully updated all documents.", log.INFO)
 }
@@ -57,7 +58,7 @@ func getCollectionName() string {
 
 func createCollection(ctx context.Context, client *http.Client, collectionName string, env string) (string, error) {
 
-	//https://publishing.develop.onsdigital.co.uk/zebedee/collection
+	// https://publishing.develop.onsdigital.co.uk/zebedee/collection
 	collectionURL := fmt.Sprintf("%s/zebedee/collection", env)
 
 	collectionDescription := &CollectionDescription{
@@ -74,8 +75,15 @@ func createCollection(ctx context.Context, client *http.Client, collectionName s
 		log.Error(errMessage)
 		return "", errMessage
 	}
+	req, err := http.NewRequestWithContext(ctx, "POST", collectionURL, bytes.NewBuffer(requestBodyString))
+	if err != nil {
+		errMessage := fmt.Errorf("failed to prepare collection creation request. Error: %v", err)
+		log.Error(errMessage)
+		return "", errMessage
+	}
+	req.Header.Set("Content-Type", "application/json")
 
-	creationResponse, err := client.Post(collectionURL, "application/json", bytes.NewBuffer(requestBodyString))
+	creationResponse, err := client.Do(req)
 	if err != nil {
 		errMessage := fmt.Errorf("failed to create collection via API. Error: %v", err)
 		log.Error(errMessage)
