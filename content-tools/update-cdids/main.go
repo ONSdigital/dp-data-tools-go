@@ -56,11 +56,9 @@ func main() {
 		return
 	}
 
-	cdIDPairs := readCdIDPairs(filePath, sheetname, limit)
+	cdIDPairs := readCdIDPairs(ctx, filePath, sheetname, limit)
 	for _, pair := range cdIDPairs {
-		fmt.Println("Processing for pairs")
-		fmt.Printf("cdid: %s, oldCdid: %s", pair.cdID, pair.oldCdID)
-		fmt.Println("---------------------")
+		pair.Print(ctx, "Parsed ")
 	}
 
 	ctx, err := authenticate(ctx, httpClient, environment, username, password)
@@ -74,7 +72,7 @@ func main() {
 		fmt.Errorf("error occurred while creating collection. Stopping the script. error: %s", err.Error())
 		return
 	}
-	fmt.Printf("created collection: %s", collectionID)
+	log.Event(ctx, fmt.Sprintf("created collection: %s", collectionID), log.INFO)
 
 	log.Event(ctx, "successfully updated all documents.", log.INFO)
 }
@@ -82,6 +80,10 @@ func main() {
 type CdIDPair struct {
 	cdID    string
 	oldCdID string
+}
+
+func (cp *CdIDPair) Print(ctx context.Context, prefix string) {
+	log.Event(ctx, fmt.Sprintf("%s cdid: %s, oldcdid: %s", prefix, cp.cdID, cp.oldCdID), log.INFO)
 }
 
 func authenticate(ctx context.Context, client *http.Client, environment, username string, password string) (context.Context, error) {
@@ -232,7 +234,7 @@ func setupFlags() {
 	flag.Parse()
 }
 
-func readCdIDPairs(filePath string, sheetname string, limit int64) []*CdIDPair {
+func readCdIDPairs(ctx context.Context, filePath string, sheetName string, limit int64) []*CdIDPair {
 	cdIDPairs := make([]*CdIDPair, 0)
 	// Open given file.
 	wb, err := xlsx.OpenFile(filePath)
@@ -241,14 +243,15 @@ func readCdIDPairs(filePath string, sheetname string, limit int64) []*CdIDPair {
 	}
 	// wb now contains a reference to the workbook
 	// show all the sheets in the workbook
-	fmt.Println("Sheets in this file:")
+
+	log.Event(ctx, "Sheets in this file:", log.INFO)
 	for i, sh := range wb.Sheets {
-		fmt.Println(i, sh.Name)
+		log.Event(ctx, fmt.Sprintf("Index:  Sheets name:  in this file:", i, sh.Name), log.INFO)
 	}
 
-	sheet, ok := wb.Sheet[sheetname]
+	sheet, ok := wb.Sheet[sheetName]
 	if !ok {
-		fmt.Printf("Sheet %s does not exist", sheetname)
+		panic(fmt.Errorf("sheet %s does not exist", sheetName))
 	}
 
 	var rowCount int64
@@ -261,7 +264,10 @@ func readCdIDPairs(filePath string, sheetname string, limit int64) []*CdIDPair {
 			cdIDPair.cdID = row.Cells[0].String()
 			cdIDPair.oldCdID = row.Cells[3].String()
 			cdIDPairs = append(cdIDPairs, cdIDPair)
+		} else {
+			log.Event(ctx, fmt.Sprintf("Skipping cdid: %s, oldcdid: %s", row.Cells[0].String(), row.Cells[3].String()), log.INFO)
 		}
+
 		rowCount++
 	}
 
