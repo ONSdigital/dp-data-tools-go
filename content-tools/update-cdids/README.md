@@ -7,8 +7,9 @@ This script is to link all old timeseries CDIDs to New timeseries CDIDs for PST
 - Run `go build`
 - Run 
 ```
-./update-cdids -zebedee-url=<url> -mapper-path=<full-path-to-mapper-excel> \
- -environment=<env-url> -username=<> -password=<> 
+./update-cdids -zebedee-url=<url> \
+ -environment=<env-url> -username=<> -password=<> -filepath=<xlsx-file-path> -sheetname=<sheet-name-to-use> \
+-limit=<count-of-rows-to-process>
 ```
 
 The zebedee url should be correct for the environment you are running on.

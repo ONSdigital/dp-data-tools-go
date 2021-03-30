@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/ONSdigital/log.go/log"
+	"github.com/tealeg/xlsx"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -18,10 +19,12 @@ const (
 
 var (
 	zebedeeURL  string
-	mapperPath  string
 	environment string
 	username    string
 	password    string
+	filePath    string
+	sheetname   string
+	limit       int64
 )
 
 type CollectionDescription struct {
@@ -53,9 +56,16 @@ func main() {
 		return
 	}
 
+	cdIDPairs := readCdIDPairs(filePath, sheetname, limit)
+	for _, pair := range cdIDPairs {
+		fmt.Println("Processing for pairs")
+		fmt.Printf("cdid: %s, oldCdid: %s", pair.cdID, pair.oldCdID)
+		fmt.Println("---------------------")
+	}
+
 	ctx, err := authenticate(ctx, httpClient, environment, username, password)
 	if err != nil {
-		fmt.Errorf("error occurred while authenticating. Stopping the script. error: %s", err.Error())
+		_ = fmt.Errorf("error occurred while authenticating. Stopping the script. error: %s", err.Error())
 		return
 	}
 
@@ -67,6 +77,11 @@ func main() {
 	fmt.Printf("created collection: %s", collectionID)
 
 	log.Event(ctx, "successfully updated all documents.", log.INFO)
+}
+
+type CdIDPair struct {
+	cdID    string
+	oldCdID string
 }
 
 func authenticate(ctx context.Context, client *http.Client, environment, username string, password string) (context.Context, error) {
@@ -174,11 +189,6 @@ func validateMandatoryParams(ctx context.Context) bool {
 		return true
 	}
 
-	if mapperPath == "" {
-		log.Event(ctx, "missing mapper-path flag", log.ERROR)
-		return true
-	}
-
 	if environment == "" {
 		log.Event(ctx, "missing environment flag", log.ERROR)
 		return true
@@ -193,15 +203,76 @@ func validateMandatoryParams(ctx context.Context) bool {
 		log.Event(ctx, "missing password flag", log.ERROR)
 		return true
 	}
+
+	if filePath == "" {
+		log.Event(ctx, "missing filepath flag", log.ERROR)
+		return true
+	}
+
+	if sheetname == "" {
+		log.Event(ctx, "missing sheetname flag", log.ERROR)
+		return true
+	}
+
+	if limit == 0 {
+		log.Event(ctx, "missing limit flag", log.ERROR)
+		return true
+	}
 	return false
 }
 
 func setupFlags() {
 	flag.StringVar(&zebedeeURL, "zebedee-url", zebedeeURL, "Zebedee API URL")
-	flag.StringVar(&mapperPath, "mapper-path", mapperPath, "Path to the mapper")
-	flag.StringVar(&environment, "environment-url", environment, "Environment URL")
 	flag.StringVar(&environment, "environment-url", environment, "Environment URL")
 	flag.StringVar(&password, "password", password, "password")
 	flag.StringVar(&username, "username", username, "username")
+	flag.StringVar(&filePath, "filepath", filePath, "filepath")
+	flag.StringVar(&sheetname, "sheetname", sheetname, "sheetname to use")
+	flag.Int64Var(&limit, "limit", limit, "limit of the cdids to process")
 	flag.Parse()
+}
+
+func readCdIDPairs(filePath string, sheetname string, limit int64) []*CdIDPair {
+	cdIDPairs := make([]*CdIDPair, 0)
+	// Open given file.
+	wb, err := xlsx.OpenFile(filePath)
+	if err != nil {
+		panic(err)
+	}
+	// wb now contains a reference to the workbook
+	// show all the sheets in the workbook
+	fmt.Println("Sheets in this file:")
+	for i, sh := range wb.Sheets {
+		fmt.Println(i, sh.Name)
+	}
+
+	sheet, ok := wb.Sheet[sheetname]
+	if !ok {
+		fmt.Printf("Sheet %s does not exist", sheetname)
+	}
+
+	var rowCount int64
+	for _, row := range sheet.Rows {
+		cdIDPair := &CdIDPair{}
+		if rowCount > limit {
+			break
+		}
+		if isValidRow(row) {
+			cdIDPair.cdID = row.Cells[0].String()
+			cdIDPair.oldCdID = row.Cells[3].String()
+			cdIDPairs = append(cdIDPairs, cdIDPair)
+		}
+		rowCount++
+	}
+
+	return cdIDPairs
+}
+
+func isValidRow(row *xlsx.Row) bool {
+	isValid := row.Cells[0].Value != "" &&
+		row.Cells[0].Value != "CDID" &&
+		row.Cells[3].Value != "" &&
+		row.Cells[3].Value != "no_cdid" &&
+		row.Cells[3].Value != "old_cdid"
+	return isValid
 }
