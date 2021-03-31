@@ -16,6 +16,7 @@ import (
 
 const (
 	ZebedeeToken = "ZEBEDEE_TOKEN"
+	FlorenceToken = "X-Florence-Token"
 )
 
 var (
@@ -96,10 +97,47 @@ func main() {
 			continue
 		}
 
+		err = approveCDID(ctx, httpClient, environment, collectionID, oldCdIDLocation)
+		if err != nil {
+			pair.Print(ctx, "stopping. Error occurred while approving cdid in the collection")
+			continue
+		}
+
 		pair.Print(ctx, "Completed Processing ")
 	}
 
 	log.Event(ctx, "successfully updated all documents.", log.INFO)
+}
+
+// 	curl -X POST --header "X-Florence-Token:$ZEBEDEE_TOKEN"
+//	http://localhost:8082/review/{collection-id}?uri={path-to-content}/data.json&recursive=false
+func approveCDID(ctx context.Context, client *http.Client, environment string, collectionID string, cdIDLocation string) error {
+	cdIDURI := strings.Replace(cdIDLocation, environment, "", -1)
+
+	pageReviewURL := fmt.Sprintf("%s/review/%s?uri=%s/data.json&recursive=false", environment, collectionID, cdIDURI)
+	req, err := http.NewRequestWithContext(ctx, "POST", pageReviewURL, nil)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to approve CDID. Error: %v", err)
+		log.Error(errMessage)
+		return errMessage
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set(FlorenceToken, ctx.Value(ZebedeeToken).(string))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to approve CDID. Error: %v", err)
+		log.Error(errMessage)
+
+		return errMessage
+	}
+	if resp.StatusCode > 400 {
+		errMessage := fmt.Errorf("failed to approve CDID. Error In API: %v. Status Code: %s", err, resp.Status)
+		log.Error(errMessage)
+
+		return errMessage
+	}
+	return nil
 }
 
 // POST http://localhost:8081/zebedee/content
@@ -108,9 +146,9 @@ func main() {
 //		&overwriteExisting=true
 
 func addCDIDToCollection(ctx context.Context, client *http.Client, environment string, collectionID string, cdIDLocation string, data string) error {
-	cdIDPath := strings.Replace(cdIDLocation, environment, "", -1)
+	cdIDURI := strings.Replace(cdIDLocation, environment, "", -1)
 
-	pageURL := fmt.Sprintf("%s/zebedee/content/%s?uri=%s/data.json&overwriteExisting=true", environment, collectionID, cdIDPath)
+	pageURL := fmt.Sprintf("%s/zebedee/content/%s?uri=%s/data.json&overwriteExisting=true", environment, collectionID, cdIDURI)
 	req, err := http.NewRequestWithContext(ctx, "POST", pageURL, bytes.NewBuffer([]byte(data)))
 	if err != nil {
 		errMessage := fmt.Errorf("failed to page adding to collection request. Error: %v", err)
