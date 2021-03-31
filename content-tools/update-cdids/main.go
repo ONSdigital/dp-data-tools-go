@@ -10,6 +10,7 @@ import (
 	"github.com/tealeg/xlsx"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -60,7 +61,7 @@ func main() {
 	for _, pair := range cdIDPairs {
 		pair.Print(ctx, "Parsed ")
 	}
-
+	log.Event(ctx, fmt.Sprintf("Read %d cdIDPairs" , len(cdIDPairs)), log.INFO)
 	ctx, err := authenticate(ctx, httpClient, environment, username, password)
 	if err != nil {
 		_ = fmt.Errorf("error occurred while authenticating. Stopping the script. error: %s", err.Error())
@@ -74,7 +75,127 @@ func main() {
 	}
 	log.Event(ctx, fmt.Sprintf("created collection: %s", collectionID), log.INFO)
 
+	for _, pair := range cdIDPairs {
+		pair.Print(ctx, "Processing ")
+
+		oldCdIDLocation, err := searchOldCdID(ctx, httpClient, environment, pair.oldCdID)
+		if err != nil {
+			pair.Print(ctx, "stopping. Error occurred while fetching cdID location")
+			continue
+		}
+
+		cdIDData, err := fetchDataForCDID(ctx, httpClient, environment, oldCdIDLocation)
+		if err != nil {
+			pair.Print(ctx, "stopping. Error occurred while fetching cdID data.")
+			continue
+		}
+
+		err = addCDIDToCollection(ctx, httpClient, environment, collectionID, oldCdIDLocation, cdIDData)
+		if err != nil {
+			pair.Print(ctx, "stopping. Error occurred while adding CDID to collection")
+			continue
+		}
+
+		pair.Print(ctx, "Completed Processing ")
+	}
+
 	log.Event(ctx, "successfully updated all documents.", log.INFO)
+}
+
+// POST http://localhost:8081/zebedee/content
+//		/test-4c153d5de19c33be41b772b9d6c27dfc917bda71f2d8925e6b95e17da3a7d8cf
+//		?uri=inflationandpriceindices/timeseries/mb55/mm22/data.json
+//		&overwriteExisting=true
+
+func addCDIDToCollection(ctx context.Context, client *http.Client, environment string, collectionID string, cdIDLocation string, data string) error {
+	cdIDPath := strings.Replace(cdIDLocation, environment, "", -1)
+
+	pageURL := fmt.Sprintf("%s/zebedee/content/%s?uri=%s/data.json&overwriteExisting=true", environment, collectionID, cdIDPath)
+	req, err := http.NewRequestWithContext(ctx, "POST", pageURL, bytes.NewBuffer([]byte(data)))
+	if err != nil {
+		errMessage := fmt.Errorf("failed to page adding to collection request. Error: %v", err)
+		log.Error(errMessage)
+		return errMessage
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set(ZebedeeToken, ctx.Value(ZebedeeToken).(string))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to add collection to page. Error: %v", err)
+		log.Error(errMessage)
+
+		return errMessage
+	}
+	if resp.StatusCode > 400 {
+		errMessage := fmt.Errorf("failed to add collection to page. Error In API: %v. Status Code: %s", err, resp.Status)
+		log.Error(errMessage)
+
+		return errMessage
+	}
+	return nil
+}
+
+func fetchDataForCDID(ctx context.Context, client *http.Client, environment string, location string) (string, error) {
+
+	cdIDDataURL := fmt.Sprintf("%s/data", location)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", cdIDDataURL, nil)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to prepare fetch CDID request. Error: %v", err)
+		log.Error(errMessage)
+		return "", errMessage
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		if err != nil {
+			errMessage := fmt.Errorf("failed to fetch CDID data from API. Error: %v", err)
+			log.Error(errMessage)
+
+			return "", errMessage
+		}
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to read CDID data response. Error: %v", err)
+		log.Error(errMessage)
+		return "", errMessage
+	}
+
+	return string(body), nil
+}
+
+func searchOldCdID(ctx context.Context, client *http.Client, environment string, cdID string) (string, error) {
+	searchURL := fmt.Sprintf("%s/search?q=%s", environment, cdID)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", searchURL, nil)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to prepare search request. Error: %v", err)
+		log.Error(errMessage)
+		return "", errMessage
+	}
+	resp, err := client.Transport.RoundTrip(req)
+	if err != nil {
+		if err != nil {
+			errMessage := fmt.Errorf("failed to search API. Error: %v", err)
+			log.Error(errMessage)
+
+			return "", errMessage
+		}
+	}
+
+	defer resp.Body.Close()
+	locationHeader := resp.Header.Get("Location")
+	if len(locationHeader) == 0 {
+		errMessage := fmt.Errorf("failed to search the given CDID")
+		log.Error(errMessage)
+
+		return "", errMessage
+	}
+
+	return strings.Split(locationHeader, "?")[0], nil
 }
 
 type CdIDPair struct {
