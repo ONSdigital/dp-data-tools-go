@@ -85,6 +85,17 @@ func main() {
 			continue
 		}
 
+		existingCollectionID, err := checkIfCdIDExistsInAnotherCollection(ctx, httpClient, environment,oldCdIDLocation)
+		if err != nil {
+			pair.Print(ctx, "stopping. Error occurred while verifying if cdID location exists in another collection")
+			continue
+		}
+
+		if len(existingCollectionID) > 0 {
+			pair.Print(ctx, fmt.Sprintf("stopping. Error occurred. CDID: %s already exists in another collection: %s", pair.oldCdID, existingCollectionID))
+			continue
+		}
+
 		cdIDData, err := fetchDataForCDID(ctx, httpClient, environment, oldCdIDLocation)
 		if err != nil {
 			pair.Print(ctx, "stopping. Error occurred while fetching cdID data.")
@@ -107,6 +118,35 @@ func main() {
 	}
 
 	log.Event(ctx, "successfully updated all documents.", log.INFO)
+}
+
+func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Client, environment string, cdIDLocation string) (string, error) {
+	cdIDURI := strings.Replace(cdIDLocation, environment, "", -1)
+	collectionCheckURL := fmt.Sprintf("%s/checkcollectionsforuri?uri=%s/data.json", environment, cdIDURI)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", collectionCheckURL, nil)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to prepare search cdid in collection request. Error: %v", err)
+		log.Error(errMessage)
+		return "", errMessage
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		if err != nil {
+			errMessage := fmt.Errorf("failed to search in API for cdid in collection . Error: %v", err)
+			log.Error(errMessage)
+
+			return "", errMessage
+		}
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode > 400 {
+		return "existing-Collection-ID", nil
+	}
+
+
+	return "", nil
 }
 
 // 	curl -X POST --header "X-Florence-Token:$ZEBEDEE_TOKEN"
