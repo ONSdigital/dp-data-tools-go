@@ -150,11 +150,14 @@ func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Clie
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode > 400 {
-		return "existing-Collection-ID", nil
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to read existing collection ID. Error: %v", err)
+		log.Error(errMessage)
+		return "", errMessage
 	}
 
-	return "", nil
+	return string(body), nil
 }
 
 // 	curl -X POST --header "X-Florence-Token:$ZEBEDEE_TOKEN"
