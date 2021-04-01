@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	ZebedeeToken = "ZEBEDEE_TOKEN"
+	ZebedeeToken  = "ZEBEDEE_TOKEN"
 	FlorenceToken = "X-Florence-Token"
 )
 
@@ -48,6 +48,15 @@ type CollectionDescriptionResponse struct {
 	ID string `json:"id"`
 }
 
+type CdIDPair struct {
+	cdID    string
+	oldCdID string
+}
+
+func (cp *CdIDPair) Print(ctx context.Context, prefix string) {
+	log.Event(ctx, fmt.Sprintf("%s cdid: %s, oldcdid: %s", prefix, cp.cdID, cp.oldCdID), log.INFO)
+}
+
 func main() {
 	setupFlags()
 
@@ -62,16 +71,18 @@ func main() {
 	for _, pair := range cdIDPairs {
 		pair.Print(ctx, "Parsed ")
 	}
-	log.Event(ctx, fmt.Sprintf("Read %d cdIDPairs" , len(cdIDPairs)), log.INFO)
+	log.Event(ctx, fmt.Sprintf("Read %d cdIDPairs", len(cdIDPairs)), log.INFO)
 	ctx, err := authenticate(ctx, httpClient, environment, username, password)
 	if err != nil {
-		_ = fmt.Errorf("error occurred while authenticating. Stopping the script. error: %s", err.Error())
+		errMessage := fmt.Errorf("error occurred while authenticating. Stopping the script. error: %s", err.Error())
+		log.Error(errMessage)
 		return
 	}
 
 	collectionID, err := createCollection(ctx, httpClient, getCollectionName(), environment)
 	if err != nil {
-		fmt.Errorf("error occurred while creating collection. Stopping the script. error: %s", err.Error())
+		errMessage := fmt.Errorf("error occurred while creating collection. Stopping the script. error: %s", err.Error())
+		log.Error(errMessage)
 		return
 	}
 	log.Event(ctx, fmt.Sprintf("created collection: %s", collectionID), log.INFO)
@@ -85,7 +96,7 @@ func main() {
 			continue
 		}
 
-		existingCollectionID, err := checkIfCdIDExistsInAnotherCollection(ctx, httpClient, environment,oldCdIDLocation)
+		existingCollectionID, err := checkIfCdIDExistsInAnotherCollection(ctx, httpClient, environment, oldCdIDLocation)
 		if err != nil {
 			pair.Print(ctx, "stopping. Error occurred while verifying if cdID location exists in another collection")
 			continue
@@ -132,19 +143,16 @@ func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Clie
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		if err != nil {
-			errMessage := fmt.Errorf("failed to search in API for cdid in collection . Error: %v", err)
-			log.Error(errMessage)
+		errMessage := fmt.Errorf("failed to search in API for cdid in collection . Error: %v", err)
+		log.Error(errMessage)
 
-			return "", errMessage
-		}
+		return "", errMessage
 	}
-
 	defer resp.Body.Close()
+
 	if resp.StatusCode > 400 {
 		return "existing-Collection-ID", nil
 	}
-
 
 	return "", nil
 }
@@ -177,6 +185,7 @@ func approveCDID(ctx context.Context, client *http.Client, environment string, c
 
 		return errMessage
 	}
+	defer resp.Body.Close()
 	return nil
 }
 
@@ -274,15 +283,6 @@ func searchOldCdID(ctx context.Context, client *http.Client, environment string,
 	}
 
 	return strings.Split(locationHeader, "?")[0], nil
-}
-
-type CdIDPair struct {
-	cdID    string
-	oldCdID string
-}
-
-func (cp *CdIDPair) Print(ctx context.Context, prefix string) {
-	log.Event(ctx, fmt.Sprintf("%s cdid: %s, oldcdid: %s", prefix, cp.cdID, cp.oldCdID), log.INFO)
 }
 
 func authenticate(ctx context.Context, client *http.Client, environment, username string, password string) (context.Context, error) {
