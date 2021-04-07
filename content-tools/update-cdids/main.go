@@ -63,7 +63,7 @@ func main() {
 	ctx := context.Background()
 	httpClient := http.DefaultClient
 
-	if validateMandatoryParams(ctx) {
+	if !isMandatoryParamsPresent(ctx) {
 		return
 	}
 
@@ -78,6 +78,8 @@ func main() {
 		log.Error(errMessage)
 		return
 	}
+
+	clearCreds()
 
 	collectionID, err := createCollection(ctx, httpClient, getCollectionName(), environment)
 	if err != nil {
@@ -129,6 +131,11 @@ func main() {
 	}
 
 	log.Event(ctx, "successfully updated all documents.", log.INFO)
+}
+
+func clearCreds() {
+	username = ""
+	password = ""
 }
 
 func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Client, environment string, cdIDLocation string) (string, error) {
@@ -425,42 +432,42 @@ func createCollection(ctx context.Context, client *http.Client, collectionName s
 	return response.ID, nil
 }
 
-func validateMandatoryParams(ctx context.Context) bool {
+func isMandatoryParamsPresent(ctx context.Context) bool {
 	if zebedeeURL == "" {
 		log.Event(ctx, "missing zebedeeURL flag", log.ERROR)
-		return true
+		return false
 	}
 
 	if environment == "" {
 		log.Event(ctx, "missing environment flag", log.ERROR)
-		return true
+		return false
 	}
 
 	if username == "" {
 		log.Event(ctx, "missing username flag", log.ERROR)
-		return true
+		return false
 	}
 
 	if password == "" {
 		log.Event(ctx, "missing password flag", log.ERROR)
-		return true
+		return false
 	}
 
 	if filePath == "" {
 		log.Event(ctx, "missing filepath flag", log.ERROR)
-		return true
+		return false
 	}
 
 	if sheetname == "" {
 		log.Event(ctx, "missing sheetname flag", log.ERROR)
-		return true
+		return false
 	}
 
 	if limit == 0 {
 		log.Event(ctx, "missing limit flag", log.ERROR)
-		return true
+		return false
 	}
-	return false
+	return true
 }
 
 func setupFlags() {
@@ -495,7 +502,7 @@ func readCdIDPairs(ctx context.Context, filePath string, sheetName string, limit
 	}
 
 	var rowCount int64
-	for _, row := range sheet.Rows {
+	for index, row := range sheet.Rows {
 		cdIDPair := &CdIDPair{}
 		if rowCount > limit {
 			break
@@ -505,7 +512,7 @@ func readCdIDPairs(ctx context.Context, filePath string, sheetName string, limit
 			cdIDPair.oldCdID = row.Cells[3].String()
 			cdIDPairs = append(cdIDPairs, cdIDPair)
 		} else {
-			log.Event(ctx, fmt.Sprintf("Skipping cdid: %s, oldcdid: %s", row.Cells[0].String(), row.Cells[3].String()), log.INFO)
+			log.Event(ctx, fmt.Sprintf("RowNumber: %d, Skipping cdid: %s, oldcdid: %s", index+1, row.Cells[0].String(), row.Cells[3].String()), log.INFO)
 		}
 
 		rowCount++
