@@ -49,12 +49,13 @@ type CollectionDescriptionResponse struct {
 }
 
 type CdIDPair struct {
-	cdID    string
-	oldCdID string
+	cdID       string
+	oldCdID    string
+	ExcelIndex int
 }
 
 func (cp *CdIDPair) Print(ctx context.Context, prefix string) {
-	log.Event(ctx, fmt.Sprintf("%s cdid: %s, oldcdid: %s", prefix, cp.cdID, cp.oldCdID), log.INFO)
+	log.Event(ctx, fmt.Sprintf("%s ExcelIndex: %d, cdid: %s, oldcdid: %s", prefix, cp.ExcelIndex, cp.cdID, cp.oldCdID), log.INFO)
 }
 
 func main() {
@@ -528,6 +529,7 @@ func readCdIDPairs(ctx context.Context, config *Config) []*CdIDPair {
 		if isValidRow(row) {
 			cdIDPair.cdID = row.Cells[0].String()
 			cdIDPair.oldCdID = row.Cells[3].String()
+			cdIDPair.ExcelIndex = index
 			cdIDPairs = append(cdIDPairs, cdIDPair)
 		} else {
 			log.Event(ctx, fmt.Sprintf("RowNumber: %d, Skipping cdid: %s, oldcdid: %s", index+1, row.Cells[0].String(), row.Cells[3].String()), log.INFO)
