@@ -19,15 +19,15 @@ const (
 	FlorenceToken = "X-Florence-Token"
 )
 
-var (
-	zebedeeURL  string
-	environment string
-	username    string
-	password    string
-	filePath    string
-	sheetname   string
-	limit       int64
-)
+type Config struct {
+	ZebedeeURL  string
+	Environment string
+	Username    string
+	Password    string
+	FilePath    string
+	Sheetname   string
+	Limit       int64
+}
 
 type CollectionDescription struct {
 	Name            string      `json:"name"`
@@ -58,30 +58,30 @@ func (cp *CdIDPair) Print(ctx context.Context, prefix string) {
 }
 
 func main() {
-	setupFlags()
+	config := parseConfig()
 
 	ctx := context.Background()
 	httpClient := http.DefaultClient
 
-	if !isMandatoryParamsPresent(ctx) {
+	if !config.isMandatoryParamsPresent(ctx) {
 		return
 	}
 
-	cdIDPairs := readCdIDPairs(ctx, filePath, sheetname, limit)
+	cdIDPairs := readCdIDPairs(ctx, config)
 	for _, pair := range cdIDPairs {
 		pair.Print(ctx, "Parsed ")
 	}
 	log.Event(ctx, fmt.Sprintf("Read %d cdIDPairs", len(cdIDPairs)), log.INFO)
-	ctx, err := authenticate(ctx, httpClient, environment, username, password)
+	ctx, err := authenticate(ctx, httpClient, config)
 	if err != nil {
 		errMessage := fmt.Errorf("error occurred while authenticating. Stopping the script. error: %s", err.Error())
 		log.Error(errMessage)
 		return
 	}
 
-	clearCreds()
+	config.clearCreds()
 
-	collectionID, err := createCollection(ctx, httpClient, getCollectionName(), environment)
+	collectionID, err := createCollection(ctx, httpClient, getCollectionName(), config.Environment)
 	if err != nil {
 		errMessage := fmt.Errorf("error occurred while creating collection. Stopping the script. error: %s", err.Error())
 		log.Error(errMessage)
@@ -92,13 +92,13 @@ func main() {
 	for _, pair := range cdIDPairs {
 		pair.Print(ctx, "Processing ")
 
-		oldCdIDLocation, err := searchOldCdID(ctx, httpClient, environment, pair.oldCdID)
+		oldCdIDLocation, err := searchOldCdID(ctx, httpClient, config, pair.oldCdID)
 		if err != nil {
 			pair.Print(ctx, "stopping. Error occurred while fetching cdID location")
 			continue
 		}
 
-		existingCollectionID, err := checkIfCdIDExistsInAnotherCollection(ctx, httpClient, environment, oldCdIDLocation)
+		existingCollectionID, err := checkIfCdIDExistsInAnotherCollection(ctx, httpClient, config, oldCdIDLocation)
 		if err != nil {
 			pair.Print(ctx, "stopping. Error occurred while verifying if cdID location exists in another collection")
 			continue
@@ -109,19 +109,19 @@ func main() {
 			continue
 		}
 
-		cdIDData, err := fetchDataForCDID(ctx, httpClient, environment, oldCdIDLocation)
+		cdIDData, err := fetchDataForCDID(ctx, httpClient, config, oldCdIDLocation)
 		if err != nil {
 			pair.Print(ctx, "stopping. Error occurred while fetching cdID data.")
 			continue
 		}
 
-		err = addCDIDToCollection(ctx, httpClient, environment, collectionID, oldCdIDLocation, cdIDData)
+		err = addCDIDToCollection(ctx, httpClient, config, collectionID, oldCdIDLocation, cdIDData)
 		if err != nil {
 			pair.Print(ctx, "stopping. Error occurred while adding CDID to collection")
 			continue
 		}
 
-		err = approveCDID(ctx, httpClient, environment, collectionID, oldCdIDLocation)
+		err = approveCDID(ctx, httpClient, config, collectionID, oldCdIDLocation)
 		if err != nil {
 			pair.Print(ctx, "stopping. Error occurred while approving cdid in the collection")
 			continue
@@ -133,14 +133,9 @@ func main() {
 	log.Event(ctx, "successfully updated all documents.", log.INFO)
 }
 
-func clearCreds() {
-	username = ""
-	password = ""
-}
-
-func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Client, environment string, cdIDLocation string) (string, error) {
-	cdIDURI := strings.Replace(cdIDLocation, environment, "", -1)
-	collectionCheckURL := fmt.Sprintf("%s/checkcollectionsforuri?uri=%s/data.json", environment, cdIDURI)
+func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Client, config *Config, cdIDLocation string) (string, error) {
+	cdIDURI := strings.Replace(cdIDLocation, config.Environment, "", -1)
+	collectionCheckURL := fmt.Sprintf("%s/checkcollectionsforuri?uri=%s/data.json", config.Environment, cdIDURI)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", collectionCheckURL, nil)
 	if err != nil {
@@ -176,10 +171,10 @@ func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Clie
 
 // 	curl -X POST --header "X-Florence-Token:$ZEBEDEE_TOKEN"
 //	http://localhost:8082/review/{collection-id}?uri={path-to-content}/data.json&recursive=false
-func approveCDID(ctx context.Context, client *http.Client, environment string, collectionID string, cdIDLocation string) error {
-	cdIDURI := strings.Replace(cdIDLocation, environment, "", -1)
+func approveCDID(ctx context.Context, client *http.Client, config *Config, collectionID string, cdIDLocation string) error {
+	cdIDURI := strings.Replace(cdIDLocation, config.Environment, "", -1)
 
-	pageReviewURL := fmt.Sprintf("%s/review/%s?uri=%s/data.json&recursive=false", environment, collectionID, cdIDURI)
+	pageReviewURL := fmt.Sprintf("%s/review/%s?uri=%s/data.json&recursive=false", config.Environment, collectionID, cdIDURI)
 	req, err := http.NewRequestWithContext(ctx, "POST", pageReviewURL, nil)
 	if err != nil {
 		errMessage := fmt.Errorf("failed to approve CDID. Error: %v", err)
@@ -213,10 +208,10 @@ func approveCDID(ctx context.Context, client *http.Client, environment string, c
 //		?uri=inflationandpriceindices/timeseries/mb55/mm22/data.json
 //		&overwriteExisting=true
 
-func addCDIDToCollection(ctx context.Context, client *http.Client, environment string, collectionID string, cdIDLocation string, data string) error {
-	cdIDURI := strings.Replace(cdIDLocation, environment, "", -1)
+func addCDIDToCollection(ctx context.Context, client *http.Client, config *Config, collectionID string, cdIDLocation string, data string) error {
+	cdIDURI := strings.Replace(cdIDLocation, config.Environment, "", -1)
 
-	pageURL := fmt.Sprintf("%s/zebedee/content/%s?uri=%s/data.json&overwriteExisting=true", environment, collectionID, cdIDURI)
+	pageURL := fmt.Sprintf("%s/zebedee/content/%s?uri=%s/data.json&overwriteExisting=true", config.Environment, collectionID, cdIDURI)
 	req, err := http.NewRequestWithContext(ctx, "POST", pageURL, bytes.NewBuffer([]byte(data)))
 	if err != nil {
 		errMessage := fmt.Errorf("failed to page adding to collection request. Error: %v", err)
@@ -244,7 +239,7 @@ func addCDIDToCollection(ctx context.Context, client *http.Client, environment s
 	return nil
 }
 
-func fetchDataForCDID(ctx context.Context, client *http.Client, environment string, location string) (string, error) {
+func fetchDataForCDID(ctx context.Context, client *http.Client, config *Config, location string) (string, error) {
 
 	cdIDDataURL := fmt.Sprintf("%s/data", location)
 
@@ -281,8 +276,8 @@ func fetchDataForCDID(ctx context.Context, client *http.Client, environment stri
 	return string(body), nil
 }
 
-func searchOldCdID(ctx context.Context, client *http.Client, environment string, cdID string) (string, error) {
-	searchURL := fmt.Sprintf("%s/search?q=%s", environment, cdID)
+func searchOldCdID(ctx context.Context, client *http.Client, config *Config, cdID string) (string, error) {
+	searchURL := fmt.Sprintf("%s/search?q=%s", config.Environment, cdID)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", searchURL, nil)
 	if err != nil {
@@ -319,12 +314,12 @@ func searchOldCdID(ctx context.Context, client *http.Client, environment string,
 	return strings.Split(locationHeader, "?")[0], nil
 }
 
-func authenticate(ctx context.Context, client *http.Client, environment, username string, password string) (context.Context, error) {
-	loginURL := fmt.Sprintf("%s/login", environment)
+func authenticate(ctx context.Context, client *http.Client, config *Config) (context.Context, error) {
+	loginURL := fmt.Sprintf("%s/login", config.Environment)
 
 	credential := &Credential{
-		Email:    username,
-		Password: password,
+		Email:    config.Username,
+		Password: config.Password,
 	}
 
 	requestBodyString, err := json.Marshal(credential)
@@ -409,7 +404,7 @@ func createCollection(ctx context.Context, client *http.Client, collectionName s
 	defer creationResponse.Body.Close()
 
 	if creationResponse.StatusCode != 200 {
-		errMessage := fmt.Errorf("failed to create collection. Error In API: %v. Status Code: %s", err, resp.Status)
+		errMessage := fmt.Errorf("failed to create collection. Error In API: %v. Status Code: %s", err, creationResponse.Status)
 		log.Error(errMessage)
 
 		return "", errMessage
@@ -432,45 +427,58 @@ func createCollection(ctx context.Context, client *http.Client, collectionName s
 	return response.ID, nil
 }
 
-func isMandatoryParamsPresent(ctx context.Context) bool {
-	if zebedeeURL == "" {
+func (config *Config) isMandatoryParamsPresent(ctx context.Context) bool {
+	if config.ZebedeeURL == "" {
 		log.Event(ctx, "missing zebedeeURL flag", log.ERROR)
 		return false
 	}
 
-	if environment == "" {
+	if config.Environment == "" {
 		log.Event(ctx, "missing environment flag", log.ERROR)
 		return false
 	}
 
-	if username == "" {
+	if config.Username == "" {
 		log.Event(ctx, "missing username flag", log.ERROR)
 		return false
 	}
 
-	if password == "" {
+	if config.Password == "" {
 		log.Event(ctx, "missing password flag", log.ERROR)
 		return false
 	}
 
-	if filePath == "" {
+	if config.FilePath == "" {
 		log.Event(ctx, "missing filepath flag", log.ERROR)
 		return false
 	}
 
-	if sheetname == "" {
+	if config.Sheetname == "" {
 		log.Event(ctx, "missing sheetname flag", log.ERROR)
 		return false
 	}
 
-	if limit == 0 {
+	if config.Limit == 0 {
 		log.Event(ctx, "missing limit flag", log.ERROR)
 		return false
 	}
 	return true
 }
 
-func setupFlags() {
+func (config *Config) clearCreds() {
+	config.Username = ""
+	config.Password = ""
+}
+
+func parseConfig() *Config {
+	var zebedeeURL string
+	var environment string
+	var username string
+	var password string
+	var filePath string
+	var sheetname string
+	var limit int64
+
 	flag.StringVar(&zebedeeURL, "zebedee-url", zebedeeURL, "Zebedee API URL")
 	flag.StringVar(&environment, "environment-url", environment, "Environment URL")
 	flag.StringVar(&password, "password", password, "password")
@@ -479,12 +487,22 @@ func setupFlags() {
 	flag.StringVar(&sheetname, "sheetname", sheetname, "sheetname to use")
 	flag.Int64Var(&limit, "limit", limit, "limit of the cdids to process")
 	flag.Parse()
+
+	return &Config{
+		ZebedeeURL:  zebedeeURL,
+		Environment: environment,
+		Username:    username,
+		Password:    password,
+		FilePath:    filePath,
+		Sheetname:   sheetname,
+		Limit:       limit,
+	}
 }
 
-func readCdIDPairs(ctx context.Context, filePath string, sheetName string, limit int64) []*CdIDPair {
+func readCdIDPairs(ctx context.Context, config *Config) []*CdIDPair {
 	cdIDPairs := make([]*CdIDPair, 0)
 	// Open given file.
-	wb, err := xlsx.OpenFile(filePath)
+	wb, err := xlsx.OpenFile(config.FilePath)
 	if err != nil {
 		panic(err)
 	}
@@ -496,15 +514,15 @@ func readCdIDPairs(ctx context.Context, filePath string, sheetName string, limit
 		log.Event(ctx, fmt.Sprintf("Index:  Sheets name:  in this file:", i, sh.Name), log.INFO)
 	}
 
-	sheet, ok := wb.Sheet[sheetName]
+	sheet, ok := wb.Sheet[config.Sheetname]
 	if !ok {
-		panic(fmt.Errorf("sheet %s does not exist", sheetName))
+		panic(fmt.Errorf("sheet %s does not exist", config.Sheetname))
 	}
 
 	var rowCount int64
 	for index, row := range sheet.Rows {
 		cdIDPair := &CdIDPair{}
-		if rowCount > limit {
+		if rowCount > config.Limit {
 			break
 		}
 		if isValidRow(row) {
