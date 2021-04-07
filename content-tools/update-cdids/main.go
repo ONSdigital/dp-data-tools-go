@@ -294,6 +294,13 @@ func searchOldCdID(ctx context.Context, client *http.Client, environment string,
 	}
 
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		errMessage := fmt.Errorf("failed to search the given CDID. Error In API: %v. Status Code: %s", err, resp.Status)
+		log.Error(errMessage)
+
+		return "", errMessage
+	}
+
 	locationHeader := resp.Header.Get("Location")
 	if len(locationHeader) == 0 {
 		errMessage := fmt.Errorf("failed to search the given CDID")
