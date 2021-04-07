@@ -150,6 +150,13 @@ func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Clie
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		errMessage := fmt.Errorf("failed to read existing collection ID. Error In API: %v. Status Code: %s", err, resp.Status)
+		log.Error(errMessage)
+
+		return "", errMessage
+	}
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		errMessage := fmt.Errorf("failed to read existing collection ID. Error: %v", err)
@@ -184,7 +191,7 @@ func approveCDID(ctx context.Context, client *http.Client, environment string, c
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode > 400 {
+	if resp.StatusCode != 200 {
 		errMessage := fmt.Errorf("failed to approve CDID. Error In API: %v. Status Code: %s", err, resp.Status)
 		log.Error(errMessage)
 
@@ -221,7 +228,7 @@ func addCDIDToCollection(ctx context.Context, client *http.Client, environment s
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode > 400 {
+	if resp.StatusCode != 200 {
 		errMessage := fmt.Errorf("failed to add collection to page. Error In API: %v. Status Code: %s", err, resp.Status)
 		log.Error(errMessage)
 
@@ -251,7 +258,12 @@ func fetchDataForCDID(ctx context.Context, client *http.Client, environment stri
 		}
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		errMessage := fmt.Errorf("failed to read CDID. Error In API: %v. Status Code: %s", err, resp.Status)
+		log.Error(errMessage)
 
+		return "", errMessage
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		errMessage := fmt.Errorf("failed to read CDID data response. Error: %v", err)
@@ -325,6 +337,13 @@ func authenticate(ctx context.Context, client *http.Client, environment, usernam
 	}
 	defer loginResponse.Body.Close()
 
+	if loginResponse.StatusCode != 200 {
+		errMessage := fmt.Errorf("failed to login. Error In API: %v. Status Code: %s", err, loginResponse.Status)
+		log.Error(errMessage)
+
+		return ctx, errMessage
+	}
+
 	body, err := ioutil.ReadAll(loginResponse.Body)
 	if err != nil {
 		errMessage := fmt.Errorf("failed to read API response. Error: %v", err)
@@ -374,6 +393,13 @@ func createCollection(ctx context.Context, client *http.Client, collectionName s
 		return "", errMessage
 	}
 	defer creationResponse.Body.Close()
+
+	if creationResponse.StatusCode != 200 {
+		errMessage := fmt.Errorf("failed to create collection. Error In API: %v. Status Code: %s", err, resp.Status)
+		log.Error(errMessage)
+
+		return "", errMessage
+	}
 
 	body, err := ioutil.ReadAll(creationResponse.Body)
 	if err != nil {
