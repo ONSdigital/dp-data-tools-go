@@ -87,16 +87,6 @@ for repo_name in repo_names_clean:
     branches_url = "https://github.com/ONSdigital/" + repo_name + "/settings/branches"
     time.sleep(1) # without delay Github sometimes crashis this app with a timeout
     driver.get(branches_url)
-    #print("Waiting for ID to be present ...\n")
-    try:
-        element = WebDriverWait(driver, 3).until(
-        EC.presence_of_element_located((By.ID, "default-branch-filter"))  # something that indicates we are on the page we want
-        )
-    except:
-        print(repo_name)
-        print("  ERROR: No 'Branch protection rules' defined")
-        print()
-        continue
 
     html = driver.page_source
     soup = BeautifulSoup(html, 'lxml')

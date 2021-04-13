@@ -1,7 +1,3 @@
-Attempting to setup chrome debug port connection ...
-
-
-
 Repo & branch,          require,  required,   dismiss stale,  require,  restrict,  require,  require,   concourse,  concourse,  concourse,   concourse,  require,  require,  include,         restrict,  allow,   allow
  ,                      pull,     approving,  pull request,   review,   who can,   status,   branches,  -ci/,       -ci/,       -ci/,        -ci/,       signed,   linear,   administrators,  who can,   force,   deletions
  ,                      request,  reviews,    approvals,      from,     can,       checks,   to be up,  {repo,      {repo,      {repo,       {repo,      commits,  history,  ,                push to,   pushes,  
@@ -324,8 +320,8 @@ dp-authorisation
   :  master
                         on,       1,          - ,             - ,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         on,       - ,       - ,              - ,        - ,      - 
 dp-component-test
-  ERROR: No 'Branch protection rules' defined
-
+  :  main
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
 dp-cookies
   :  master
                         on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
@@ -357,7 +353,7 @@ dp-logging
   :  feature/performance-test
                         - ,       ,           ,               ,         ,          - ,       - ,        - ,         - ,         - ,          - ,         on,       - ,       on,              - ,        - ,      - 
 dp-mocking
-  ERROR: No 'Branch protection rules' defined
+  ERROR: No 'Branches' created
 
 dp-mongodb
   :  main
@@ -384,7 +380,7 @@ dp-ssqs
   :  master
                         on,       1,          on,             - ,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         - ,       - ,       - ,              - ,        - ,      - 
 dp-table-builder-ui
-  ERROR: No 'Branch protection rules' defined
+  ERROR: No 'Branches' created
 
 dp-vault
   :  main
