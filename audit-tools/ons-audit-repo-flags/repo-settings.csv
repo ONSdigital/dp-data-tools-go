@@ -1,0 +1,400 @@
+Attempting to setup chrome debug port connection ...
+
+
+
+Repo & branch,          require,  required,   dismiss stale,  require,  restrict,  require,  require,   concourse,  concourse,  concourse,   concourse,  require,  require,  include,         restrict,  allow,   allow
+ ,                      pull,     approving,  pull request,   review,   who can,   status,   branches,  -ci/,       -ci/,       -ci/,        -ci/,       signed,   linear,   administrators,  who can,   force,   deletions
+ ,                      request,  reviews,    approvals,      from,     can,       checks,   to be up,  {repo,      {repo,      {repo,       {repo,      commits,  history,  ,                push to,   pushes,  
+ ,                      reviews,  ,           when new,       code,     pull,      to pass,  to date,   -name},     -name},     -name},      -name},     ,         ,         ,                matching,  ,        
+ ,                      before,   ,           commits are,    owners,   request,   before,   before,    -audit,     -build,     -component,  -unit,      ,         ,         ,                branches,  ,        
+ ,                      merging,  ,           pushed,         ,         reviews,   merging,  merging,   ,           ,           ,            ,           ,         ,         ,                ,          ,        
+babbage
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+babbage
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-api-router
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-api-router
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-areas-api
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-areas-api
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-bulletin-api
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-bulletin-api
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-cantabular-ui
+  ERROR: No 'Branches' created
+
+dp-code-list-api
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-code-list-api
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dataset-api
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        on,         on,         - ,          on,         on,       - ,       on,              on,        - ,      - 
+dp-dataset-api
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        on,         on,         - ,          on,         on,       - ,       on,              on,        - ,      - 
+dp-dataset-exporter
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dataset-exporter
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dataset-exporter-xlsx
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dataset-exporter-xlsx
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dimension-extractor
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dimension-extractor
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dimension-importer
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dimension-importer
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dimension-search-api
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-dimension-search-api
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-download-service
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-download-service
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-file-downloader
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-file-downloader
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-filter-api
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-filter-api
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-cookie-controller
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-cookie-controller
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-dataset-controller
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-dataset-controller
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-feedback-controller
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-feedback-controller
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-filter-dataset-controller
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-filter-dataset-controller
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-geography-controller
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-geography-controller
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-homepage-controller
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-homepage-controller
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-renderer
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-renderer
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-router
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-router
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-search-controller
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-frontend-search-controller
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-hierarchy-api
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-hierarchy-api
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-hierarchy-builder
+  :  cmd-develop
+                        on,       1,          - ,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         - ,       - ,       on,              on,        - ,      - 
+dp-hierarchy-builder
+  :  cmd-master
+                        on,       1,          - ,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         - ,       - ,       on,              on,        - ,      - 
+dp-hierarchy-builder
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-hierarchy-builder
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-identity-api
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-identity-api
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-image-api
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-image-api
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-image-importer
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-image-importer
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-import-api
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-import-api
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-import-reporter
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-import-reporter
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-import-tracker
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-import-tracker
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-legacy-redirector
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-legacy-redirector
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-observation-api
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-observation-api
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-observation-extractor
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-observation-extractor
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-observation-importer
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-observation-importer
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-permissions-api
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-permissions-api
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-publishing-dataset-controller
+  :  master
+                        on,       1,          on,             - ,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-publishing-dataset-controller
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-recipe-api
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-recipe-api
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-search-api
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-search-api
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-search-builder
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-search-builder
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-search-reindex-api
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-search-reindex-api
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-sessions-api
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-sessions-api
+  :  develop
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-static-file-publisher
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-static-file-publisher
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-table-renderer
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-table-renderer
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-topic-api
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-topic-api
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-upload-service
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-upload-service
+  :  develop
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+florence
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+florence
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+project-brian
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+project-brian
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+the-train
+  :  master
+                        on,       1,          on,             on,       - ,        on,       - ,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+the-train
+  :  develop
+                        - ,       ,           ,               ,         ,          - ,       - ,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+zebedee
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+zebedee
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-api-clients-go
+  :  main
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-authorisation
+  :  master
+                        on,       1,          - ,             - ,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         on,       - ,       - ,              - ,        - ,      - 
+dp-component-test
+  ERROR: No 'Branch protection rules' defined
+
+dp-cookies
+  :  master
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-deployer
+  :  master
+                        on,       1,          on,             on,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-design-system
+  :  main
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-developer-site
+  :  develop
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-elasticsearch
+  :  main
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-graph
+  :  main
+                        on,       1,          - ,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-healthcheck
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-kafka
+  :  main
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-logging
+  :  master
+                        - ,       ,           ,               ,         ,          - ,       - ,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-logging
+  :  feature/performance-test
+                        - ,       ,           ,               ,         ,          - ,       - ,        - ,         - ,         - ,          - ,         on,       - ,       on,              - ,        - ,      - 
+dp-mocking
+  ERROR: No 'Branch protection rules' defined
+
+dp-mongodb
+  :  main
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-net
+  :  main
+                        on,       1,          on,             - ,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-nomad
+  :  master
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-performance-dashboard
+  :  master
+                        on,       1,          - ,             - ,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         - ,       - ,       on,              on,        - ,      - 
+dp-performance-dashboard
+  :  develop
+                        on,       1,          - ,             - ,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         - ,       - ,       on,              on,        - ,      - 
+dp-reporter-client
+  :  main
+                        on,       1,          - ,             - ,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         - ,       - ,       on,              on,        - ,      - 
+dp-s3
+  :  main
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+dp-ssqs
+  :  master
+                        on,       1,          on,             - ,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         - ,       - ,       - ,              - ,        - ,      - 
+dp-table-builder-ui
+  ERROR: No 'Branch protection rules' defined
+
+dp-vault
+  :  main
+                        on,       1,          on,             on,       on,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+go-ns
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+log.go
+  :  master
+                        on,       1,          on,             on,       - ,        on,       on,        - ,         - ,         - ,          - ,         on,       - ,       on,              on,        - ,      - 
+s3crypto
+  :  master
+                        on,       1,          - ,             - ,       - ,        - ,       - ,        - ,         - ,         - ,          - ,         - ,       - ,       on,              on,        - ,      - 
