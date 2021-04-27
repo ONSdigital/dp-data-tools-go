@@ -63,12 +63,12 @@ driver = webdriver.Chrome(ChromeDriverManager().install() ,options=opts)
 print()
 
 # show title
-print("Repo & branch,          require,  required,   dismiss stale,  require,  restrict,  require,  require,   concourse,  concourse,  concourse,   concourse,  require,  require,  include,         restrict,  allow,   allow")
-print(" ,                      pull,     approving,  pull request,   review,   who can,   status,   branches,  -ci/,       -ci/,       -ci/,        -ci/,       signed,   linear,   administrators,  who can,   force,   deletions")
-print(" ,                      request,  reviews,    approvals,      from,     can,       checks,   to be up,  {repo,      {repo,      {repo,       {repo,      commits,  history,  ,                push to,   pushes,  ")
-print(" ,                      reviews,  ,           when new,       code,     pull,      to pass,  to date,   -name},     -name},     -name},      -name},     ,         ,         ,                matching,  ,        ")
-print(" ,                      before,   ,           commits are,    owners,   request,   before,   before,    -audit,     -build,     -component,  -unit,      ,         ,         ,                branches,  ,        ")
-print(" ,                      merging,  ,           pushed,         ,         reviews,   merging,  merging,   ,           ,           ,            ,           ,         ,         ,                ,          ,        ")
+print("Repo & branch,          require,  required,   dismiss stale,  require,  restrict,  require,  require,   concourse,  concourse,  concourse,   concourse,  require,  require,  include,         restrict,  people,                       allow,   allow")
+print(" ,                      pull,     approving,  pull request,   review,   who can,   status,   branches,  -ci/,       -ci/,       -ci/,        -ci/,       signed,   linear,   administrators,  who can,   teams,                        force,   deletions")
+print(" ,                      request,  reviews,    approvals,      from,     can,       checks,   to be up,  {repo,      {repo,      {repo,       {repo,      commits,  history,  ,                push to,   or apps,                      pushes,  ")
+print(" ,                      reviews,  ,           when new,       code,     pull,      to pass,  to date,   -name},     -name},     -name},      -name},     ,         ,         ,                matching,  with,                         ,        ")
+print(" ,                      before,   ,           commits are,    owners,   request,   before,   before,    -audit,     -build,     -component,  -unit,      ,         ,         ,                branches,  push,                         ,        ")
+print(" ,                      merging,  ,           pushed,         ,         reviews,   merging,  merging,   ,           ,           ,            ,           ,         ,         ,                ,          access,                       ,        ")
 
 with open("app-list.txt") as f:
     repo_names = f.readlines()
@@ -256,6 +256,7 @@ for repo_name in repo_names_clean:
             require_linear_history_flag = "- "
             include_administrators_flag = "- "
             restrict_who_can_push_flag = "- "
+            restrict_name = "                            " # 28 spaces long
             for flag in flags:
                 #state_1 = flag.find('div', class_='form-checkbox')
                 state_2 = flag.find('label')
@@ -277,6 +278,10 @@ for repo_name in repo_names_clean:
                         if 'checked' in state_3.attrs:
                             if state_3.attrs['checked'] == "checked":
                                 restrict_who_can_push_flag = "on"
+                                na = soup.find('a', {'class':'Link--primary color-text-primary js-protected-branch-pusher'})
+                                if na != None:
+                                    st = na.find("strong")
+                                    restrict_name = st.get_text()
 
             # concourse-ci/dp-dataset-api-audit
             line += ",        "
@@ -310,8 +315,12 @@ for repo_name in repo_names_clean:
             line += ",              "
             line += restrict_who_can_push_flag
 
-            # Allow force pushes
+            # Restrict name
             line += ",        "
+            line += restrict_name
+
+            # Allow force pushes
+            line += ", "
             line += allow_force_flag
 
             # Allow deletions
