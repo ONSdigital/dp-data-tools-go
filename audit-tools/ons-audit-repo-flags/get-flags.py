@@ -25,9 +25,9 @@ pip3 install webdriver-manager
 #
 # then to run chrome in debug port mode, do:
 #
-# Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir="~/ChromeProfile"
+# /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir="~/ChromeProfile"
 #
-# Then go to github ONS repo dp-topic-api and SIGN IN (you only need to sign in the first time)
+# Then go to github ONS repo dp-topic-api and SIGN IN (you only need to sign in the first time, including two factor authentication)
 # 
 # DO NOT CLOSE this window in the python code ... close it manually and kill the command line that launched it with CTRL-C
 #
@@ -121,7 +121,7 @@ for repo_name in repo_names_clean:
             soup = BeautifulSoup(html, 'lxml')
             match = soup.find('div', class_='js-protected-branch-options')
 
-            line = "                        "
+            line = " ,                      "
             # Require pull request reviews before merging
             state_1 = match.find('div', class_='form-checkbox')
             state_2 = state_1.find('label')

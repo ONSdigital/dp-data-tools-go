@@ -83,3 +83,6 @@ dp-vault
 go-ns
 log.go
 s3crypto
+
+# documentation
+dp-operations
