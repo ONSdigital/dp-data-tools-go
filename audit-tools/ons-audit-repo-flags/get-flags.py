@@ -27,7 +27,9 @@ pip3 install webdriver-manager
 #
 # /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir="~/ChromeProfile"
 #
-# Then go to github ONS repo dp-topic-api and SIGN IN (you only need to sign in the first time, including two factor authentication)
+# In the Google Chrome window that opens up from the above command ...
+#  go to "https://github.com/ONSdigital" and SIGN IN
+#  (you only need to sign in the first time, including two factor authentication)
 # 
 # DO NOT CLOSE this window in the python code ... close it manually and kill the command line that launched it with CTRL-C
 #
@@ -35,9 +37,11 @@ pip3 install webdriver-manager
 #
 # now develop / run the python code.
 #
-# When development done, to get final results, at command line do:
+# When development done, to get final results, at command line do (it takes a few minutes to run):
 #
 # python3 get-flags.py >repo-settings.csv
+#
+# Once the script is complete you will need to Quit the Chrome browser that is shown running in the icon bar at bottom of screen.
 
 import os
 import selenium

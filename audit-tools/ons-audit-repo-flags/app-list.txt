@@ -1,8 +1,9 @@
 # lines beginning with a HASH character are comment lines
 #
 # update this list as needed.
-#
-# apps as per deployed by nomand
+
+# apps as per deployed by nomand:
+
 babbage
 # dp-api-poc     Proof of Concept: repo ? => dp-apipoc-server
 dp-api-router
@@ -57,7 +58,8 @@ project-brian
 the-train
 zebedee
 
-# libraries as per appearance in Concourse
+# libraries as per appearance in Concourse:
+
 dp-api-clients-go
 dp-authorisation
 dp-component-test
@@ -84,5 +86,15 @@ go-ns
 log.go
 s3crypto
 
-# documentation
+# documentation:
+
 dp-operations
+
+# other:
+
+dp
+dp-ci
+dp-cli
+dp-setup
+dp-configs
+dp-data-tools
