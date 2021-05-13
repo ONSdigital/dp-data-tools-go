@@ -12,7 +12,7 @@ import (
 	"time"
 
 	kafka "github.com/ONSdigital/dp-kafka/v2"
-	"github.com/ONSdigital/go-ns/avro"
+	"github.com/ONSdigital/dp-kafka/v2/avro"
 	"github.com/ONSdigital/log.go/log"
 )
 
