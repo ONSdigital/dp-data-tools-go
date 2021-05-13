@@ -1,4 +1,4 @@
-# New check-audit
+# Check-audit
 
 This utility consumes messages from the `audit` kafka topic and builds a
 list of accessed paths and their respective results (as `successful` and `unsuccessful`
