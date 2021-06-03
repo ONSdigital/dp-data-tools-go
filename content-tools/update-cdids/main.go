@@ -153,7 +153,7 @@ func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Clie
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode == 204 || resp.StatusCode > 400 {
 		errMessage := fmt.Errorf("failed to read existing collection ID. Error In API: %v. Status Code: %s", err, resp.Status)
 		log.Error(errMessage)
 
@@ -365,7 +365,7 @@ func authenticate(ctx context.Context, client *http.Client, config *Config) (con
 }
 
 func getCollectionName() string {
-	return fmt.Sprintf("migrated-collection-%d", time.Now().Format(time.RFC3339))
+	return fmt.Sprintf("migrated-collection-%d", time.Now().UnixNano())
 }
 
 func createCollection(ctx context.Context, client *http.Client, collectionName string, env string) (string, error) {
@@ -512,7 +512,7 @@ func readCdIDPairs(ctx context.Context, config *Config) []*CdIDPair {
 
 	log.Event(ctx, "Sheets in this file:", log.INFO)
 	for i, sh := range wb.Sheets {
-		log.Event(ctx, fmt.Sprintf("Index:  Sheets name:  in this file:", i, sh.Name), log.INFO)
+		log.Event(ctx, fmt.Sprintf("Index: %d Sheets name: %s in this file:", i, sh.Name), log.INFO)
 	}
 
 	sheet, ok := wb.Sheet[config.Sheetname]
