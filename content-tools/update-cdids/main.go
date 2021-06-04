@@ -20,7 +20,6 @@ const (
 )
 
 type Config struct {
-	ZebedeeURL  string
 	Environment string
 	Username    string
 	Password    string
@@ -445,11 +444,6 @@ func createCollection(ctx context.Context, client *http.Client, collectionName s
 }
 
 func (config *Config) isMandatoryParamsPresent(ctx context.Context) bool {
-	if config.ZebedeeURL == "" {
-		log.Event(ctx, "missing zebedeeURL flag", log.ERROR)
-		return false
-	}
-
 	if config.Environment == "" {
 		log.Event(ctx, "missing environment flag", log.ERROR)
 		return false
@@ -488,7 +482,6 @@ func (config *Config) clearCreds() {
 }
 
 func parseConfig() *Config {
-	var zebedeeURL string
 	var environment string
 	var username string
 	var password string
@@ -496,7 +489,6 @@ func parseConfig() *Config {
 	var sheetname string
 	var limit int64
 
-	flag.StringVar(&zebedeeURL, "zebedee-url", zebedeeURL, "Zebedee API URL")
 	flag.StringVar(&environment, "environment-url", environment, "Environment URL")
 	flag.StringVar(&password, "password", password, "password")
 	flag.StringVar(&username, "username", username, "username")
@@ -506,7 +498,6 @@ func parseConfig() *Config {
 	flag.Parse()
 
 	return &Config{
-		ZebedeeURL:  zebedeeURL,
 		Environment: environment,
 		Username:    username,
 		Password:    password,
