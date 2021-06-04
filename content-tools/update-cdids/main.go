@@ -58,6 +58,10 @@ func (cp *CdIDPair) Print(ctx context.Context, prefix string) {
 	log.Event(ctx, fmt.Sprintf("%s ExcelIndex: %d, cdid: %s, oldcdid: %s", prefix, cp.ExcelIndex, cp.cdID, cp.oldCdID), log.INFO)
 }
 
+func getNoticeMarkdown(newCdIDLocation string) string {
+	return fmt.Sprintf("We have published a corrected format of this document [here][1].\n\n\n [1]: %s", newCdIDLocation)
+}
+
 func main() {
 	config := parseConfig()
 
@@ -93,9 +97,15 @@ func main() {
 	for _, pair := range cdIDPairs {
 		pair.Print(ctx, "Processing ")
 
-		oldCdIDLocation, err := searchOldCdID(ctx, httpClient, config, pair.oldCdID)
+		oldCdIDLocation, err := searchCdID(ctx, httpClient, config, pair.oldCdID)
 		if err != nil {
-			pair.Print(ctx, "stopping. Error occurred while fetching cdID location")
+			pair.Print(ctx, "stopping. Error occurred while fetching old cdID location")
+			continue
+		}
+
+		newCDIDLocation, err := searchCdID(ctx, httpClient, config, pair.cdID)
+		if err != nil {
+			pair.Print(ctx, "stopping. Error occurred while fetching new cdID location")
 			continue
 		}
 
@@ -110,13 +120,19 @@ func main() {
 			continue
 		}
 
-		cdIDData, err := fetchDataForCDID(ctx, httpClient, config, oldCdIDLocation)
+		oldCdIDData, err := fetchDataForCDID(ctx, httpClient, config, oldCdIDLocation)
 		if err != nil {
 			pair.Print(ctx, "stopping. Error occurred while fetching cdID data.")
 			continue
 		}
 
-		err = addCDIDToCollection(ctx, httpClient, config, collectionID, oldCdIDLocation, cdIDData)
+		updatedCdIDData, err := addNoticeForNewCDID(ctx, oldCdIDData, pair, newCDIDLocation)
+		if err != nil {
+			pair.Print(ctx, "stopping. Error occurred while adding alert to cdidData")
+			continue
+		}
+
+		err = addCDIDToCollection(ctx, httpClient, config, collectionID, oldCdIDLocation, updatedCdIDData)
 		if err != nil {
 			pair.Print(ctx, "stopping. Error occurred while adding CDID to collection")
 			continue
@@ -170,7 +186,7 @@ func checkIfCdIDExistsInAnotherCollection(ctx context.Context, client *http.Clie
 	return string(body), nil
 }
 
-// 	curl -X POST --header "X-Florence-Token:$ZEBEDEE_TOKEN"
+// 	curl -X POST --header "X-Florwence-Token:$ZEBEDEE_TOKEN"
 //	http://localhost:8082/review/{collection-id}?uri={path-to-content}/data.json&recursive=false
 func approveCDID(ctx context.Context, client *http.Client, config *Config, collectionID string, cdIDLocation string) error {
 	cdIDURI := strings.Replace(cdIDLocation, config.Environment, "", -1)
@@ -277,7 +293,7 @@ func fetchDataForCDID(ctx context.Context, client *http.Client, config *Config, 
 	return string(body), nil
 }
 
-func searchOldCdID(ctx context.Context, client *http.Client, config *Config, cdID string) (string, error) {
+func searchCdID(ctx context.Context, client *http.Client, config *Config, cdID string) (string, error) {
 	searchURL := fmt.Sprintf("%s/search?q=%s", config.Environment, cdID)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", searchURL, nil)
@@ -548,4 +564,46 @@ func isValidRow(row *xlsx.Row) bool {
 		row.Cells[3].Value != "no_cdid" &&
 		row.Cells[3].Value != "old_cdid"
 	return isValid
+}
+
+type Alert struct {
+	Date     string `json:"date"`
+	Markdown string `json:"markdown"`
+	Type     string `json:"type"`
+}
+
+func addNoticeForNewCDID(ctx context.Context, dataJSON string, pair *CdIDPair, newCdIDLocation string) (string, error) {
+
+	var result map[string]interface{}
+	err := json.Unmarshal([]byte(dataJSON), &result)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to unmarshal content data JSON response. Error: %v", err)
+		log.Error(errMessage)
+		return "", errMessage
+	}
+	existingAlerts := make([]Alert, 0)
+	alerts, ok := result["alerts"].(map[string]interface{})
+	if ok {
+		for alert := range alerts {
+			parsedAlert := Alert{}
+			_ = json.Unmarshal([]byte(alert), &parsedAlert)
+			existingAlerts = append(existingAlerts, parsedAlert)
+		}
+	}
+	contentUpdateAlert := Alert{
+		Date:     time.Now().Format(time.RFC3339),
+		Markdown: getNoticeMarkdown(newCdIDLocation),
+		Type:     "alert",
+	}
+
+	existingAlerts = append(existingAlerts, contentUpdateAlert)
+	result["alerts"] = existingAlerts
+	jsonString, err := json.Marshal(result)
+	if err != nil {
+		errMessage := fmt.Errorf("failed to marshal updated content. Error: %v", err)
+		log.Error(errMessage)
+		return "", errMessage
+	}
+
+	return string(jsonString), err
 }
