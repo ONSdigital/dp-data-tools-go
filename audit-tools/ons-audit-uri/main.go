@@ -27,14 +27,14 @@ import (
 
 // Config represents config for ons-scrape
 type Config struct {
-	FullDepth              bool `envconfig:"FULL_DEPTH"`              // search deeper through the whole site from content down
-	OnlyFirstFullDepth     bool `envconfig:"ONLY_FIRST_FULL_DEPTH"`   // enable this to minimise the amount of full depth for code development / testing
-	SkipVersions           bool `envconfig:"SKIP_VERSIONS"`           // when doing FULL_DEPTH, this skips processing of version files (to save time when developing this code)
-	PlayNice               bool `envconfig:"PLAY_NICE"`               // add a little delay before reading each page
-	UseThreads             bool `envconfig:"USE_THREADS"`             // set true to use more than 1 thread to read pages (to run faster)
-	SaveSite               bool `envconfig:"SAVE_SITE"`               // set true to create mongo init scripts for all page types
-	LimitReads             bool `envconfig:"LIMIT_READS"`             // set true to limit data read per second
-	IncludeReleaseCalendar bool `envconfig:"INCLUDE_RELEASE_CALENDAR` // set to true to include processing the release calendar
+	FullDepth              bool `envconfig:"FULL_DEPTH"`               // search deeper through the whole site from content down
+	OnlyFirstFullDepth     bool `envconfig:"ONLY_FIRST_FULL_DEPTH"`    // enable this to minimise the amount of full depth for code development / testing
+	SkipVersions           bool `envconfig:"SKIP_VERSIONS"`            // when doing FULL_DEPTH, this skips processing of version files (to save time when developing this code)
+	PlayNice               bool `envconfig:"PLAY_NICE"`                // add a little delay before reading each page
+	UseThreads             bool `envconfig:"USE_THREADS"`              // set true to use more than 1 thread to read pages (to run faster)
+	SaveSite               bool `envconfig:"SAVE_SITE"`                // set true to create mongo init scripts for all page types
+	LimitReads             bool `envconfig:"LIMIT_READS"`              // set true to limit data read per second
+	IncludeReleaseCalendar bool `envconfig:"INCLUDE_RELEASE_CALENDAR"` // set to true to include processing the release calendar
 }
 
 var cfg *Config
@@ -72,7 +72,7 @@ func InitConfig() error {
 		SkipVersions:           false,
 		PlayNice:               false,
 		UseThreads:             true,
-		SaveSite:               false,
+		SaveSite:               true, //false,
 		LimitReads:             true,
 		IncludeReleaseCalendar: true,
 	}
@@ -960,6 +960,12 @@ type pageData struct {
 
 var listOfPageData []pageData
 var listMu sync.Mutex
+
+var releaseRelatedDatasets []string
+var releaseRelatedDatasetsMu sync.Mutex
+
+var releaseRelatedDocuments []string
+var releaseRelatedDocumentsMu sync.Mutex
 
 func replaceUnicodeWithASCII(b []byte) []byte {
 	l := len(b)
@@ -2015,6 +2021,56 @@ func checkMarshalingDeepEqual(fullURI string, err error, location int, payload *
 	}
 }
 
+func saveReleaseInfoToCSV(shortURI string, data *releaseResponse) {
+	fieldDatasets := data.RelatedDatasets
+
+	if fieldDatasets != nil {
+		releaseAndDate := shortURI + ","
+		if data.Description.ReleaseDate != nil {
+			releaseAndDate += *data.Description.ReleaseDate
+		} else {
+			releaseAndDate += "NO Date"
+		}
+		releaseAndDate += ","
+
+		if len(*fieldDatasets) > 0 {
+			for _, info := range *fieldDatasets {
+				if info.URI != nil {
+					infoToSave := releaseAndDate + *info.URI
+
+					releaseRelatedDatasetsMu.Lock()
+					releaseRelatedDatasets = append(releaseRelatedDatasets, infoToSave)
+					releaseRelatedDatasetsMu.Unlock()
+				}
+			}
+		}
+	}
+
+	fieldDocuments := data.RelatedDocuments
+
+	if fieldDocuments != nil {
+		releaseAndDate := shortURI + ","
+		if data.Description.ReleaseDate != nil {
+			releaseAndDate += *data.Description.ReleaseDate
+		} else {
+			releaseAndDate += "NO Date"
+		}
+		releaseAndDate += ","
+
+		if len(*fieldDocuments) > 0 {
+			for _, info := range *fieldDocuments {
+				if info.URI != nil {
+					infoToSave := releaseAndDate + *info.URI
+
+					releaseRelatedDocumentsMu.Lock()
+					releaseRelatedDocuments = append(releaseRelatedDocuments, infoToSave)
+					releaseRelatedDocumentsMu.Unlock()
+				}
+			}
+		}
+	}
+}
+
 func getPageData(shortURI string, fieldName string, parentURI string, index int, depth int) (int, []urilist) {
 	// Create a list of URIs
 	var URIList []urilist
@@ -2384,7 +2440,11 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		payload, err := json.Marshal(data)
 		checkMarshaling(fullURI, err, 18, &payload, &fixedJSON, "releaseResponse")
 
+		if cfg.IncludeReleaseCalendar {
+			saveReleaseInfoToCSV(shortURI, &data)
+		}
 		saveContentPageToCollection(releaseJsFile, &releaseCount, releaseCollectionName, bodyTextCopy, shortURI)
+
 		if cfg.FullDepth {
 			URIList = getURIListFromRelease(fullURI, &data, shortURI, depth)
 		}
@@ -3085,6 +3145,50 @@ func createBrokenLinkFile() {
 	}
 }
 
+func uniqueString(stringSlice []string) []string {
+	keys := make(map[string]bool)
+	listString := []string{}
+	for _, entry := range stringSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			listString = append(listString, entry)
+		}
+	}
+	return listString
+}
+
+func createReleaseRelatedInfoFiles() {
+	if releaseRelatedDatasets != nil {
+		checkFile, err := os.Create("mongo-init-scripts/release-related-datasets.csv")
+		check(err)
+		defer checkFile.Close()
+
+		sort.Strings(releaseRelatedDatasets)
+
+		uniqueStrings := uniqueString(releaseRelatedDatasets)
+
+		for _, releaseLine := range uniqueStrings {
+			_, err = fmt.Fprintf(checkFile, "%s\n", releaseLine)
+			check(err)
+		}
+	}
+
+	if releaseRelatedDocuments != nil {
+		checkFile, err := os.Create("mongo-init-scripts/release-related-documents.csv")
+		check(err)
+		defer checkFile.Close()
+
+		sort.Strings(releaseRelatedDocuments)
+
+		uniqueStrings := uniqueString(releaseRelatedDocuments)
+
+		for _, releaseLine := range uniqueStrings {
+			_, err = fmt.Fprintf(checkFile, "%s\n", releaseLine)
+			check(err)
+		}
+	}
+}
+
 // create file that contains list of URI's saved when doing deeper scan together with
 // the name of the collection that the URI info is stored in - that is the 'type'
 // of the page and thus one knows the struct to use to read the URI
@@ -3177,9 +3281,9 @@ func createContentCountsFile() {
 	check(err)
 	_, err = fmt.Fprintf(countsTextFile, "table collection quantity: %d\n", tableCount)
 	check(err)
-	_, err = fmt.Fprintf(countsTextFile, "taxonomy_panding_page collection quantity: %d\n", taxonomyLandingPageCount)
+	_, err = fmt.Fprintf(countsTextFile, "taxonomy_landing_page collection quantity: %d\n", taxonomyLandingPageCount)
 	check(err)
-	_, err = fmt.Fprintf(countsTextFile, "taxonomy_panding_page collection quantity: %d\n", homePageCount)
+	_, err = fmt.Fprintf(countsTextFile, "home_page collection quantity: %d\n", homePageCount)
 	check(err)
 	_, err = fmt.Fprintf(countsTextFile, "timeseries_dataset collection quantity: %d\n", timeseriesDatasetCount)
 	check(err)
@@ -3655,6 +3759,8 @@ func main() {
 		finaliseCollectionDatabase(timeseriesDatasetCollectionName, timeseriesDatasetJsFile)
 		finaliseCollectionDatabase(taxonomyLandingPageCollectionName, taxonomyLandingPageJsFile)
 		finaliseCollectionDatabase(homePageCollectionName, homePageJsFile)
+
+		createReleaseRelatedInfoFiles()
 	}
 	createContentCountsFile()
 
