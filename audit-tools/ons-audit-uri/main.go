@@ -72,7 +72,7 @@ func InitConfig() error {
 		SkipVersions:           false,
 		PlayNice:               false,
 		UseThreads:             true,
-		SaveSite:               true, //false,
+		SaveSite:               false,
 		LimitReads:             true,
 		IncludeReleaseCalendar: true,
 	}
