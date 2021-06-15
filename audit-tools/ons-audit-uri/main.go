@@ -27,13 +27,14 @@ import (
 
 // Config represents config for ons-scrape
 type Config struct {
-	FullDepth          bool `envconfig:"FULL_DEPTH"`            // search deeper through the whole site from content down
-	OnlyFirstFullDepth bool `envconfig:"ONLY_FIRST_FULL_DEPTH"` // enable this to minimise the amount of full depth for code development / testing
-	SkipVersions       bool `envconfig:"SKIP_VERSIONS"`         // when doing FULL_DEPTH, this skips processing of version files (to save time when developing this code)
-	PlayNice           bool `envconfig:"PLAY_NICE"`             // add a little delay before reading each page
-	UseThreads         bool `envconfig:"USE_THREADS"`           // set true to use more than 1 thread to read pages (to run faster)
-	SaveSite           bool `envconfig:"SAVE_SITE"`             // set true to create mongo init scripts for all page types
-	LimitReads         bool `envconfig:"LIMIT_READS"`           // set true to limit data read per second
+	FullDepth              bool `envconfig:"FULL_DEPTH"`               // search deeper through the whole site from content down
+	OnlyFirstFullDepth     bool `envconfig:"ONLY_FIRST_FULL_DEPTH"`    // enable this to minimise the amount of full depth for code development / testing
+	SkipVersions           bool `envconfig:"SKIP_VERSIONS"`            // when doing FULL_DEPTH, this skips processing of version files (to save time when developing this code)
+	PlayNice               bool `envconfig:"PLAY_NICE"`                // add a little delay before reading each page
+	UseThreads             bool `envconfig:"USE_THREADS"`              // set true to use more than 1 thread to read pages (to run faster)
+	SaveSite               bool `envconfig:"SAVE_SITE"`                // set true to create mongo init scripts for all page types
+	LimitReads             bool `envconfig:"LIMIT_READS"`              // set true to limit data read per second
+	IncludeReleaseCalendar bool `envconfig:"INCLUDE_RELEASE_CALENDAR"` // set to true to include processing the release calendar
 }
 
 var cfg *Config
@@ -66,13 +67,14 @@ var cfg *Config
 // variables
 func InitConfig() error {
 	cfg = &Config{
-		FullDepth:          true,
-		OnlyFirstFullDepth: false,
-		SkipVersions:       false,
-		PlayNice:           false,
-		UseThreads:         true,
-		SaveSite:           false,
-		LimitReads:         true,
+		FullDepth:              true,
+		OnlyFirstFullDepth:     false,
+		SkipVersions:           false,
+		PlayNice:               false,
+		UseThreads:             true,
+		SaveSite:               false,
+		LimitReads:             true,
+		IncludeReleaseCalendar: true,
 	}
 
 	return envconfig.Process("", cfg)
@@ -473,10 +475,15 @@ type releaseResponse struct {
 	RelatedMethodology        *[]relatedMethodology        `bson:"relatedMethodology,omitempty"         json:"relatedMethodology,omitempty"`
 	RelatedMethodologyArticle *[]relatedMethodologyArticle `bson:"relatedMethodologyArticle,omitempty"  json:"relatedMethodologyArticle,omitempty"`
 	Links                     *[]links                     `bson:"links,omitempty"                      json:"links,omitempty"`
-	DateChanges               *[]string                    `bson:"dateChanges,omitempty"                json:"dateChanges,omitempty"`
+	DateChanges               *[]dateChanges               `bson:"dateChanges,omitempty"                json:"dateChanges,omitempty"`
 	Type                      *string                      `bson:"type,omitempty"                       json:"type,omitempty"`
 	URI                       *string                      `bson:"uri,omitempty"                        json:"uri,omitempty"`
 	Description               *cDescription                `bson:"description,omitempty"                json:"description,omitempty"`
+}
+
+type dateChanges struct {
+	PreviousDate *string `bson:"previousDate,omitempty"  json:"previousDate,omitempty"`
+	ChangeNotice *string `bson:"changeNotice,omitempty"  json:"changeNotice,omitempty"`
 }
 
 type listResponse struct {
@@ -484,6 +491,20 @@ type listResponse struct {
 	ListType *string `bson:"listType,omitempty"  json:"listType,omitempty"`
 	URI      *string `bson:"uri,omitempty"       json:"uri,omitempty"`
 	Result   *result `bson:"result,omitempty"    json:"result,omitempty"`
+	Counts   *counts `bson:"counts,omitempty"    json:"counts,omitempty"`
+}
+
+type counts struct {
+	NumberOfResults *int       `bson:"numberOfResults,omitempty"  json:"numberOfResults,omitempty"`
+	Took            *int       `bson:"took,omitempty"             json:"took,omitempty"`
+	Results         *[]int     `bson:"results,omitempty"          json:"results,omitempty"`
+	Suggestions     *[]int     `bson:"suggestions,omitempty"      json:"suggestions,omitempty"`
+	DocCounts       *docCounts `bson:"docCounts,omitempty"        json:"docCounts,omitempty"`
+}
+
+type docCounts struct {
+	DatasetLandingPage *int `bson:"dataset_landing_page,omitempty"  json:"dataset_landing_page,omitempty"`
+	StaticAdhoc        *int `bson:"static_adhoc,omitempty"          json:"static_adhoc,omitempty"`
 }
 
 type result struct {
@@ -541,25 +562,33 @@ type paginator struct {
 }*/
 
 type resultDescription struct {
-	Summary           *string         `bson:"summary,omitempty"            json:"summary,omitempty"`
-	NextRelease       *string         `bson:"nextRelease,omitempty"        json:"nextRelease,omitempty"`
-	Keywords          *[]string       `bson:"keywords,omitempty"           json:"keywords,omitempty"`
-	ReleaseDate       *string         `bson:"releaseDate,omitempty"        json:"releaseDate,omitempty"`
-	Edition           *string         `bson:"edition,omitempty"            json:"edition,omitempty"`
-	Language          *string         `bson:"language,omitempty"           json:"language,omitempty"`
-	DatasetID         *string         `bson:"datasetId,omitempty"          json:"datasetId,omitempty"`
-	Source            *string         `bson:"source,omitempty"             json:"source,omitempty"`
-	Title             *string         `bson:"title,omitempty"              json:"title,omitempty"`
-	MetaDescription   *string         `bson:"metaDescription,omitempty"    json:"metaDescription,omitempty"`
-	NationalStatistic *bool           `bson:"nationalStatistic,omitempty"  json:"nationalStatistic,omitempty"`
-	Abstract          *string         `bson:"_abstract,omitempty"          json:"_abstract,omitempty"`
-	LatestRelease     *bool           `bson:"latestRelease,omitempty"      json:"latestRelease,omitempty"`
-	Unit              *string         `bson:"unit,omitempty"               json:"unit,omitempty"`
-	Headline1         *string         `bson:"headline1,omitempty"          json:"headline1,omitempty"`
-	Headline2         *string         `bson:"headline2,omitempty"          json:"headline2,omitempty"`
-	Contacts          *ContactDetails `bson:"contact,omitempty"            json:"contact,omitempty"`
-	Headline3         *string         `bson:"headline3,omitempty"          json:"headline3,omitempty"`
-	PreUnit           *string         `bson:"preUnit,omitempty"            json:"preUnit,omitempty"`
+	Summary            *string         `bson:"summary,omitempty"            json:"summary,omitempty"`
+	NextRelease        *string         `bson:"nextRelease,omitempty"        json:"nextRelease,omitempty"`
+	Keywords           *[]string       `bson:"keywords,omitempty"           json:"keywords,omitempty"`
+	ReleaseDate        *string         `bson:"releaseDate,omitempty"        json:"releaseDate,omitempty"`
+	Edition            *string         `bson:"edition,omitempty"            json:"edition,omitempty"`
+	Language           *string         `bson:"language,omitempty"           json:"language,omitempty"`
+	DatasetID          *string         `bson:"datasetId,omitempty"          json:"datasetId,omitempty"`
+	MetaCmd            *string         `bson:"metaCmd,omitempty"            json:"metaCmd,omitempty"`
+	Finalised          *bool           `bson:"finalised,omitempty"          json:"finalised,omitempty"`
+	Source             *string         `bson:"source,omitempty"             json:"source,omitempty"`
+	Published          *bool           `bson:"published,omitempty"          json:"published,omitempty"`
+	Title              *string         `bson:"title,omitempty"              json:"title,omitempty"`
+	MetaDescription    *string         `bson:"metaDescription,omitempty"    json:"metaDescription,omitempty"`
+	NationalStatistic  *bool           `bson:"nationalStatistic,omitempty"  json:"nationalStatistic,omitempty"`
+	Abstract           *string         `bson:"_abstract,omitempty"          json:"_abstract,omitempty"`
+	LatestRelease      *bool           `bson:"latestRelease,omitempty"      json:"latestRelease,omitempty"`
+	Reference          *string         `bson:"reference,omitempty"          json:"reference,omitempty"`
+	Unit               *string         `bson:"unit,omitempty"               json:"unit,omitempty"`
+	Headline1          *string         `bson:"headline1,omitempty"          json:"headline1,omitempty"`
+	Headline2          *string         `bson:"headline2,omitempty"          json:"headline2,omitempty"`
+	Contacts           *ContactDetails `bson:"contact,omitempty"            json:"contact,omitempty"`
+	Headline3          *string         `bson:"headline3,omitempty"          json:"headline3,omitempty"`
+	ProvisionalDate    *string         `bson:"provisionalDate,omitempty"    json:"provisionalDate,omitempty"`
+	Cancelled          *bool           `bson:"cancelled,omitempty"          json:"cancelled,omitempty"`
+	PreUnit            *string         `bson:"preUnit,omitempty"            json:"preUnit,omitempty"`
+	CancellationNotice *[]string       `bson:"cancellationNotice,omitempty" json:"cancellationNotice,omitempty"`
+	Authors            *[]string       `bson:"authors,omitempty"            json:"authors,omitempty"`
 }
 
 type staticPageResponse struct {
@@ -848,7 +877,8 @@ type alerts struct {
 
 // relatedMethodology is the sub page links
 type relatedMethodology struct {
-	URI *string `bson:"uri,omitempty"  json:"uri,omitempty"`
+	Title *string `bson:"title,omitempty"  json:"title,omitempty"`
+	URI   *string `bson:"uri,omitempty"    json:"uri,omitempty"`
 }
 
 // relatedMethodologyArticle is the sub page links
@@ -931,6 +961,12 @@ type pageData struct {
 var listOfPageData []pageData
 var listMu sync.Mutex
 
+var releaseRelatedDatasets []string
+var releaseRelatedDatasetsMu sync.Mutex
+
+var releaseRelatedDocuments []string
+var releaseRelatedDocumentsMu sync.Mutex
+
 func replaceUnicodeWithASCII(b []byte) []byte {
 	l := len(b)
 	var dst int
@@ -956,13 +992,58 @@ func replaceUnicodeWithASCII(b []byte) []byte {
 						// So, we have to assume that this is an equation and just copy the character ..
 						b[dst] = b[src]
 					} else {
-						b[dst] = num[1] // get ASCII character
-						src += 5        // skip past unicode sequence - the for loop increment makes this an increase of 6
+						if num[1] < 32 && num[1] != 13 && num[1] != 10 {
+							fmt.Printf("Control character: %d, pos %d, dst %d\n", num[1], src, dst)
+							fmt.Printf("\n")
+							fmt.Printf("No error in DecodeString: %v\n", hexstring)
+							fmt.Printf("byte 0: %v\n", b[src+2])
+							fmt.Printf("byte 1: %v\n", b[src+3])
+							fmt.Printf("byte 2: %v\n", b[src+4])
+							fmt.Printf("byte 3: %v\n", b[src+5])
+							// drop control characters, that should not be in a json string
+							dst--
+						} else {
+							b[dst] = num[1] // get ASCII character
+						}
+						src += 5 // skip past unicode sequence - the for loop increment makes this an increase of 6
 					}
 				} else {
+					if b[src] < 32 && b[src] != 13 && b[src] != 10 {
+						fmt.Printf("Control character: %d\n", b[src])
+						fmt.Printf("\n")
+						// NOTE: this code is here, for debug as it might be that this code needs
+						// further work to drop any not wanted control characters if they cause grief
+					}
 					b[dst] = b[src]
 				}
 				dst++
+			}
+		} else {
+			b[dst] = b[src]
+			dst++
+		}
+	}
+	return b[0:dst]
+}
+
+func removeNotAllowedEscapeCodes(b []byte) []byte {
+	l := len(b)
+	var dst int
+
+	for src := 0; src < l; src++ {
+		if b[src] == '\\' {
+			if b[src] == 92 && b[src+1] == 102 {
+				fmt.Printf("b[src]: %d\nb[src+1]: %d\n", b[src], b[src+1])
+			}
+			if src < l-2 {
+				if b[src+1] == 'f' {
+					fmt.Printf("b[src+1]: %d\n", b[src+1])
+					// We have a escape sequence that should not be in the json as it breaks unmarshaling
+					src += 1 // skip past escape sequence - the for loop increment makes this an increase of 2
+				} else {
+					b[dst] = b[src]
+					dst++
+				}
 			}
 		} else {
 			b[dst] = b[src]
@@ -1463,6 +1544,18 @@ func addDataResponseHighlightedContent(uriList *[]urilist, field *[]HighlightedC
 	}
 }
 
+func addRelatedResult(uriList *[]urilist, field *[]results, parentURI string, depth int) {
+	if field != nil {
+		if len(*field) > 0 {
+			for index, info := range *field {
+				if info.URI != nil {
+					*uriList = append(*uriList, urilist{*info.URI, "relatedResult", parentURI, depth, index})
+				}
+			}
+		}
+	}
+}
+
 func getURIListFromProductPage(containintURI string, data *DataResponse, parentURI string, depth int) []urilist {
 	var uriList []urilist
 
@@ -1699,6 +1792,18 @@ func getURIListFromRelease(containintURI string, data *releaseResponse, parentUR
 	return uriList
 }
 
+func getURIListFromList(containintURI string, data *listResponse, parentURI string, depth int) []urilist {
+	var uriList []urilist
+
+	if cfg.OnlyFirstFullDepth {
+		return uriList
+	}
+
+	addRelatedResult(&uriList, data.Result.Results, parentURI, depth)
+
+	return uriList
+}
+
 func getURIListFromStaticPage(containintURI string, data *staticPageResponse, parentURI string, depth int) []urilist {
 	var uriList []urilist
 
@@ -1898,7 +2003,7 @@ func checkMarshalingDeepEqual(fullURI string, err error, location int, payload *
 		if !reflect.DeepEqual(line1, line2) {
 			fmt.Printf("DeepEqual comparison failed\n")
 			fmt.Printf("Processing page: %s\n", fullURI)
-			fmt.Printf("Unmarshal / Marshal mismatch - %v.\nInspect the saved .json files and fix struct %s\n", location, structName)
+			fmt.Printf("Unmarshal / Marshal mismatch(2) - %v.\nInspect the saved .json files and fix struct %s\n", location, structName)
 			fmt.Printf("It helps to open these files in vscode and right click in file, select format Docuemnt\n")
 			fmt.Printf(" and then save each document and then do a file comparison in an App like meld.")
 			// NOTE: In the files, ignore the '&' character at the begining of one of the lines as this is just
@@ -1912,6 +2017,56 @@ func checkMarshalingDeepEqual(fullURI string, err error, location int, payload *
 			_, err = fmt.Fprintf(bodyTextFile, "%s\n", line2)
 			check(err)
 			os.Exit(103)
+		}
+	}
+}
+
+func saveReleaseInfoToCSV(shortURI string, data *releaseResponse) {
+	fieldDatasets := data.RelatedDatasets
+
+	if fieldDatasets != nil {
+		releaseAndDate := shortURI + ","
+		if data.Description.ReleaseDate != nil {
+			releaseAndDate += *data.Description.ReleaseDate
+		} else {
+			releaseAndDate += "NO Date"
+		}
+		releaseAndDate += ","
+
+		if len(*fieldDatasets) > 0 {
+			for _, info := range *fieldDatasets {
+				if info.URI != nil {
+					infoToSave := releaseAndDate + *info.URI
+
+					releaseRelatedDatasetsMu.Lock()
+					releaseRelatedDatasets = append(releaseRelatedDatasets, infoToSave)
+					releaseRelatedDatasetsMu.Unlock()
+				}
+			}
+		}
+	}
+
+	fieldDocuments := data.RelatedDocuments
+
+	if fieldDocuments != nil {
+		releaseAndDate := shortURI + ","
+		if data.Description.ReleaseDate != nil {
+			releaseAndDate += *data.Description.ReleaseDate
+		} else {
+			releaseAndDate += "NO Date"
+		}
+		releaseAndDate += ","
+
+		if len(*fieldDocuments) > 0 {
+			for _, info := range *fieldDocuments {
+				if info.URI != nil {
+					infoToSave := releaseAndDate + *info.URI
+
+					releaseRelatedDocumentsMu.Lock()
+					releaseRelatedDocuments = append(releaseRelatedDocuments, infoToSave)
+					releaseRelatedDocumentsMu.Unlock()
+				}
+			}
 		}
 	}
 }
@@ -1983,7 +2138,8 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 	var bodyTextCopy []byte = make([]byte, len(bodyText))
 	copy(bodyTextCopy, bodyText)
 
-	fixedJSON := replaceUnicodeWithASCII(bodyText)
+	fixJSON := replaceUnicodeWithASCII(bodyText)
+	fixedJSON := removeNotAllowedEscapeCodes(fixJSON)
 
 	var shape pageShape
 	// Unmarshal body bytes to model
@@ -2035,6 +2191,16 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		URIList = append(URIList, urilist{"/economy", "home_page", "/", depth, 1})
 		URIList = append(URIList, urilist{"/employmentandlabourmarket", "home_page", "/", depth, 2})
 		URIList = append(URIList, urilist{"/peoplepopulationandcommunity", "home_page", "/", depth, 3})
+
+		if cfg.IncludeReleaseCalendar {
+			URIList = append(URIList, urilist{"/releasecalendar", "home_page", "/", depth, 4})
+		}
+
+		// NOTE: comment out the above URIList append's and use the following line to quickly get
+		// to a page that was causing code to fial as the following URI leads to a page that has an
+		// escape sequence of '\f' that breaks golang's unmarshaling - that is worked around with
+		// the function: removeNotAllowedEscapeCodes()
+		// URIList = append(URIList, urilist{"/economy/inflationandpriceindices/articles/consumerpricesindexincludingowneroccupiershousingcostshistoricalseries/1988to2004", "home_page", "/", depth, 4})
 
 	case taxonomyLandingPageCollectionName:
 		var data DataResponse
@@ -2274,7 +2440,11 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		payload, err := json.Marshal(data)
 		checkMarshaling(fullURI, err, 18, &payload, &fixedJSON, "releaseResponse")
 
+		if cfg.IncludeReleaseCalendar {
+			saveReleaseInfoToCSV(shortURI, &data)
+		}
 		saveContentPageToCollection(releaseJsFile, &releaseCount, releaseCollectionName, bodyTextCopy, shortURI)
+
 		if cfg.FullDepth {
 			URIList = getURIListFromRelease(fullURI, &data, shortURI, depth)
 		}
@@ -2290,7 +2460,85 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 		checkMarshalingDeepEqual(fullURI, err, 19, &payload, &fixedJSON, "listResponse")
 
 		saveContentPageToCollection(listJsFile, &listCount, listCollectionName, bodyTextCopy, shortURI)
-		// NOTE: this page has no URI links to add to list
+		// NOTE: this page has no 'DIRECT' URI links to add to list
+		if cfg.FullDepth {
+			// But, it may have links in any results array
+			URIList = getURIListFromList(fullURI, &data, shortURI, depth)
+		}
+		if data.Result.Results != nil {
+			var field *[]results = data.Result.Results
+
+			fmt.Printf("field %v, nof results %v\n", len(*field), *data.Result.NumberOfResults)
+			if len(*field) < *data.Result.NumberOfResults {
+				fmt.Printf("\nnumberOfPages %d\n", *data.Result.NumberOfResults)
+
+				redirectedURI := response.Request.URL.Path
+				if strings.HasPrefix(redirectedURI, "//") {
+					fmt.Printf("Double slash    : %s\n", redirectedURI)
+					// Remove the first slash as it messes up the usage of the link
+					// (the double slash signifies the link uses the same http or https protocol as whatever was being used)
+					redirectedURI = redirectedURI[1:]
+				}
+
+				var fullURI = "https://www.production.onsdigital.co.uk" + shortURI + "/data"
+
+				fmt.Printf("shortURI      URI: %v\n", shortURI)
+				fmt.Printf("fullURI       URI: %v\n", fullURI)
+				fmt.Printf("redirected    URI: %v\n", redirectedURI)
+
+				// loop through getting other URI list pages, etc (and doing all necessary checks)
+				for pageNumber := 2; pageNumber <= *data.Result.Paginator.NumberOfPages; pageNumber++ {
+
+					// build up the required paginated 'list' page URI
+					specificPage := fullURI + "?:uri="
+					specificPage += shortURI[1:] // skip the leading 'forward slash'
+					specificPage += "&page="
+					specificPage += fmt.Sprintf("%d", pageNumber)
+					fmt.Printf("specificPage  URI: %v\n", specificPage)
+					good, pageURIList := getIndexedListPage(specificPage, shortURI, fieldName, parentURI, index, depth)
+					if good == 200 {
+						for _, eachURI := range pageURIList {
+							URIList = append(URIList, eachURI)
+						}
+					}
+				}
+				/*
+					Examples of what the URI's look like for list pages that have extra paginated pages
+					the first page:
+
+					https://www.ons.gov.uk/releasecalendar/data
+
+					https://www.ons.gov.uk/economy/grossdomesticproductgdp/bulletins/gdpfirstquarterlyestimateuk/previousReleases/data
+
+					where
+
+					paginator
+						numberOfPages 	412
+						currentPage 	1
+
+					the second page:
+
+					https://www.ons.gov.uk/releasecalendar/data?:uri=releasecalendar&page=2
+
+					https://www.ons.gov.uk/economy/grossdomesticproductgdp/bulletins/gdpfirstquarterlyestimateuk/previousReleases/data?:uri=economy/grossdomesticproductgdp/bulletins/gdpfirstquarterlyestimateuk/previousReleases&page=2
+
+					where
+
+					paginator
+						numberOfPages 	412
+						currentPage 	2
+
+					last page:
+
+					https://www.ons.gov.uk/releasecalendar/data?:uri=releasecalendar&page=412
+
+					paginator
+						numberOfPages 	412
+						currentPage 	412
+
+				*/
+			}
+		}
 
 	case staticPageCollectionName:
 		var data staticPageResponse
@@ -2538,6 +2786,126 @@ func getPageData(shortURI string, fieldName string, parentURI string, index int,
 	return response.StatusCode, URIList
 }
 
+func getIndexedListPage(specificPage string, shortURI string, fieldName string, parentURI string, index int, depth int) (int, []urilist) {
+	// Create a list of URIs
+	var URIList []urilist
+
+	var fullURI = specificPage
+
+	atomic.AddInt32(&attemptedGetCount, 1)
+	if cfg.PlayNice {
+		// a little delay to play nice with ONS site and 'hopefully' not have cloudflare 'reset' the connection
+		time.Sleep(50 * time.Millisecond)
+	}
+	response, err := http.Get(fullURI)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Printf("getIndexedListPage: http.Get(fullURI) failed\n")
+		fmt.Printf("We now fabricate the response code to a 429 to instigate a retry after a delay 2\n")
+		return 429, URIList
+	}
+
+	defer response.Body.Close()
+	if response.StatusCode != 200 {
+		if response.StatusCode != 404 {
+			if response.StatusCode != 429 {
+				// a 503 is being seen at this point .. (it could be some other error, but whatever it is we do error action)
+				fmt.Printf("\nERROR on ONS website /data field: %v\n\n", response.StatusCode)
+				fmt.Printf("URI does not exist:  %v\n", fullURI)
+
+				listMu.Lock()
+				listOfPageData = append(listOfPageData, pageData{
+					subSectionIndex: index,
+					pageBroken:      true,
+					depth:           depth,
+					shortURI:        shortURI,
+					parentURI:       parentURI,
+					fieldName:       fieldName,
+				})
+				listMu.Unlock()
+			} else {
+				fmt.Printf("\nToo many requests\n")
+				// caller will call this function again for a 429
+			}
+		}
+		return response.StatusCode, URIList
+	}
+	bodyText, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Printf("getIndexedListPage: RealAll failed\n")
+		os.Exit(10)
+	}
+
+	atomic.AddInt64(&dataRead, int64(len(bodyText)))
+
+	// Take a copy into another block of memory before the call to replaceUnicodeWithASCII()
+	// strips out the unicode characters.
+	// .. thus retaining any unicode to write back out after checks made.
+	var bodyTextCopy []byte = make([]byte, len(bodyText))
+	copy(bodyTextCopy, bodyText)
+
+	fixedJSON := replaceUnicodeWithASCII(bodyText)
+
+	var shape pageShape
+	// Unmarshal body bytes to model
+	if err := json.Unmarshal(fixedJSON, &shape); err != nil {
+		fmt.Println(err)
+		fmt.Printf("getIndexedListPage: json.Unmarshal failed 1\n")
+		// we can get here from:
+		// /employmentandlabourmarket/peopleinwork/workplacepensions#publications
+		// where the '#publications' jumps one some way into a page that has already been processed
+		// (though #'s are now caught elsewhere)
+		//
+		// OR
+		//    from:
+		//    https://www.ons.gov.uk/search?q=interactivetool
+		//    which is a valid page, but has no data structure to extract info from
+		if shortURI == "/search?q=interactivetool" {
+			// NOTE: the number of exception pages may need to grow
+			// say the page is unavailable
+			return 503, URIList
+		}
+		fmt.Printf("Unknown problem on page: %s\n", fullURI)
+		fmt.Printf("shortURI: %s\n", shortURI)
+		os.Exit(11)
+	}
+
+	// Decode each page into a specific structure according to the 'Type' of the page ..
+	// NOTE: This is done to ensure that the structure definitions are fully defined to read ALL
+	//       the info in the /data endpoint.
+	switch *shape.Type {
+	case listCollectionName:
+		var data listResponse
+
+		if err := json.Unmarshal(fixedJSON, &data); err != nil {
+			unmarshalFail(fullURI, err, 19)
+		}
+
+		payload, err := json.Marshal(data)
+		checkMarshalingDeepEqual(fullURI, err, 19, &payload, &fixedJSON, "listResponse")
+
+		saveContentPageToCollection(listJsFile, &listCount, listCollectionName, bodyTextCopy, shortURI)
+		URIList = getURIListFromList(fullURI, &data, shortURI, depth)
+
+	default:
+		fmt.Printf("Unknown page Type .. should only be seeing %s\n", listCollectionName)
+		fmt.Printf("shape: %s\n", *shape.Type)
+		fmt.Printf("URI: %s\n", fullURI)
+
+		_, err = fmt.Fprint(bodyTextFile, "Unknown JSON body:\n")
+		check(err)
+		_, err = bodyTextFile.Write(bodyTextCopy)
+		check(err)
+		_, err = fmt.Fprint(bodyTextFile, "\n")
+		check(err)
+
+		os.Exit(83)
+	}
+
+	return 200, URIList
+}
+
 var skippedVersionURI = make(map[string]int) // key: shortURI, value: count unique URI's with version number that has been skipped
 var skippedVersionURIMutex sync.Mutex
 
@@ -2637,7 +3005,7 @@ func getPageDataRetry(index int, shortURI string, fieldName string, parentFullUR
 		if err != nil {
 			fmt.Println(err)
 			fmt.Printf("getPageData: RealAll failed\n")
-			os.Exit(7)
+			os.Exit(20)
 		}
 
 		atomic.AddInt64(&dataRead, int64(len(bodyText)))
@@ -2777,6 +3145,50 @@ func createBrokenLinkFile() {
 	}
 }
 
+func uniqueString(stringSlice []string) []string {
+	keys := make(map[string]bool)
+	listString := []string{}
+	for _, entry := range stringSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			listString = append(listString, entry)
+		}
+	}
+	return listString
+}
+
+func createReleaseRelatedInfoFiles() {
+	if releaseRelatedDatasets != nil {
+		checkFile, err := os.Create("mongo-init-scripts/release-related-datasets.csv")
+		check(err)
+		defer checkFile.Close()
+
+		sort.Strings(releaseRelatedDatasets)
+
+		uniqueStrings := uniqueString(releaseRelatedDatasets)
+
+		for _, releaseLine := range uniqueStrings {
+			_, err = fmt.Fprintf(checkFile, "%s\n", releaseLine)
+			check(err)
+		}
+	}
+
+	if releaseRelatedDocuments != nil {
+		checkFile, err := os.Create("mongo-init-scripts/release-related-documents.csv")
+		check(err)
+		defer checkFile.Close()
+
+		sort.Strings(releaseRelatedDocuments)
+
+		uniqueStrings := uniqueString(releaseRelatedDocuments)
+
+		for _, releaseLine := range uniqueStrings {
+			_, err = fmt.Fprintf(checkFile, "%s\n", releaseLine)
+			check(err)
+		}
+	}
+}
+
 // create file that contains list of URI's saved when doing deeper scan together with
 // the name of the collection that the URI info is stored in - that is the 'type'
 // of the page and thus one knows the struct to use to read the URI
@@ -2869,9 +3281,9 @@ func createContentCountsFile() {
 	check(err)
 	_, err = fmt.Fprintf(countsTextFile, "table collection quantity: %d\n", tableCount)
 	check(err)
-	_, err = fmt.Fprintf(countsTextFile, "taxonomy_panding_page collection quantity: %d\n", taxonomyLandingPageCount)
+	_, err = fmt.Fprintf(countsTextFile, "taxonomy_landing_page collection quantity: %d\n", taxonomyLandingPageCount)
 	check(err)
-	_, err = fmt.Fprintf(countsTextFile, "taxonomy_panding_page collection quantity: %d\n", homePageCount)
+	_, err = fmt.Fprintf(countsTextFile, "home_page collection quantity: %d\n", homePageCount)
 	check(err)
 	_, err = fmt.Fprintf(countsTextFile, "timeseries_dataset collection quantity: %d\n", timeseriesDatasetCount)
 	check(err)
@@ -3347,6 +3759,8 @@ func main() {
 		finaliseCollectionDatabase(timeseriesDatasetCollectionName, timeseriesDatasetJsFile)
 		finaliseCollectionDatabase(taxonomyLandingPageCollectionName, taxonomyLandingPageJsFile)
 		finaliseCollectionDatabase(homePageCollectionName, homePageJsFile)
+
+		createReleaseRelatedInfoFiles()
 	}
 	createContentCountsFile()
 
