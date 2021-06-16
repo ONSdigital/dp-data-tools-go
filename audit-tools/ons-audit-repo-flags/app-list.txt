@@ -1,16 +1,19 @@
 # lines beginning with a HASH character are comment lines
 #
 # update this list as needed.
-
-# apps as per deployed by nomand:
+#
+# apps as per deployed by nomand, and as seen in concourse:
 
 babbage
 # dp-api-poc     Proof of Concept: repo ? => dp-apipoc-server
 dp-api-router
 dp-areas-api
 dp-bulletin-api
+dp-cantabular-api-ext
+dp-cantabular-server
 dp-cantabular-ui
 dp-code-list-api
+dp-collection-api
 dp-dataset-api
 dp-dataset-exporter
 dp-dataset-exporter-xlsx
@@ -18,6 +21,7 @@ dp-dataset-exporter-xlsx
 dp-dimension-extractor
 dp-dimension-importer
 dp-dimension-search-api
+dp-dimension-search-builder
 dp-download-service
 dp-file-downloader
 dp-filter-api
@@ -36,6 +40,8 @@ dp-identity-api
 dp-image-api
 dp-image-importer
 dp-import-api
+dp-import-cantabular-dataset
+dp-import-cantabular-dimension-options
 dp-import-reporter
 dp-import-tracker
 dp-legacy-redirector
@@ -47,6 +53,8 @@ dp-publishing-dataset-controller
 dp-recipe-api
 dp-search-api
 dp-search-builder
+dp-search-data-extractor
+dp-search-data-importer
 dp-search-reindex-api
 dp-sessions-api
 dp-static-file-publisher
@@ -55,6 +63,7 @@ dp-topic-api
 dp-upload-service
 florence
 project-brian
+sixteens
 the-train
 zebedee
 
@@ -83,6 +92,7 @@ dp-ssqs
 dp-table-builder-ui
 dp-vault
 go-ns
+gremgo-neptune
 log.go
 s3crypto
 
