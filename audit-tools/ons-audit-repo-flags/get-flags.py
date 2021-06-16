@@ -89,7 +89,7 @@ for line in repo_names:
 for repo_name in repo_names_clean:
 
     branches_url = "https://github.com/ONSdigital/" + repo_name + "/settings/branches"
-    time.sleep(1) # without delay Github sometimes crashis this app with a timeout
+    time.sleep(1) # without delay Github sometimes crashes this app with a timeout
     driver.get(branches_url)
 
     html = driver.page_source
@@ -114,7 +114,7 @@ for repo_name in repo_names_clean:
             print("  : ", branch_name)
 
             search_url = "https://github.com"+branch_href
-            time.sleep(1) # without delay Github sometimes crashis this app with a timeout
+            time.sleep(1) # without delay Github sometimes crashes this app with a timeout
             driver.get(search_url)
             #print("Waiting for ID to be present ...\n")
             element = WebDriverWait(driver, 3).until(
@@ -333,6 +333,8 @@ for repo_name in repo_names_clean:
 
             print(line)
 
+# The following is commented out so as to NOT close the chromedriver that this app is talking to ...
+# just incase this app needs to be run again (in an iterative manner for any development changes)
 #driver.close()
 
 # %%
