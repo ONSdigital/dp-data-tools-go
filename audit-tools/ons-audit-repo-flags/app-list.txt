@@ -52,6 +52,7 @@ dp-permissions-api
 dp-publishing-dataset-controller
 dp-recipe-api
 dp-search-api
+# has following been removed from concourse ? (9th July 2021 Q added)
 dp-search-builder
 dp-search-data-extractor
 dp-search-data-importer
@@ -75,6 +76,8 @@ dp-component-test
 dp-cookies
 dp-deployer
 dp-design-system
+# what is / does dp-developer-hub do (question added 9th July 2021) as its in concourse, but its not a repo ?
+# dp-developer-hub
 dp-developer-site
 dp-elasticsearch
 dp-graph
@@ -85,7 +88,9 @@ dp-mocking
 dp-mongodb
 dp-net
 dp-nomad
+dp-packer
 dp-performance-dashboard
+dp-renderer
 dp-reporter-client
 dp-s3      
 dp-ssqs
@@ -108,3 +113,9 @@ dp-cli
 dp-setup
 dp-configs
 dp-data-tools
+
+# concourse has:
+# env-manager
+# env-packer
+#  but no repo's for the above pipelines ... so will they be lost if machine goes down ? how is concourse backed up ?
+£ and a few more, see list on concourse.
